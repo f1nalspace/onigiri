@@ -1,0 +1,160 @@
+﻿<RibbonWindow x:Class="Finalspace.Onigiri.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ribbon="clr-namespace:System.Windows.Controls.Ribbon;assembly=System.Windows.Controls.Ribbon"
+        mc:Ignorable="d"
+        Title="Onigiri" Height="600" Width="800" Icon="../Resources/onigiri.ico" Loaded="RibbonWindow_Loaded">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ViewResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <Ribbon DockPanel.Dock="Top">
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu>
+                    <RibbonApplicationMenuItem Command="{Binding CmdExit}" Header="Exit" ImageSource="/Resources/close_32x32.png"/>
+                    <RibbonApplicationMenu.AuxiliaryPaneContent>
+                        <RibbonGallery CanUserFilter="False" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <RibbonGalleryCategory Background="Transparent"  MaxColumnCount="1">
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonApplicationMenu.AuxiliaryPaneContent>
+                </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+            <RibbonTab Header="Home" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
+                <RibbonGroup Header="Actions">
+                    <RibbonButton ToolTip="Reload Database" Command="{Binding CmdRefresh}" Label="Refresh" LargeImageSource="/Resources/refresh_32x32.png" />
+                    <RibbonButton ToolTip="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database" Label="Rebuild Database" LargeImageSource="/Resources/download_32x32.png" />
+                    <RibbonButton ToolTip="Update titles from the internet" Command="{Binding CmdUpdate}" CommandParameter="Titles" Label="Update Titles" LargeImageSource="/Resources/download_32x32.png" />
+                    <RibbonButton ToolTip="Update files from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store" Label="Update Files" LargeImageSource="/Resources/download_32x32.png" />
+                    <RibbonButton ToolTip="Show titles" Command="{Binding CmdTitles}" Label="Titles" LargeImageSource="/Resources/download_32x32.png" />
+                    <RibbonButton ToolTip="Show issues" Command="{Binding CmdIssues}" Label="Issues" LargeImageSource="/Resources/download_32x32.png" />
+                </RibbonGroup>
+                <RibbonGroup Header="Sorting">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
+                                <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FirstSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <RibbonGalleryCategory Header="First field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
+                                </RibbonGallery>
+                            </RibbonComboBox>
+                            <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
+                                <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SecondSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <RibbonGalleryCategory Header="Second field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
+                                </RibbonGallery>
+                            </RibbonComboBox>
+                            <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
+                        </Grid>
+                    </StackPanel>
+                </RibbonGroup>
+                <RibbonGroup Header="Filter">
+                    <RibbonComboBox Label="By Type" IsEditable="True" IsReadOnly="True">
+                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <RibbonGalleryCategory ItemsSource="{Binding AnimeTypes}" DisplayMemberPath="Name" />
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonTextBox Command="{Binding CmdChangedFilter}" Label="By Title" Text="{Binding FilterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <RibbonComboBox Label="By Watch state" IsEditable="True" IsReadOnly="True">
+                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterWatchState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <RibbonGalleryCategory ItemsSource="{Binding WatchStates}" DisplayMemberPath="Name" />
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonComboBox Label="By Category" IsEditable="False" IsReadOnly="False">
+                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <RibbonGalleryCategory ItemsSource="{Binding FilterCategories, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonComboBox Label="Min Category Weight" IsEditable="False" IsReadOnly="False">
+                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategoryMinWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <RibbonGalleryCategory ItemsSource="{Binding FilterCategoryWeights, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonCheckBox Label="Marked" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterMarked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <RibbonCheckBox Label="To remove" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterRemove, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </RibbonGroup>
+            </RibbonTab>
+        </Ribbon>
+        <StatusBar DockPanel.Dock="Bottom" FontSize="16">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <!-- Number of animes -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Separator -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Visible anime count -->
+                            <ColumnDefinition Width="Auto" />
+                            <!--  of  -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Total anime count -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Separator -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Spacer -->
+                            <ColumnDefinition Width="*" />
+                            <!-- Loading subject -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Separator -->
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Loading header -->
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Text="Number of animes" />
+            </StatusBarItem>
+            <Separator Grid.Column="1" />
+            <StatusBarItem Grid.Column="2">
+                <TextBlock Text="{Binding VisibleAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="3">
+                <TextBlock Text="of" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="4">
+                <TextBlock Text="{Binding TotalAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StatusBarItem>
+            <Separator Grid.Column="5" />
+
+            <StatusBarItem Grid.Column="6"/>
+            <StatusBarItem Grid.Column="7">
+                <TextBlock Text="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StatusBarItem>
+            <Separator Grid.Column="8" />
+            <StatusBarItem Grid.Column="9">
+                <TextBlock Text="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StatusBarItem>
+        </StatusBar>
+        <DockPanel x:Name="MainContent">
+            <Grid>
+                <DockPanel Background="White" Panel.ZIndex="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Visibility="{Binding LoadingWindowVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                    <StackPanel Margin="5">
+                        <TextBlock Width="300" TextTrimming="CharacterEllipsis" Text="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
+                        <TextBlock Width="300" TextTrimming="CharacterEllipsis" Text="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
+                        <ProgressBar Width="300" Height="20" Value="{Binding LoadingPercentage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsIndeterminate="{Binding IsLoadingMarque, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
+                    </StackPanel>
+                </DockPanel>
+                <Frame Name="mainFrame" DataContext="{Binding}" LoadCompleted="mainFrame_LoadCompleted" DataContextChanged="mainFrame_DataContextChanged" Source="CardListPage.xaml" />
+            </Grid>
+        </DockPanel>
+    </DockPanel>
+</RibbonWindow>

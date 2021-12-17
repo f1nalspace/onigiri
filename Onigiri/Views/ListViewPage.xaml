@@ -1,0 +1,146 @@
+﻿<Page x:Class="Finalspace.Onigiri.Views.ListViewPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ListViewPage">
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ViewResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+    <ListBox Name="lvAnimes" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ScrollViewer.CanContentScroll="False" FontSize="16">
+        <ListBox.Style>
+            <Style TargetType="ListBox">
+                <Style.Triggers>
+                    <Trigger Property="HasItems" Value="False">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBox">
+                                    <TextBlock Text="No animes found."/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ListBox.Style>
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <VirtualizingStackPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <Grid Height="256">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" Width="180" Height="256" Stretch="Fill">
+                        <Image.Source>
+                            <MultiBinding Converter="{StaticResource animeImageConverter}" TargetNullValue="{StaticResource noPictureImage}">
+                                <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" />
+                                <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}"/>
+                            </MultiBinding>
+                        </Image.Source>
+                    </Image>
+                    <Border Grid.Column="1" Width="10" VerticalAlignment="Stretch" />
+                    <Grid Grid.Column="2" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeTitle}" />
+                        <WrapPanel Grid.Row="1">
+                            <TextBlock Text="{Binding Type, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=None}" Style="{StaticResource animeSublines}" />
+                            <TextBlock Text=" - " Style="{StaticResource animeSublines}" />
+                            <TextBlock Text="{Binding EpCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}Episodes {0}}" Style="{StaticResource animeSublines}" />
+                            <TextBlock Text=" - " Style="{StaticResource animeSublines}" />
+                            <WrapPanel>
+                                <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
+                                <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
+                                <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
+                                <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
+                                <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
+                            </WrapPanel>
+                            <TextBlock Text=" - " Style="{StaticResource animeSublines}" />
+                            <TextBlock Text="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeSublines}" />
+                        </WrapPanel>
+                        <WrapPanel Grid.Row="2">
+                            <TextBlock Text="{Binding StartDate, StringFormat=yyyy-MM-dd, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=None}" Style="{StaticResource animeSublines}" />
+                            <TextBlock Text=" / " Style="{StaticResource animeSublines}" />
+                            <TextBlock Text="{Binding EndDate, StringFormat=yyyy-MM-dd, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=None}" Style="{StaticResource animeSublines}" />
+                        </WrapPanel>
+                        <WrapPanel Grid.Row="3">
+                            <TextBlock Text="Files: " Style="{StaticResource animeMedia}" />
+                            <TextBlock Text="{Binding MediaFileCount}" Style="{StaticResource animeMedia}" />
+                        </WrapPanel>
+                        <ItemsControl Grid.Row="4" ItemsSource="{Binding TopCategories, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock x:Name="commaTextBlock" Text=" - " Style="{StaticResource animeCategory}" />
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource animeCategory}" />
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" Value="{x:Null}">
+                                            <Setter Property="Visibility" TargetName="commaTextBlock" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Grid Grid.Row="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <WrapPanel Grid.Column="0" Margin="0 0 10 0">
+                                <Button ToolTip="Toggle watched flag for final" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdToggleWatchedAnni}" CommandParameter="{Binding}">
+                                    <Image Style="{StaticResource actionIconWatchedAnni}"/>
+                                </Button>
+                                <Button ToolTip="Toggle watched flag for final" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdToggleWatchedFinal}" CommandParameter="{Binding}">
+                                    <Image Style="{StaticResource actionIconWatchedFinal}" />
+                                </Button>
+                            </WrapPanel>
+                            <WrapPanel Grid.Column="1" Margin="0 0 10 0">
+                                <Button ToolTip="Toggle deletion flag for anni" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdToggleDeleteitAnni}" CommandParameter="{Binding}">
+                                    <Image Style="{StaticResource actionIconDeleteitAnni}" />
+                                </Button>
+                                <Button ToolTip="Toggle deletion flag for final" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdToggleDeleteitFinal}" CommandParameter="{Binding}">
+                                    <Image Style="{StaticResource actionIconDeleteitFinal}" />
+                                </Button>
+                            </WrapPanel>
+                            <WrapPanel Grid.Column="2" Margin="0 0 10 0">
+                                <Button ToolTip="Toggle mark state" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdToggleMarked}" CommandParameter="{Binding}">
+                                    <Image Style="{StaticResource actionIconMarked}" />
+                                </Button>
+                            </WrapPanel>
+                            <WrapPanel Grid.Column="3">
+                                <Button ToolTip="Open details in anidb" Content="URL" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdOpenPage}" CommandParameter="{Binding}" />
+                                <Button ToolTip="Open relations in anidb" Content="Relations" Style="{StaticResource actionButton}" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}, Path=DataContext.CmdOpenRelations}" CommandParameter="{Binding}" />
+                            </WrapPanel>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+</Page>

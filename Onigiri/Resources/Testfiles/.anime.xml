@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anime id="6255" restricted="false">
+  <type>TV Series</type>
+  <episodecount>26</episodecount>
+  <startdate>2009-04-03</startdate>
+  <enddate>2009-10-02</enddate>
+  <titles>
+    <title xml:lang="x-jat" type="main">Basquash!</title>
+    <title xml:lang="ar" type="synonym">باسكواش</title>
+    <title xml:lang="x-jat" type="synonym">basquash</title>
+    <title xml:lang="zh-Hans" type="synonym">飞篮扣杀</title>
+    <title xml:lang="ja" type="official">バスカッシュ!</title>
+    <title xml:lang="fa" type="official">باسکواش</title>
+  </titles>
+  <similaranime>
+    <anime id="4575" approval="4" total="13">Tengen Toppa Gurren Lagann</anime>
+  </similaranime>
+  <url>http://basquash.com/</url>
+  <creators>
+    <name id="7389" type="Music">Yoshikawa Kei</name>
+    <name id="10808" type="Music">Audio Highs</name>
+    <name id="6487" type="Character Design">Soeta Kazuhiro</name>
+    <name id="1043" type="Original Work">Satelight</name>
+    <name id="1043" type="Animation Work">Satelight</name>
+    <name id="2338" type="Direction">Itagaki Shin</name>
+    <name id="3552" type="Character Design">Suezen</name>
+    <name id="3067" type="Chief Animation Direction">Hirata Katsuzou</name>
+    <name id="152" type="Original Work">Kawamori Shouji</name>
+    <name id="2337" type="Original Work">Thomas Romain</name>
+    <name id="152" type="Chief Direction">Kawamori Shouji</name>
+    <name id="3613" type="Series Composition">Satou Tatsuo</name>
+    <name id="3630" type="Character Design">Yoshimatsu Takahiro</name>
+  </creators>
+  <description>On the planet Earthdash, its inhabitants gaze on its moon and the technologically advanced lunar city of Mooneyes with awe. Dan JD, a boy living in Rollingtown on Earthdash`s surface, gets caught up in Bigfoot Basketball — a fast-paced sport played with giant Bigfoot robots.</description>
+  <ratings>
+    <permanent count="672">7.07</permanent>
+    <temporary count="293">7.61</temporary>
+    <review count="2">6.24</review>
+  </ratings>
+  <picture>16766.jpg</picture>
+  <categories>
+    <category id="5" parentid="3" hentai="false" weight="500">
+      <name>Shounen</name>
+      <description>A style of anime and manga intended for boys, characterized by high-action, often humorous plots featuring male protagonists. The camaraderie between boys or men on sports teams, fighting squads, etc. is often emphasized. Unrealistically attractive female characters are also common (see fanservice), but are not a requirement. The art style of shounen also tends to be less flowery than that of shoujo.</description>
+    </category>
+    <category id="275" parentid="268" hentai="false" weight="600">
+      <name>New</name>
+      <description>Not based on anything, the story is a new work, usually made up by the people involved in creating the anime. Generally if an original work (原作) credit is given, it will be to the studio, or director, or other members of the production team.</description>
+    </category>
+    <category id="118" parentid="13" hentai="false" weight="600">
+      <name>Piloted Robots</name>
+      <description>Piloted Robots are, as the name suggests, robots that cannot control themselves; they need to be steered from somewhere, this can be from a human sitting inside or a remote controlled option. </description>
+    </category>
+    <category id="8" parentid="313" hentai="false" weight="600">
+      <name>Sci-Fi</name>
+      <description>Science fiction stories usually focus on how situations could be different in the future when we are more technologically advanced; due to either our own achievements or having met with other civilizations whom we have learned from. </description>
+    </category>
+    <category id="13" parentid="8" hentai="false" weight="600">
+      <name>Mecha</name>
+      <description>Mecha in Japanese basically means mechanical things; everything from an electric whisk or a car to a spaceship or a robot. Here however we limit it to the more exotic things usually referred to as mecha anime: robots, whether controlled by a human or not, and their ilk.</description>
+    </category>
+    <category id="12" parentid="6" hentai="false" weight="600">
+      <name>Future</name>
+      <description>
+        Anime that fall under the future category are the ones that have a society that could have originated from ours. In most cases it should go hand to hand with sci-fi since we expect the future to consist of advanced technology, however, in the case where it`s explicitly stated in the story that the anime takes place "x years into the future", the state of technology doesn`t matter as long as it`s long into the future. The anime can be set in an alternative universe not tied with our own, as long as it has a futuristic feel to it.&#13;
+        &#13;
+        This category sports quite a lot of anime, mostly stemming from SciFi, but not necessarily only from there.
+      </description>
+    </category>
+    <category id="138" parentid="113" hentai="false" weight="600">
+      <name>Basketball</name>
+      <description>Basketball is Netball for men, the real game that encourages dribbling and other such uncouth behaviour that was sanitised out of the ladies` version. However, it is itself woozy compared to Ulama, as the losing side are seldom publicly sacrificed.</description>
+    </category>
+    <category id="113" parentid="317" hentai="false" weight="600">
+      <name>Sports</name>
+      <description>Sports anime revolves around a recreational physical activity or skill. In addition they often adhere to certain genre conventions, the emphasis on training and practice in preparation for competition, characters desire for self improvement, and pursuit of a specific goal.</description>
+    </category>
+    <category id="282" parentid="313" hentai="false" weight="100">
+      <name>Ecchi</name>
+      <description>Ecchi, or etchi (エッチ), is a common Japanese word meaning “indecent”, “lewd”, “frisky” or “sexy”, while its usage can be compared to the word “naughty”. The term is used when vague sexual content, such as skimpy clothing or nudity, is prominent.</description>
+    </category>
+    <category id="284" parentid="282" hentai="false" weight="400">
+      <name>Boing</name>
+      <description>The sound breasts make when they bounce. Size may vary, but mainly involves larger breasts in tight or otherwise sexy clothing. Partial or complete exposure may occur, usually emphasizing the boing-effect as they come out. Not capable of bouncing means no boing.</description>
+    </category>
+    <category id="52" parentid="50" hentai="false" weight="200">
+      <name>Large Breasts</name>
+      <description>Focus on larger than average breasts. Pretty common in anime. Usually involves adolescent girls or fully grown women.</description>
+    </category>
+    <category id="198" parentid="313" hentai="false" weight="200">
+      <name>Romance</name>
+      <description>Romance describes a story that deals with love between two or more characters typically also having an optimistic ending. Romance is also a difficulty encountered when creating a harem.</description>
+    </category>
+  </categories>
+  <tags>
+    <tag id="2372" approval="4" spoiler="true" localspoiler="true" globalspoiler="false" update="2009-11-21">
+      <name>giants</name>
+      <count>5</count>
+    </tag>
+    <tag id="35" approval="13" spoiler="false" localspoiler="false" globalspoiler="false" update="2007-07-28">
+      <name>awesome animation</name>
+      <count>188</count>
+      <description>Describes the style of an animation production that deems itself respectfully noteworthy for its impressive uniqueness of appearance and attention, emphasis, or exaggeration to all or specific characteristics, constructions and details that make it so recognizable.</description>
+    </tag>
+    <tag id="1235" approval="10" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-04-04">
+      <name>great ED</name>
+      <count>136</count>
+      <description>
+        The ending is pretty well made. It`s nicely presented, artistically and conceptually. It`s usually follow by a catchy song/tune, but it isn`t a norm.
+        It portrays the series theme perfectly, in other words, it doesn`t feel out of place.
+      </description>
+    </tag>
+    <tag id="2092" approval="9" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-06-03">
+      <name>over the top</name>
+      <count>36</count>
+      <description>Both the characters and the story in this anime are completely over the top.</description>
+    </tag>
+    <tag id="5391" approval="7" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-02-01">
+      <name>strange English fonts</name>
+      <count>2</count>
+      <description>Texts seen in the animations can be Japanese, English or any other existing human language. Sometimes the alphabets are used using very user-unfriendly styled characters. At first glance one would think that the texts are gibberish, but they are not.</description>
+    </tag>
+    <tag id="631" approval="8" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-12-08">
+      <name>Gainax bounce</name>
+      <count>42</count>
+      <description>A term that has come to describe often exaggerated, very jiggly, fluid, and painstakingly detailed animation of female characters’ bouncing breasts. The term has its roots in Top wo Nerae! — Gunbuster, Gainax’s first OVA (1988), in which the Gainax bounce is found unabated in the three female characters of Noriko, Kazumi, and Jung.</description>
+    </tag>
+    <tag id="5862" approval="3" spoiler="false" localspoiler="false" globalspoiler="true" update="2010-07-17">
+      <name>save the world</name>
+      <count>6</count>
+      <description>Plot revolves around some heroes in this anime that save the world.</description>
+    </tag>
+    <tag id="645" approval="9" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-05-22">
+      <name>comic relief animal sidekick</name>
+      <count>179</count>
+      <description>Every mahou shoujo anime needs them, the cute little critters that are supposed to help the protagonists but in reality are nothing but useless bystanders most often abused for gags. Kids love them but they can also often turn into an annoyance.</description>
+    </tag>
+    <tag id="1012" approval="14" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-02-26">
+      <name>product placement</name>
+      <count>31</count>
+      <description>
+        Otherwise known as a "plug" or "writing commercials right into a show". The practice of prominently displaying or talking about a recognizable product in a program, in exchange for some consideration from the manufacturer, usually monetary. (Source: TV Tropes)
+        Particularly notorious example, Pizza Hut for the involvement with Code Geass, Darker than Black and other series.
+      </description>
+    </tag>
+    <tag id="171" approval="9" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-02-20">
+      <name>Who the hell do you think I am?</name>
+      <count>18</count>
+      <description>
+        The catchphrase Kamina, one of the main characters in "Tengen Toppa Gurren Lagann", uses all the time.
+        Also used by Shizuru from "Shinkon Gattai Godannar!!".
+      </description>
+    </tag>
+    <tag id="4889" approval="8" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-04-28">
+      <name>the rule of cool</name>
+      <count>16</count>
+      <description>Physics be damned, logic is for fools.  It works because its awesome.  It`s pure cool fuel.</description>
+    </tag>
+    <tag id="1108" approval="7" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-06-08">
+      <name>guy shorter than girl</name>
+      <count>44</count>
+      <description>He is short, she is tall, it`s destiny.</description>
+    </tag>
+    <tag id="102" approval="7" spoiler="false" localspoiler="false" globalspoiler="false" update="2007-10-26">
+      <name>reverse trap</name>
+      <count>33</count>
+      <description>A girl who dresses in male clothing.</description>
+    </tag>
+    <tag id="2222" approval="13" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-07-20">
+      <name>boobs in your face</name>
+      <count>121</count>
+      <description>The protagonists face is pressed into a female`s cleavage. This may be accidental, or actually intended by the female character.</description>
+    </tag>
+    <tag id="5113" approval="7" spoiler="false" localspoiler="false" globalspoiler="false" update="2010-12-04">
+      <name>dark-skinned girl</name>
+      <count>102</count>
+      <description>The anime features a girl with dark skin. A fetish of sorts, since the other protagonists are usually as white-skinned as porcelain dolls.</description>
+    </tag>
+    <tag id="1242" approval="6" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-06-08">
+      <name>facial distortion</name>
+      <count>79</count>
+      <description>
+        The characters face are exaggerated into a misshape, deformed, and almost warped. Used as comedy element to express extreme mood swings.
+        Differing from "Super Deformed", here only the face changes to an extreme degree, not the whole body of the protagonist.
+      </description>
+    </tag>
+    <tag id="890" approval="11" spoiler="false" localspoiler="false" globalspoiler="false" update="2009-05-24">
+      <name>timeskip</name>
+      <count>81</count>
+      <description>
+        The plot features at least one skip or jump in time.
+        Example: A skip from the present into the past, or time skips in increments, e.g. every hour there is a timeskip by a day.
+      </description>
+    </tag>
+    <tag id="6339" approval="2" spoiler="false" localspoiler="false" globalspoiler="false" update="2011-04-12">
+      <name>Roman Holiday</name>
+      <count>8</count>
+      <description>Roman Holiday is a 1953 romantic comedy, starring Audrey Hepburn, playing the role of a bored and sheltered princess, who leaves her home to meet a commoner, eventually falling in love with him.</description>
+    </tag>
+  </tags>
+  <characters>
+    <character id="6262" type="main character in" update="2009-04-18">
+      <rating votes="1">7.08</rating>
+      <name>Dan JD</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23549.jpg</picture>
+      <seiyuu id="175" picture="25717.jpg">Shimono Hiro</seiyuu>
+    </character>
+    <character id="6263" type="main character in" update="2009-04-18">
+      <rating votes="2">6.73</rating>
+      <name>Sela D Miranda</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23548.jpg</picture>
+      <seiyuu id="182" picture="28111.jpg">Itou Shizuka</seiyuu>
+    </character>
+    <character id="6264" type="main character in" update="2009-04-18">
+      <rating votes="2">6.28</rating>
+      <name>Iceman Hotty</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23550.jpg</picture>
+      <seiyuu id="345" picture="17183.jpg">Nakamura Yuuichi</seiyuu>
+    </character>
+    <character id="6265" type="main character in" update="2009-04-18">
+      <rating votes="3">7.44</rating>
+      <name>Miyuki Ayukawa</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23551.jpg</picture>
+      <seiyuu id="193" picture="17007.jpg">Asano Masumi</seiyuu>
+    </character>
+    <character id="6266" type="main character in" update="2009-04-18">
+      <rating votes="1">8.19</rating>
+      <name>Coco JD</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23552.jpg</picture>
+      <seiyuu id="176" picture="35450.jpg">Hanazawa Kana</seiyuu>
+    </character>
+    <character id="6267" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">6.06</rating>
+      <name>Flora Skybloom</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23553.jpg</picture>
+      <seiyuu id="3" picture="44969.jpg">Kugimiya Rie</seiyuu>
+    </character>
+    <character id="6268" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">7.08</rating>
+      <name>Ganz Bogard</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23554.jpg</picture>
+      <seiyuu id="592" picture="17989.jpg">Tsuda Kenjirou</seiyuu>
+    </character>
+    <character id="6269" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">6.06</rating>
+      <name>Bel Lindon</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23555.jpg</picture>
+      <seiyuu id="320" picture="66660.jpg">Kobayashi Yumiko</seiyuu>
+    </character>
+    <character id="6270" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">8.19</rating>
+      <name>Soichi Ayukawa</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23556.jpg</picture>
+      <seiyuu id="418" picture="17270.jpg">Hirose Masashi</seiyuu>
+    </character>
+    <character id="6271" type="secondary cast in" update="2009-04-18">
+      <rating votes="2">7.92</rating>
+      <name>Spanky</name>
+      <gender>unknown</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23557.jpg</picture>
+      <seiyuu id="424" picture="17294.jpg">Endou Aya</seiyuu>
+    </character>
+    <character id="6272" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">7.08</rating>
+      <name>Crawley</name>
+      <gender>unknown</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23558.jpg</picture>
+      <seiyuu id="79" picture="34814.jpg">Kobayashi Yuu</seiyuu>
+    </character>
+    <character id="6273" type="secondary cast in" update="2009-07-05">
+      <rating votes="5">8.15</rating>
+      <name>Rouge</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <description>Referred to as `Idol Red`, Rouge is a pink-haired member of Eclipse, a musical group from the moon and a street Bigfoot Basketball team. She`s shown to have a spunky, rebellious attitude, apparent when she runs away from her manager and the press, eventually involving Dan in her escape by kissing him to hide her face. This, however, was caught on camera, and started the rumor that she was dating `Dunk Mask`. Later on, she, along with the rest of her team mates, participates in a match against Dan, Iceman and Sela, one of Team Basquash`s many traveling/fugitive matches. In the match, she receives a few slight injuries, to which she disregards, until she receives a particularly strong blow; Dan then dismounted his Bigfoot and carried her so she could recieve medical attention. She later reveals to her teammates that she has developed feelings for him because of this action.</description>
+      <picture>23559.jpg</picture>
+      <seiyuu id="5" picture="37146.jpg">Tomatsu Haruka</seiyuu>
+    </character>
+    <character id="6274" type="secondary cast in" update="2009-04-18">
+      <rating votes="4">5.77</rating>
+      <name>Citron</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23560.jpg</picture>
+      <seiyuu id="423" picture="37799.jpg">Nakajima Megumi</seiyuu>
+    </character>
+    <character id="6275" type="secondary cast in" update="2009-04-18">
+      <rating votes="1">7.08</rating>
+      <name>Violet</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>23561.jpg</picture>
+      <seiyuu id="2296" picture="21985.jpg">Hayami Saori</seiyuu>
+    </character>
+    <character id="6276" type="appears in" update="2009-05-11">
+      <name>Eclipse</name>
+      <gender>unknown</gender>
+      <charactertype id="3">Organization</charactertype>
+      <description>A fictional idol band and consisting out of the three characters Rouge, Citron and Violet.</description>
+      <picture>24825.jpg</picture>
+    </character>
+    <character id="6283" type="appears in" update="2009-04-18">
+      <rating votes="1">5.33</rating>
+      <name>Dan Senyouki</name>
+      <gender>unknown</gender>
+      <charactertype id="2">Mecha</charactertype>
+      <picture>23568.jpg</picture>
+    </character>
+    <character id="6284" type="appears in" update="2009-04-18">
+      <rating votes="1">5.33</rating>
+      <name>Sela Senyouki</name>
+      <gender>unknown</gender>
+      <charactertype id="2">Mecha</charactertype>
+      <picture>23569.jpg</picture>
+    </character>
+    <character id="6285" type="appears in" update="2009-04-18">
+      <rating votes="1">5.33</rating>
+      <name>Iceman Senyouki</name>
+      <gender>unknown</gender>
+      <charactertype id="2">Mecha</charactertype>
+      <picture>23571.jpg</picture>
+    </character>
+    <character id="6837" type="secondary cast in" update="2009-05-11">
+      <rating votes="4">8.60</rating>
+      <name>Haruka Gracia</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24817.jpg</picture>
+      <seiyuu id="74" picture="16682.jpg">Oohara Sayaka</seiyuu>
+    </character>
+    <character id="6838" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">6.06</rating>
+      <name>James Loon</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24818.jpg</picture>
+      <seiyuu id="373" picture="28112.jpg">Hamada Kenji</seiyuu>
+    </character>
+    <character id="6839" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">7.08</rating>
+      <name>Ril</name>
+      <gender>female</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24819.jpg</picture>
+    </character>
+    <character id="6840" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">6.06</rating>
+      <name>MAN-Z</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24820.jpg</picture>
+      <seiyuu id="1692" picture="19888.jpg">Okitsu Kazuyuki</seiyuu>
+    </character>
+    <character id="6841" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">6.06</rating>
+      <name>PPP</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24821.jpg</picture>
+    </character>
+    <character id="6842" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">6.06</rating>
+      <name>FFF</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24822.jpg</picture>
+      <seiyuu id="2708" picture="37823.jpg">Oohara Takashi</seiyuu>
+    </character>
+    <character id="6843" type="secondary cast in" update="2009-05-11">
+      <rating votes="1">5.33</rating>
+      <name>Falcon Lightwing</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>24823.jpg</picture>
+      <seiyuu id="181" picture="25723.jpg">Taniyama Kishou</seiyuu>
+    </character>
+    <character id="6844" type="appears in" update="2009-05-11">
+      <rating votes="1">5.33</rating>
+      <name>Patfoot</name>
+      <gender>unknown</gender>
+      <charactertype id="2">Mecha</charactertype>
+      <description>The police`s patlabor units.</description>
+      <picture>24824.jpg</picture>
+    </character>
+    <character id="6846" type="appears in" update="2009-05-11">
+      <name>The Worst</name>
+      <gender>unknown</gender>
+      <charactertype id="3">Organization</charactertype>
+      <description>The Worst is a team of Bigfoot Streetball players, its members are MAN-Z, FFF and PPP.</description>
+      <picture>24829.jpg</picture>
+    </character>
+    <character id="8637" type="main character in" update="2009-06-07">
+      <rating votes="1">7.08</rating>
+      <name>Dunk Mask</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <picture>27924.jpg</picture>
+      <seiyuu id="175" picture="25717.jpg">Shimono Hiro</seiyuu>
+    </character>
+    <character id="8653" type="appears in" update="2009-06-07">
+      <name>Toukutsu Trio</name>
+      <gender>unknown</gender>
+      <charactertype id="3">Organization</charactertype>
+      <picture>27947.jpg</picture>
+    </character>
+    <character id="8654" type="appears in" update="2009-06-07">
+      <rating votes="1">6.06</rating>
+      <name>Vargas</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <description>Captain of the trio.</description>
+      <seiyuu id="60" picture="46952.jpg">Kawada Shinji</seiyuu>
+    </character>
+    <character id="8655" type="appears in" update="2009-06-07">
+      <rating votes="1">6.06</rating>
+      <name>Deni</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <seiyuu id="2577" picture="22573.jpg">Misono Yukihiro</seiyuu>
+    </character>
+    <character id="8656" type="appears in" update="2009-06-07">
+      <rating votes="1">6.06</rating>
+      <name>Salem</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <seiyuu id="1683" picture="19799.jpg">Kanemitsu Nobuaki</seiyuu>
+    </character>
+    <character id="10883" type="appears in" update="2009-08-02">
+      <rating votes="1">7.08</rating>
+      <name>Naviga Stelte</name>
+      <gender>male</gender>
+      <charactertype id="1">Character</charactertype>
+      <description>A moon giant whose ancestors were brought to Earthdash to mine Ultimite in the Underground due to the fact that it was poisonous to humans but not them he wears a suit that is as big as a big foot possibly to also provide him protection from the ultimite due to his weaked resistance to its poisonous effects and he protected his friends` graves until Dan found him and introduced him to the world of basquash and told him that his friends` would not want him to spend the rest of his life protecting their graves.</description>
+      <episodes>105160</episodes>
+      <picture>32419.jpg</picture>
+      <seiyuu id="465" picture="56019.jpg">Kondou Takayuki</seiyuu>
+    </character>
+  </characters>
+  <episodes>
+    <episode id="97345" update="2009-03-09">
+      <epno type="4">T1</epno>
+      <length>2</length>
+      <title xml:lang="en">Trailer</title>
+    </episode>
+    <episode id="98423" update="2009-03-30">
+      <epno type="1">1</epno>
+      <length>25</length>
+      <airdate>2009-04-03</airdate>
+      <rating votes="7">7.50</rating>
+      <title xml:lang="ja">アイ・アム・レジェンド</title>
+      <title xml:lang="en">I Am Legend</title>
+      <title xml:lang="x-jat">I Am Legend</title>
+    </episode>
+    <episode id="98424" update="2009-03-30">
+      <epno type="2">S1</epno>
+      <length>25</length>
+      <airdate>2009-03-27</airdate>
+      <title xml:lang="ja">バスカッシュ! 放送直前SP ～レジェンド オブ バスカッシュ～</title>
+      <title xml:lang="en">Basquash! Before Broadcast SP ~Legend of Basquash~</title>
+      <title xml:lang="x-jat">Basquash! Housou Chokuzen SP ~Legend of Basquash~</title>
+    </episode>
+    <episode id="98840" update="2009-04-02">
+      <epno type="1">2</epno>
+      <length>25</length>
+      <airdate>2009-04-10</airdate>
+      <rating votes="6">7.25</rating>
+      <title xml:lang="ja">レジェンド・イズ・デッド</title>
+      <title xml:lang="en">Legend Is Dead</title>
+      <title xml:lang="x-jat">Legend Is Dead</title>
+    </episode>
+    <episode id="99633" update="2009-04-13">
+      <epno type="1">6</epno>
+      <length>25</length>
+      <airdate>2009-05-08</airdate>
+      <rating votes="6">6.33</rating>
+      <title xml:lang="ja">セイント・ハズ・カム</title>
+      <title xml:lang="en">Saint Has Come</title>
+      <title xml:lang="x-jat">Saint Has Come</title>
+    </episode>
+    <episode id="99634" update="2009-04-13">
+      <epno type="1">5</epno>
+      <length>25</length>
+      <airdate>2009-05-01</airdate>
+      <rating votes="7">8.57</rating>
+      <title xml:lang="ja">バスカッシュ!</title>
+      <title xml:lang="en">Basquash!</title>
+      <title xml:lang="x-jat">Basquash!</title>
+    </episode>
+    <episode id="99635" update="2009-04-13">
+      <epno type="1">4</epno>
+      <length>25</length>
+      <airdate>2009-04-24</airdate>
+      <rating votes="7">7.92</rating>
+      <title xml:lang="ja">スリーウエイ・フリーファイト</title>
+      <title xml:lang="en">Three-Way Free-Fight</title>
+      <title xml:lang="x-jat">Three-Way Free-Fight</title>
+    </episode>
+    <episode id="99636" update="2009-04-13">
+      <epno type="1">3</epno>
+      <length>25</length>
+      <airdate>2009-04-17</airdate>
+      <rating votes="7">7.03</rating>
+      <title xml:lang="ja">デストロイ・デストロイ</title>
+      <title xml:lang="en">Destroy, Destroy</title>
+      <title xml:lang="x-jat">Destroy. Destroy</title>
+    </episode>
+    <episode id="102104" update="2009-05-10">
+      <epno type="1">7</epno>
+      <length>25</length>
+      <airdate>2009-05-15</airdate>
+      <rating votes="5">8.58</rating>
+      <title xml:lang="ja">ウイズイン・アウト・オブ</title>
+      <title xml:lang="en">Within, Out Of</title>
+      <title xml:lang="x-jat">Within Out Of</title>
+    </episode>
+    <episode id="102437" update="2009-05-13">
+      <epno type="1">10</epno>
+      <length>25</length>
+      <airdate>2009-06-05</airdate>
+      <rating votes="5">7.45</rating>
+      <title xml:lang="ja">ノンストップ・ジャンプストップ</title>
+      <title xml:lang="en">Nonstop, Jumpstop</title>
+      <title xml:lang="x-jat">Nonstop, Jumpstop</title>
+    </episode>
+    <episode id="102438" update="2009-05-13">
+      <epno type="1">9</epno>
+      <length>25</length>
+      <airdate>2009-05-29</airdate>
+      <rating votes="7">7.86</rating>
+      <title xml:lang="ja">アイドル・アタック!</title>
+      <title xml:lang="en">Idol Attack!</title>
+      <title xml:lang="x-jat">Idol Attack!</title>
+    </episode>
+    <episode id="102439" update="2009-05-13">
+      <epno type="1">8</epno>
+      <length>25</length>
+      <airdate>2009-05-22</airdate>
+      <rating votes="4">7.88</rating>
+      <title xml:lang="ja">パス・オブ・トゥルース</title>
+      <title xml:lang="en">Path of Truth</title>
+      <title xml:lang="x-jat">Path of Truth</title>
+    </episode>
+    <episode id="103960" update="2009-06-08">
+      <epno type="1">11</epno>
+      <length>25</length>
+      <airdate>2009-06-12</airdate>
+      <rating votes="4">7.88</rating>
+      <title xml:lang="ja">イン・ザ・ナイト・ビフォア</title>
+      <title xml:lang="en">In the Night Before</title>
+      <title xml:lang="x-jat">In the Night Before</title>
+    </episode>
+    <episode id="104242" update="2009-06-16">
+      <epno type="1">12</epno>
+      <length>25</length>
+      <airdate>2009-06-19</airdate>
+      <rating votes="5">7.69</rating>
+      <title xml:lang="ja">リーグ・リーグ・リーグ! / セカンダリー・ブレイク</title>
+      <title xml:lang="en">League League League! / Secondary Break</title>
+      <title xml:lang="x-jat">League League League! / Secondary Break</title>
+    </episode>
+    <episode id="104243" update="2009-06-16">
+      <epno type="1">15</epno>
+      <length>25</length>
+      <airdate>2009-07-10</airdate>
+      <rating votes="3">8.62</rating>
+      <title xml:lang="ja">ラン・アンド・キャノン</title>
+      <title xml:lang="en">Run and Cannon</title>
+      <title xml:lang="x-jat">Run and Cannon</title>
+    </episode>
+    <episode id="104244" update="2009-06-16">
+      <epno type="1">14</epno>
+      <length>25</length>
+      <airdate>2009-07-03</airdate>
+      <rating votes="3">7.71</rating>
+      <title xml:lang="ja">スプラッシュ・ダッシュ・クラッシュ!</title>
+      <title xml:lang="en">Splash Dash Crash!</title>
+      <title xml:lang="x-jat">Splash Dash Crash!</title>
+    </episode>
+    <episode id="104245" update="2009-06-16">
+      <epno type="1">13</epno>
+      <length>25</length>
+      <airdate>2009-06-26</airdate>
+      <rating votes="5">9.54</rating>
+      <title xml:lang="ja">シーユー・オン・ザ・ムーン</title>
+      <title xml:lang="en">See You On The Moon</title>
+      <title xml:lang="x-jat">See You On The Moon</title>
+    </episode>
+    <episode id="105052" update="2009-07-10">
+      <epno type="1">16</epno>
+      <length>25</length>
+      <airdate>2009-07-17</airdate>
+      <rating votes="3">7.71</rating>
+      <title xml:lang="ja">アンダーグラウンド</title>
+      <title xml:lang="en">Underground</title>
+      <title xml:lang="x-jat">Underground</title>
+    </episode>
+    <episode id="105160" update="2009-07-18">
+      <epno type="1">17</epno>
+      <length>25</length>
+      <airdate>2009-07-24</airdate>
+      <rating votes="3">6.99</rating>
+      <title xml:lang="ja">ジャイアント・ステップ</title>
+      <title xml:lang="en">Giant Step</title>
+      <title xml:lang="x-jat">Giant Step</title>
+    </episode>
+    <episode id="105503" update="2009-07-24">
+      <epno type="1">18</epno>
+      <length>25</length>
+      <airdate>2009-07-31</airdate>
+      <rating votes="3">8.39</rating>
+      <title xml:lang="ja">メモリー・オブ・ユー</title>
+      <title xml:lang="en">Memory of You</title>
+      <title xml:lang="x-jat">Memory of You</title>
+    </episode>
+    <episode id="105882" update="2009-08-03">
+      <epno type="1">19</epno>
+      <length>25</length>
+      <airdate>2009-08-07</airdate>
+      <rating votes="3">7.71</rating>
+      <title xml:lang="ja">ターン・オーバー / ココ・レポート</title>
+      <title xml:lang="en">Turn Over / Coco Report</title>
+      <title xml:lang="x-jat">Turn Over / Coco Report</title>
+    </episode>
+    <episode id="106126" update="2009-08-07">
+      <epno type="1">20</epno>
+      <length>25</length>
+      <airdate>2009-08-14</airdate>
+      <rating votes="3">7.71</rating>
+      <title xml:lang="ja">フィットイン・ブレーク</title>
+      <title xml:lang="en">Fitting Break</title>
+      <title xml:lang="x-jat">Fitting Break</title>
+    </episode>
+    <episode id="106290" update="2009-08-20">
+      <epno type="1">22</epno>
+      <length>25</length>
+      <airdate>2009-09-04</airdate>
+      <rating votes="4">9.03</rating>
+      <title xml:lang="ja">クラッチショット</title>
+      <title xml:lang="en">Clutch Shot</title>
+      <title xml:lang="x-jat">Clutch Shot</title>
+    </episode>
+    <episode id="106291" update="2009-08-20">
+      <epno type="1">21</epno>
+      <length>25</length>
+      <airdate>2009-08-28</airdate>
+      <rating votes="5">8.21</rating>
+      <title xml:lang="ja">トータル・エクリプス</title>
+      <title xml:lang="en">Total Eclipse</title>
+      <title xml:lang="x-jat">Total Eclipse</title>
+    </episode>
+    <episode id="108296" update="2009-09-05">
+      <epno type="1">23</epno>
+      <length>25</length>
+      <airdate>2009-09-11</airdate>
+      <rating votes="4">7.41</rating>
+      <title xml:lang="ja">コーズ・スラッシュ・セッド・ソウ</title>
+      <title xml:lang="en">`Cause Slash Said So</title>
+      <title xml:lang="x-jat">`Cause Slash Said So</title>
+    </episode>
+    <episode id="108455" update="2009-09-11">
+      <epno type="1">24</epno>
+      <length>25</length>
+      <airdate>2009-09-18</airdate>
+      <rating votes="4">7.66</rating>
+      <title xml:lang="ja">フー・アー・ユー?</title>
+      <title xml:lang="en">Who are you?</title>
+      <title xml:lang="x-jat">Who are you?</title>
+    </episode>
+    <episode id="108456" update="2009-09-11">
+      <epno type="1">25</epno>
+      <length>25</length>
+      <airdate>2009-09-25</airdate>
+      <rating votes="4">7.74</rating>
+      <title xml:lang="ja">アバヴ・ザ・リム</title>
+      <title xml:lang="en">Above the Rim</title>
+      <title xml:lang="x-jat">Above the Rim</title>
+    </episode>
+    <episode id="108457" update="2009-09-11">
+      <epno type="1">26</epno>
+      <length>25</length>
+      <airdate>2009-10-02</airdate>
+      <rating votes="4">6.84</rating>
+      <title xml:lang="ja">フリー</title>
+      <title xml:lang="en">Free</title>
+      <title xml:lang="x-jat">Free</title>
+    </episode>
+    <episode id="108786" update="2009-09-27">
+      <epno type="3">C2</epno>
+      <length>2</length>
+      <airdate>2009-04-03</airdate>
+      <title xml:lang="en">Ending 1</title>
+    </episode>
+  </episodes>
+</anime>
