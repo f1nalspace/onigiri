@@ -51,7 +51,7 @@ namespace Finalspace.Onigiri.ViewModels
             collView.CustomSort = new IssuesSorter();
             CmdSelectTitle = new DelegateCommand<Issue>((issue) =>
             {
-                TitlesViewModel titlesViewModel = new TitlesViewModel(Main, true);
+                using TitlesViewModel titlesViewModel = new TitlesViewModel(Main, true);
                 titlesViewModel.SetTitles(Main.CoreService.Titles.Items);
                 titlesViewModel.StartRefreshTimer();
                 titlesViewModel.FilterString = string.Empty; //issue.Value as string;

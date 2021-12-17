@@ -22,7 +22,7 @@ namespace Finalspace.Onigiri.ViewModels
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        #region Services       
+        #region Services
         public OnigiriService CoreService { get; private set; }
         public IOnigiriDialogService DlgService => GetService<IOnigiriDialogService>();
         public IProcessStarterService ProcessStarterService => GetService<IProcessStarterService>();
@@ -36,29 +36,11 @@ namespace Finalspace.Onigiri.ViewModels
         #region Anime list & properties
         private readonly List<Anime> _animes;
 
-        public ICollectionView AnimesView
-        {
-            get => GetValue<ICollectionView>();
-            private set => SetValue(value);
-        }
+        public ICollectionView AnimesView { get; }
 
-        public int VisibleAnimeCount
-        {
-            get
-            {
-                int result = AnimesView.Cast<Anime>().Count();
-                return result;
-            }
-        }
+        public int VisibleAnimeCount => AnimesView.Cast<Anime>().Count();
 
-        public int TotalAnimeCount
-        {
-            get
-            {
-                int result = _animes.Count;
-                return result;
-            }
-        }
+        public int TotalAnimeCount => _animes.Count;
         #endregion
 
         #region Status & Loading
@@ -156,10 +138,11 @@ namespace Finalspace.Onigiri.ViewModels
                 25.0,
                 50.0,
             };
-            _filterCategoryWeights.Clear();
+
+            List<CategoryItemViewModel> filterCatsWeights = new List<CategoryItemViewModel>(MinWeightPercentages.Length);
             foreach (double weight in MinWeightPercentages)
             {
-                _filterCategoryWeights.Add(new CategoryItemViewModel()
+                filterCatsWeights.Add(new CategoryItemViewModel()
                 {
                     DisplayName = $"{weight} %",
                     MinWeightPercentage = weight,
@@ -169,7 +152,7 @@ namespace Finalspace.Onigiri.ViewModels
             _animes.Clear();
             _animes.AddRange(CoreService.Animes.Items);
 
-            _filterCategories.Clear();
+            List<CategoryItemViewModel> filterCats = new List<CategoryItemViewModel>();
 
             HashSet<ulong> catIds = new HashSet<ulong>();
             foreach (Anime anime in _animes)
@@ -179,7 +162,7 @@ namespace Finalspace.Onigiri.ViewModels
                     if (!catIds.Contains(category.Id))
                     {
                         catIds.Add(category.Id);
-                        _filterCategories.Add(new CategoryItemViewModel()
+                        filterCats.Add(new CategoryItemViewModel()
                         {
                             Id = category.Id,
                             DisplayName = $"{category.Name}",
@@ -188,7 +171,7 @@ namespace Finalspace.Onigiri.ViewModels
                 }
             }
 
-            _filterCategories.Sort((a, b) =>
+            filterCats.Sort((a, b) =>
             {
                 return string.Compare(a.DisplayName, b.DisplayName);
             });
@@ -197,8 +180,8 @@ namespace Finalspace.Onigiri.ViewModels
             {
                 FilterCategoryWeights.Clear();
                 FilterCategories.Clear();
-                FilterCategories.AddRange(_filterCategories);
-                FilterCategoryWeights.AddRange(_filterCategoryWeights);
+                FilterCategories.AddRange(filterCats);
+                FilterCategoryWeights.AddRange(filterCatsWeights);
                 UpdateSort(false);
             });
         }
@@ -328,19 +311,8 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
-        private readonly List<CategoryItemViewModel> _filterCategories;
-        public ExtendedObservableCollection<CategoryItemViewModel> FilterCategories
-        {
-            get => GetValue<ExtendedObservableCollection<CategoryItemViewModel>>();
-            private set => SetValue(value);
-        }
-
-        private readonly List<CategoryItemViewModel> _filterCategoryWeights;
-        public ExtendedObservableCollection<CategoryItemViewModel> FilterCategoryWeights
-        {
-            get => GetValue<ExtendedObservableCollection<CategoryItemViewModel>>();
-            private set => SetValue(value);
-        }
+        public ExtendedObservableCollection<CategoryItemViewModel> FilterCategories { get; }
+        public ExtendedObservableCollection<CategoryItemViewModel> FilterCategoryWeights { get; }
         #endregion
 
         #region Sorting
@@ -420,7 +392,7 @@ namespace Finalspace.Onigiri.ViewModels
             set => SetValue(value);
         }
 
-        private bool AnimeFilter(object item)
+        private bool AnimesViewFilter(object item)
         {
             bool result = true;
             Anime anime = item as Anime;
@@ -518,7 +490,7 @@ namespace Finalspace.Onigiri.ViewModels
 
         private void ShowTitlesDialog()
         {
-            TitlesViewModel titlesViewModel = new TitlesViewModel(this, false);
+            using TitlesViewModel titlesViewModel = new TitlesViewModel(this, false);
             titlesViewModel.SetTitles(CoreService.Titles.Items);
             titlesViewModel.SetExcludedAnimes(CoreService.Animes.Items.Select((a) => a.Aid));
             titlesViewModel.StartRefreshTimer();
@@ -553,9 +525,7 @@ namespace Finalspace.Onigiri.ViewModels
             // Collections
             _animes = new List<Anime>(4096);
             AnimesView = new ListCollectionView(_animes) { CustomSort = new AnimeSorter() };
-            AnimesView.Filter = AnimeFilter;
-            _filterCategories = new List<CategoryItemViewModel>();
-            _filterCategoryWeights = new List<CategoryItemViewModel>();
+            AnimesView.Filter = AnimesViewFilter;
             FilterCategories = new ExtendedObservableCollection<CategoryItemViewModel>();
             FilterCategoryWeights = new ExtendedObservableCollection<CategoryItemViewModel>();
 

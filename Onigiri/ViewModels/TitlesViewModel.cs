@@ -5,16 +5,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Data;
+using System.Threading;
+using System;
 
 namespace Finalspace.Onigiri.ViewModels
 {
-    public class TitlesViewModel : ViewModelBase
+    public class TitlesViewModel : ViewModelBase, IDisposable
     {
         private BackgroundWorker _filterWorker;
-        private System.Threading.Timer _filterTimer;
+        private Timer _filterTimer;
 
         public IDispatcherService DispatcherService => GetService<IDispatcherService>();
 
@@ -69,6 +70,8 @@ namespace Finalspace.Onigiri.ViewModels
             set => SetValue(value);
         }
         private string _selectedFilterType;
+        private bool _isDisposed;
+
         public string SelectedFilterType
         {
             get { return _selectedFilterType; }
@@ -172,6 +175,8 @@ namespace Finalspace.Onigiri.ViewModels
             _filterTimer.Change(250, Timeout.Infinite);
         }
 
+        
+
         private readonly bool _allowButtons;
         public bool AllowButtons => _allowButtons;
 
@@ -179,7 +184,9 @@ namespace Finalspace.Onigiri.ViewModels
         {
             Main = main;
             _allowButtons = allowButtons;
+
             _filterTimer = new Timer((c) => UpdateFilter(), null, Timeout.Infinite, Timeout.Infinite);
+
             _titles = new List<Title>();
             _excludedAnimes = new HashSet<ulong>();
             _selectedFilterType = "All";
@@ -187,6 +194,25 @@ namespace Finalspace.Onigiri.ViewModels
             TitlesView.Filter = TitleFilter;
             ListCollectionView collView = TitlesView as ListCollectionView;
             collView.CustomSort = new TitleSorter();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    _filterTimer.Dispose();
+                    _filterWorker?.Dispose();
+                }
+                _isDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
