@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -9,21 +9,21 @@ namespace Finalspace.Onigiri.Models
 {
     [Serializable]
     [XmlRoot(ElementName = "additionaldata")]
-    public class AdditionalData: BindableBase
+    public class AdditionalData : BindableBase
     {
         [XmlArray("watchstates")]
         [XmlArrayItem("watched")]
         public ObservableCollection<NameState> Watchstates
         {
-            get { return GetValue(() => Watchstates); }
-            private set { SetValue(() => Watchstates, value, RaiseWatchStatesChanged); }
+            get => GetValue<ObservableCollection<NameState>>();
+            private set => SetValue(value, RaiseWatchStatesChanged);
         }
         [XmlArray("deleteits")]
         [XmlArrayItem("deleteit")]
         public ObservableCollection<NameState> Deleteits
         {
-            get { return GetValue(() => Deleteits); }
-            private set { SetValue(() => Deleteits, value, RaiseDeleteitsChanged); }
+            get => GetValue<ObservableCollection<NameState>>();
+            private set => SetValue(value, RaiseDeleteitsChanged);
         }
 
         public bool HasAnniWatched
@@ -46,22 +46,9 @@ namespace Finalspace.Onigiri.Models
                 return false;
             }
         }
-        public bool HasFinalUnwatched
-        {
-            get { return !HasFinalWatched; }
-        }
-        public bool HasAnniUnwatched
-        {
-            get { return !HasAnniWatched; }
-        }
-        public bool HasBothUnwatched
-        {
-            get
-            {
-                
-                return !HasFinalWatched && !HasAnniWatched;
-            }
-        }
+        public bool HasFinalUnwatched => !HasFinalWatched;
+        public bool HasAnniUnwatched => !HasAnniWatched;
+        public bool HasBothUnwatched => !HasFinalWatched && !HasAnniWatched;
         public bool HasAnniDeleteit
         {
             get
@@ -85,20 +72,20 @@ namespace Finalspace.Onigiri.Models
 
         private void RaiseWatchStatesChanged()
         {
-            RaisePropertyChanged(() => HasAnniWatched);
-            RaisePropertyChanged(() => HasFinalWatched);
+            RaisePropertyChanged(nameof(HasAnniWatched));
+            RaisePropertyChanged(nameof(HasFinalWatched));
         }
         private void RaiseDeleteitsChanged()
         {
-            RaisePropertyChanged(() => HasAnniDeleteit);
-            RaisePropertyChanged(() => HasFinalDeleteit);
+            RaisePropertyChanged(nameof(HasAnniDeleteit));
+            RaisePropertyChanged(nameof(HasFinalDeleteit));
         }
 
         [XmlElement("marked")]
         public bool Marked
         {
-            get { return GetValue(() => Marked); }
-            set { SetValue(() => Marked, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
 
         public AdditionalData()

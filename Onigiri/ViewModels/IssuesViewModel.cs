@@ -1,12 +1,11 @@
-﻿using Finalspace.Onigiri.Core;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Core;
 using Finalspace.Onigiri.Helper;
 using Finalspace.Onigiri.Models;
-using Finalspace.Onigiri.MVVM;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
@@ -16,21 +15,21 @@ namespace Finalspace.Onigiri.ViewModels
     {
         public MainViewModel Main
         {
-            get { return GetValue(() => Main); }
-            private set { SetValue(() => Main, value); }
+            get => GetValue<MainViewModel>();
+            private set => SetValue(value);
         }
 
         private readonly IList<Issue> _issues;
         public ICollectionView IssuesView
         {
-            get { return GetValue(() => IssuesView); }
-            private set { SetValue(() => IssuesView, value); }
+            get => GetValue<ICollectionView>();
+            private set => SetValue(value);
         }
 
         public Issue SelectedIssue
         {
-            get { return GetValue(() => SelectedIssue); }
-            set { SetValue(() => SelectedIssue, value); }
+            get => GetValue<Issue>();
+            set => SetValue(value);
         }
 
         public void SetIssues(IEnumerable<Issue> issues)

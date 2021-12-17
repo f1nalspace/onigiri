@@ -1,4 +1,5 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.ViewModels;
 using System.Windows;
@@ -15,7 +16,7 @@ namespace Finalspace.Onigiri.Views
         public MainWindow()
         {
             InitializeComponent();
-            ServiceContainer.Instance.Register<IOnigiriDialogService>(new DefaultOnigiriDialogService(this));
+            ServiceContainer.Default.RegisterService(new DefaultOnigiriDialogService(this));
             DataContext = new MainViewModel();
             (DataContext as MainViewModel).CloseRequested += () => Close();
         }

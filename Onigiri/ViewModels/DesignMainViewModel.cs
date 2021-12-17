@@ -1,5 +1,5 @@
-﻿using Finalspace.Onigiri.Models;
-using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Models;
 using System.Collections.ObjectModel;
 
 namespace Finalspace.Onigiri.ViewModels

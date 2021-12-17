@@ -1,5 +1,5 @@
-﻿using Finalspace.Onigiri.Helper;
-using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Helper;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -7,13 +7,13 @@ namespace Finalspace.Onigiri.ViewModels
     {
         public string DisplayName
         {
-            get { return GetValue(() => DisplayName); }
-            set { SetValue(() => DisplayName, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public AnimeSortKey Value
         {
-            get { return GetValue(() => Value); }
-            set { SetValue(() => Value, value); }
+            get => GetValue<AnimeSortKey>();
+            set => SetValue(value);
         }
     }
 }

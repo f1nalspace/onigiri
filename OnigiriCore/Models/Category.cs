@@ -1,33 +1,33 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.Models
 {
-    public class Category: BindableBase
+    public class Category : BindableBase
     {
         public ulong Id
         {
-            get { return GetValue(() => Id); }
-            set { SetValue(() => Id, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
         public ulong ParentId
         {
-            get { return GetValue(() => ParentId); }
-            set { SetValue(() => ParentId, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
         public string Name
         {
-            get { return GetValue(() => Name); }
-            set { SetValue(() => Name, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public string Description
         {
-            get { return GetValue(() => Description); }
-            set { SetValue(() => Description, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public int Weight
         {
-            get { return GetValue(() => Weight); }
-            set { SetValue(() => Weight, value); }
+            get => GetValue<int>();
+            set => SetValue(value);
         }
 
         public override string ToString()

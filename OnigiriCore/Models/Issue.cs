@@ -1,5 +1,5 @@
-﻿using Finalspace.Onigiri.Enums;
-using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Enums;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -7,32 +7,32 @@ namespace Finalspace.Onigiri.Models
     {
         public IssueKind Kind
         {
-            get { return GetValue(() => Kind); }
-            private set { SetValue(() => Kind, value); }
+            get => GetValue<IssueKind>();
+            private set => SetValue(value);
         }
 
         public bool IsSolved
         {
-            get { return GetValue(() => IsSolved); }
-            set { SetValue(() => IsSolved, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
 
         public string Message
         {
-            get { return GetValue(() => Message); }
-            private set { SetValue(() => Message, value); }
+            get => GetValue<string>();
+            private set => SetValue(value);
         }
 
         public string Path
         {
-            get { return GetValue(() => Path); }
-            private set { SetValue(() => Path, value); }
+            get => GetValue<string>();
+            private set => SetValue(value);
         }
 
         public object Value
         {
-            get { return GetValue(() => Value); }
-            private set { SetValue(() => Value, value); }
+            get => GetValue<object>();
+            private set => SetValue(value);
         }
 
         public Issue(IssueKind kind, string message, string path, object value)

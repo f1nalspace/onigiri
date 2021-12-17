@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.Xml.Serialization;
@@ -12,58 +12,58 @@ namespace Finalspace.Onigiri.Models
         [XmlAttribute()]
         public ulong Id
         {
-            get { return GetValue(() => Id); }
-            set { SetValue(() => Id, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
 
         [XmlAttribute()]
         public string Num
         {
-            get { return GetValue(() => Num); }
-            set { SetValue(() => Num, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlAttribute()]
         public ulong NumType
         {
-            get { return GetValue(() => NumType); }
-            set { SetValue(() => NumType, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
 
         [XmlAttribute()]
         public ulong Length
         {
-            get { return GetValue(() => Length); }
-            set { SetValue(() => Length, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
 
         [XmlElement()]
         public DateTime? AirDate
         {
-            get { return GetValue(() => AirDate); }
-            set { SetValue(() => AirDate, value); }
+            get => GetValue<DateTime?>();
+            set => SetValue(value);
         }
 
         [XmlElement()]
         public DateTime? UpDate
         {
-            get { return GetValue(() => UpDate); }
-            set { SetValue(() => UpDate, value); }
+            get => GetValue<DateTime?>();
+            set => SetValue(value);
         }
 
         [XmlElement()]
         public Rating Rating
         {
-            get { return GetValue(() => Rating); }
-            set { SetValue(() => Rating, value); }
+            get => GetValue<Rating>();
+            set => SetValue(value);
         }
 
         [XmlArray("Titles")]
         [XmlArrayItem("Title")]
         public ObservableCollection<Title> Titles
         {
-            get { return GetValue(() => Titles); }
-            set { SetValue(() => Titles, value); }
+            get => GetValue<ObservableCollection<Title>>();
+            set => SetValue(value);
         }
 
         public Episode()

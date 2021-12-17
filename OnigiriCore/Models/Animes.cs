@@ -1,8 +1,6 @@
 ﻿using log4net;
-using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Linq;
-using Finalspace.Onigiri.MVVM;
 using System.Collections.Generic;
 
 namespace Finalspace.Onigiri.Models

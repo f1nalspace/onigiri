@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -6,18 +6,18 @@ namespace Finalspace.Onigiri.ViewModels
     {
         public string DisplayName
         {
-            get { return GetValue(() => DisplayName); }
-            set { SetValue(() => DisplayName, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public ulong Id
         {
-            get { return GetValue(() => Id); }
-            set { SetValue(() => Id, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
         public double MinWeightPercentage
         {
-            get { return GetValue(() => MinWeightPercentage); }
-            set { SetValue(() => MinWeightPercentage, value); }
+            get => GetValue<double>();
+            set => SetValue(value);
         }
     }
 }

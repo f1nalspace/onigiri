@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -6,8 +6,8 @@ namespace Finalspace.Onigiri.ViewModels
     {
         public string Name
         {
-            get { return GetValue(() => Name); }
-            set { SetValue(() => Name, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
     }
 }

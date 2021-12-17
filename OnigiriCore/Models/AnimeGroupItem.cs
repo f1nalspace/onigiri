@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -6,8 +6,8 @@ namespace Finalspace.Onigiri.Models
     {
         public Anime Anime
         {
-            get { return GetValue(() => Anime); }
-            private set { SetValue(() => Anime, value); }
+            get => GetValue<Anime>();
+            private set => SetValue(value);
         }
 
         public AnimeGroupItem(Anime anime)

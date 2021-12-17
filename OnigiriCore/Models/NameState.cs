@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Xml.Serialization;
 
@@ -10,15 +10,15 @@ namespace Finalspace.Onigiri.Models
         [XmlAttribute("name")]
         public string Name
         {
-            get { return GetValue(() => Name); }
-            set { SetValue(() => Name, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlAttribute("value")]
         public bool Value
         {
-            get { return GetValue(() => Value); }
-            set { SetValue(() => Value, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
     }
 }

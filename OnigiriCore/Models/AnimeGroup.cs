@@ -1,8 +1,5 @@
-﻿using Finalspace.Onigiri.MVVM;
-using System;
-using System.Collections.Generic;
+﻿using DevExpress.Mvvm;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -10,14 +7,14 @@ namespace Finalspace.Onigiri.Models
     {
         public Anime Root
         {
-            get { return GetValue(() => Root); }
-            private set { SetValue(() => Root, value); }
+            get => GetValue<Anime>();
+            private set { SetValue(value); }
         }
 
         public ObservableCollection<AnimeGroupItem> Items
         {
-            get { return GetValue(() => Items); }
-            private set { SetValue(() => Items, value); }
+            get => GetValue<ObservableCollection<AnimeGroupItem>>();
+            private set => SetValue(value);
         }
 
         public AnimeGroup(Anime root)

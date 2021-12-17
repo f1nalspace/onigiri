@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Xml.Serialization;
 
@@ -11,29 +11,29 @@ namespace Finalspace.Onigiri.Models
         [XmlAttribute()]
         public ulong Aid
         {
-            get { return GetValue(() => Aid); }
-            set { SetValue(() => Aid, value); }
+            get { return GetValue<ulong>(); }
+            set { SetValue(value); }
         }
 
         [XmlAttribute("type")]
         public string TypeStr
         {
-            get { return GetValue(() => TypeStr); }
-            set { SetValue(() => TypeStr, value, () => { Type = RelationTypeConverter.FromString(value); }); }
+            get { return GetValue<string>(); }
+            set { SetValue(value, () => { Type = RelationTypeConverter.FromString(value); }); }
         }
 
         [XmlIgnore]
         public RelationType Type
         {
-            get { return GetValue(() => Type); }
-            private set { SetValue(() => Type, value); }
+            get { return GetValue<RelationType>(); }
+            private set { SetValue(value); }
         }
 
         [XmlAttribute()]
         public string Name
         {
-            get { return GetValue(() => Name); }
-            set { SetValue(() => Name, value); }
+            get { return GetValue<string>(); }
+            set { SetValue(value); }
         }
 
         public override string ToString()

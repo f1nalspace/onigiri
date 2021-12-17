@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -12,21 +12,21 @@ namespace Finalspace.Onigiri.Models
         [XmlArrayItem("SearchPath")]
         public ObservableCollection<SearchPath> SearchPaths
         {
-            get { return GetValue(() => SearchPaths); }
-            set { SetValue(() => SearchPaths, value); }
+            get => GetValue<ObservableCollection<SearchPath>>();
+            set => SetValue(value);
         }
 
         [XmlArrayItem("SearchTypeLanguage")]
         public ObservableCollection<SearchTypeLanguage> SearchTypeLanguages
         {
-            get { return GetValue(() => SearchTypeLanguages); }
-            private set { SetValue(() => SearchTypeLanguages, value); }
+            get => GetValue< ObservableCollection<SearchTypeLanguage>>();
+            private set => SetValue(value);
         }
 
         public int MaxThreadCount
         {
-            get { return Math.Max(1, GetValue(() => MaxThreadCount)); }
-            set { SetValue(() => MaxThreadCount, value); }
+            get { return Math.Max(1, GetValue<int>()); }
+            set { SetValue(value); }
         }
 
         public Config()

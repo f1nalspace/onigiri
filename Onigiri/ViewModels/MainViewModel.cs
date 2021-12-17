@@ -1,7 +1,6 @@
 ﻿using Finalspace.Onigiri.Core;
 using Finalspace.Onigiri.Models;
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Linq;
@@ -15,6 +14,7 @@ using Finalspace.Onigiri.Events;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
+using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -24,8 +24,9 @@ namespace Finalspace.Onigiri.ViewModels
 
         #region Services       
         public OnigiriService CoreService { get; private set; }
-        public IOnigiriDialogService DlgService { get { return GetService<IOnigiriDialogService>(); } }
-        public IProcessStarterService ProcessStarterService { get { return GetService<IProcessStarterService>(); } }
+        public IOnigiriDialogService DlgService => GetService<IOnigiriDialogService>();
+        public IProcessStarterService ProcessStarterService => GetService<IProcessStarterService>();
+        public IDispatcherService DispatcherService => GetService<IDispatcherService>();
         #endregion
 
         #region Events
@@ -37,8 +38,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         public ICollectionView AnimesView
         {
-            get { return GetValue(() => AnimesView); }
-            private set { SetValue(() => AnimesView, value); }
+            get => GetValue<ICollectionView>();
+            private set => SetValue(value);
         }
 
         public int VisibleAnimeCount
@@ -63,40 +64,31 @@ namespace Finalspace.Onigiri.ViewModels
         #region Status & Loading
         public bool IsNotLoading
         {
-            get { return GetValue(() => IsNotLoading); }
-            internal set { SetValue(() => IsNotLoading, value); }
+            get => GetValue<bool>();
+            private set => SetValue(value);
         }
 
-        public Visibility LoadingWindowVisibility
-        {
-            get { return (!IsNotLoading) ? Visibility.Visible : Visibility.Collapsed; }
-        }
+        public Visibility LoadingWindowVisibility => (!IsNotLoading) ? Visibility.Visible : Visibility.Collapsed;
 
         public string LoadingHeader
         {
-            get { return GetValue(() => LoadingHeader); }
-            internal set { SetValue(() => LoadingHeader, value); }
+            get => GetValue<string>();
+            private set => SetValue(value);
         }
 
         public string LoadingSubject
         {
-            get { return GetValue(() => LoadingSubject); }
-            internal set { SetValue(() => LoadingSubject, value); }
+            get => GetValue<string>();
+            private set => SetValue(value);
         }
 
         public int LoadingPercentage
         {
-            get { return GetValue(() => LoadingPercentage); }
-            internal set { SetValue(() => LoadingPercentage, value, RaiseLoadingProgressChanged); }
+            get => GetValue<int>();
+            private set => SetValue(value, RaiseLoadingProgressChanged);
         }
 
-        public bool IsLoadingMarque
-        {
-            get
-            {
-                return LoadingPercentage <= 0;
-            }
-        }
+        public bool IsLoadingMarque => LoadingPercentage <= 0;
 
         private void RaiseLoadingProgressChanged()
         {
@@ -201,9 +193,7 @@ namespace Finalspace.Onigiri.ViewModels
                 return string.Compare(a.DisplayName, b.DisplayName);
             });
 
-            
-
-            UIInvoke(() =>
+            DispatcherService.Invoke(() =>
             {
                 FilterCategoryWeights.Clear();
                 FilterCategories.Clear();
@@ -341,38 +331,38 @@ namespace Finalspace.Onigiri.ViewModels
         private readonly List<CategoryItemViewModel> _filterCategories;
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategories
         {
-            get { return GetValue(() => FilterCategories); }
-            private set { SetValue(() => FilterCategories, value); }
+            get => GetValue<ExtendedObservableCollection<CategoryItemViewModel>>();
+            private set => SetValue(value);
         }
 
         private readonly List<CategoryItemViewModel> _filterCategoryWeights;
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategoryWeights
         {
-            get { return GetValue(() => FilterCategoryWeights); }
-            private set { SetValue(() => FilterCategoryWeights, value); }
+            get => GetValue<ExtendedObservableCollection<CategoryItemViewModel>>();
+            private set => SetValue(value);
         }
         #endregion
 
         #region Sorting
         public SortItemViewModel FirstSortKey
         {
-            get { return GetValue(() => FirstSortKey); }
-            set { SetValue(() => FirstSortKey, value); }
+            get => GetValue<SortItemViewModel>();
+            set => SetValue(value);
         }
         public SortItemViewModel SecondSortKey
         {
-            get { return GetValue(() => SecondSortKey); }
-            set { SetValue(() => SecondSortKey, value); }
+            get => GetValue<SortItemViewModel>();
+            set => SetValue(value);
         }
         public bool IsFirstSortOrderDesc
         {
-            get { return GetValue(() => IsFirstSortOrderDesc); }
-            set { SetValue(() => IsFirstSortOrderDesc, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
         public bool IsSecondSortOrderDesc
         {
-            get { return GetValue(() => IsSecondSortOrderDesc); }
-            set { SetValue(() => IsSecondSortOrderDesc, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
         private void UpdateSort(bool forceRefresh)
         {
@@ -396,38 +386,38 @@ namespace Finalspace.Onigiri.ViewModels
         #region Filters
         public string FilterTitle
         {
-            get { return GetValue(() => FilterTitle); }
-            set { SetValue(() => FilterTitle, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public NameItemViewModel FilterType
         {
-            get { return GetValue(() => FilterType); }
-            set { SetValue(() => FilterType, value); }
+            get => GetValue<NameItemViewModel>();
+            set => SetValue(value);
         }
         public WatchStateItemViewModel FilterWatchState
         {
-            get { return GetValue(() => FilterWatchState); }
-            set { SetValue(() => FilterWatchState, value); }
+            get => GetValue<WatchStateItemViewModel>();
+            set => SetValue(value);
         }
         public CategoryItemViewModel FilterCategory
         {
-            get { return GetValue(() => FilterCategory); }
-            set { SetValue(() => FilterCategory, value); }
+            get => GetValue<CategoryItemViewModel>();
+            set => SetValue(value);
         }
         public CategoryItemViewModel FilterCategoryMinWeight
         {
-            get { return GetValue(() => FilterCategoryMinWeight); }
-            set { SetValue(() => FilterCategoryMinWeight, value); }
+            get => GetValue<CategoryItemViewModel>();
+            set => SetValue(value);
         }
         public bool FilterMarked
         {
-            get { return GetValue(() => FilterMarked); }
-            set { SetValue(() => FilterMarked, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
         public bool FilterRemove
         {
-            get { return GetValue(() => FilterRemove); }
-            set { SetValue(() => FilterRemove, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
 
         private bool AnimeFilter(object item)
@@ -496,20 +486,20 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Commands
-        public BasicDelegateCommand CmdToggleMarked { get; private set; }
-        public BasicDelegateCommand CmdToggleWatchedFinal { get; private set; }
-        public BasicDelegateCommand CmdToggleWatchedAnni { get; private set; }
-        public BasicDelegateCommand CmdToggleDeleteitFinal { get; private set; }
-        public BasicDelegateCommand CmdToggleDeleteitAnni { get; private set; }
-        public BasicDelegateCommand CmdChangedSort { get; private set; }
-        public BasicDelegateCommand CmdChangedFilter { get; private set; }
-        public BasicDelegateCommand CmdRefresh { get; private set; }
-        public DelegateCommand<string> CmdUpdate { get; private set; }
-        public BasicDelegateCommand CmdExit { get; private set; }
-        public BasicDelegateCommand CmdTitles { get; private set; }
-        public BasicDelegateCommand CmdIssues { get; private set; }
-        public BasicDelegateCommand CmdOpenPage { get; private set; }
-        public BasicDelegateCommand CmdOpenRelations { get; private set; }
+        public DelegateCommand<Anime> CmdToggleMarked { get; }
+        public DelegateCommand<Anime> CmdToggleWatchedFinal { get; }
+        public DelegateCommand<Anime> CmdToggleWatchedAnni { get; }
+        public DelegateCommand<Anime> CmdToggleDeleteitFinal { get; }
+        public DelegateCommand<Anime> CmdToggleDeleteitAnni { get; }
+        public DelegateCommand CmdChangedSort { get; }
+        public DelegateCommand CmdChangedFilter { get; }
+        public DelegateCommand CmdRefresh { get; }
+        public DelegateCommand<string> CmdUpdate { get; }
+        public DelegateCommand CmdExit { get; }
+        public DelegateCommand CmdTitles { get; }
+        public DelegateCommand CmdIssues { get; }
+        public DelegateCommand<Anime> CmdOpenPage { get; }
+        public DelegateCommand<Anime> CmdOpenRelations { get; }
         #endregion
 
         public void WindowLoaded()
@@ -588,20 +578,20 @@ namespace Finalspace.Onigiri.ViewModels
             FilterType = AnimeTypes[0];
 
             // Commands
-            CmdToggleMarked = new BasicDelegateCommand(new Action<object>((a) => ToggleMarked((Anime)a)), (a) => CanAddonDataByChanged((Anime)a));
-            CmdToggleWatchedFinal = new BasicDelegateCommand(new Action<object>((a) => ToggleWatched((Anime)a, "final")), (a) => CanAddonDataByChanged((Anime)a));
-            CmdToggleWatchedAnni = new BasicDelegateCommand(new Action<object>((a) => ToggleWatched((Anime)a, "anni")), (a) => CanAddonDataByChanged((Anime)a));
-            CmdToggleDeleteitFinal = new BasicDelegateCommand(new Action<object>((a) => ToggleDeleteit((Anime)a, "final")), (a) => CanAddonDataByChanged((Anime)a));
-            CmdToggleDeleteitAnni = new BasicDelegateCommand(new Action<object>((a) => ToggleDeleteit((Anime)a, "anni")), (a) => CanAddonDataByChanged((Anime)a));
-            CmdChangedSort = new BasicDelegateCommand(new Action<object>((o) => UpdateSort(true)));
-            CmdChangedFilter = new BasicDelegateCommand(new Action<object>((o) => UpdateFilter()));
-            CmdExit = new BasicDelegateCommand(new Action<object>((o) => CloseRequested?.Invoke()));
-            CmdRefresh = new BasicDelegateCommand((new Action<object>((o) => RefreshWorker.RunWorkerAsync(false))), (o) => !RefreshWorker.IsBusy);
-            CmdUpdate = new DelegateCommand<string>((new Action<string>((o) => UpdateWorker.RunWorkerAsync(o))));
-            CmdOpenPage = new BasicDelegateCommand(new Action<object>((a) => OpenPage((Anime)a)));
-            CmdOpenRelations = new BasicDelegateCommand(new Action<object>((a) => OpenRelations((Anime)a)));
-            CmdTitles = new BasicDelegateCommand((o) => ShowTitlesDialog());
-            CmdIssues = new BasicDelegateCommand((o) => ShowIssuesDialog());
+            CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanAddonDataByChanged);
+            CmdToggleWatchedFinal = new DelegateCommand<Anime>((a) => ToggleWatched(a, "final"), (a) => CanAddonDataByChanged(a));
+            CmdToggleWatchedAnni = new DelegateCommand<Anime>((a) => ToggleWatched(a, "anni"), (a) => CanAddonDataByChanged(a));
+            CmdToggleDeleteitFinal = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "final"), (a) => CanAddonDataByChanged(a));
+            CmdToggleDeleteitAnni = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "anni"), (a) => CanAddonDataByChanged(a));
+            CmdChangedSort = new DelegateCommand(() => UpdateSort(true));
+            CmdChangedFilter = new DelegateCommand(UpdateFilter);
+            CmdExit = new DelegateCommand(() => CloseRequested?.Invoke());
+            CmdRefresh = new DelegateCommand(() => RefreshWorker.RunWorkerAsync(false), () => !RefreshWorker.IsBusy);
+            CmdUpdate = new DelegateCommand<string>((s) => UpdateWorker.RunWorkerAsync(s));
+            CmdOpenPage = new DelegateCommand<Anime>(OpenPage);
+            CmdOpenRelations = new DelegateCommand<Anime>(OpenRelations);
+            CmdTitles = new DelegateCommand(ShowTitlesDialog);
+            CmdIssues = new DelegateCommand(ShowIssuesDialog);
 
             // Refresh directly at startup
             RefreshWorker.RunWorkerAsync();

@@ -9,7 +9,7 @@ using System.Xml;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
-using Finalspace.Onigiri.MVVM;
+using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -24,138 +24,135 @@ namespace Finalspace.Onigiri.Models
         [XmlElement]
         public AdditionalData AddonData
         {
-            get { return GetValue(() => AddonData); }
-            set { SetValue(() => AddonData, value); }
+            get => GetValue<AdditionalData>();
+            set => SetValue(value);
         }
 
         [XmlArray("MediaFiles")]
         [XmlArrayItem("MediaFile")]
         public List<string> MediaFiles
         {
-            get { return GetValue(() => MediaFiles); }
-            set { SetValue(() => MediaFiles, value, () => RaisePropertyChanged(() => MediaFileCount)); }
+            get => GetValue<List<string>>();
+            set => SetValue(value, () => RaisePropertyChanged(nameof(MediaFileCount)));
         }
 
-        public int MediaFileCount
-        {
-            get { return MediaFiles.Count; }
-        }
+        public int MediaFileCount => MediaFiles.Count;
 
         [XmlElement]
         public string FoundPath
         {
-            get { return GetValue(() => FoundPath); }
-            set { SetValue(() => FoundPath, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlElement]
         public string ImageFilePath
         {
-            get { return GetValue(() => ImageFilePath); }
-            set { SetValue(() => ImageFilePath, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlAttribute]
         public bool Restricted
         {
-            get { return GetValue(() => Restricted); }
-            set { SetValue(() => Restricted, value); }
+            get => GetValue<bool>();
+            set => SetValue(value);
         }
 
         [XmlAttribute]
         public ulong Aid
         {
-            get { return GetValue(() => Aid); }
-            set { SetValue(() => Aid, value); }
+            get => GetValue<ulong>();
+            set => SetValue(value);
         }
 
         [XmlAttribute]
         public string Type
         {
-            get { return GetValue(() => Type); }
-            set { SetValue(() => Type, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlAttribute]
         public int EpCount
         {
-            get { return GetValue(() => EpCount); }
-            set { SetValue(() => EpCount, value); }
+            get => GetValue<int>();
+            set => SetValue(value);
         }
 
         [XmlElement]
         public DateTime? StartDate
         {
-            get { return GetValue(() => StartDate); }
-            set { SetValue(() => StartDate, value); }
+            get => GetValue<DateTime?>();
+            set => SetValue(value);
         }
 
         [XmlElement]
         public DateTime? EndDate
         {
-            get { return GetValue(() => EndDate); }
-            set { SetValue(() => EndDate, value); }
+            get => GetValue<DateTime?>();
+            set => SetValue(value);
         }
 
         [XmlElement]
         public string Description
         {
-            get { return GetValue(() => Description); }
-            set { SetValue(() => Description, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlElement]
         public string Picture
         {
-            get { return GetValue(() => Picture); }
-            set { SetValue(() => Picture, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlElement("Titles")]
         public Titles Titles
         {
-            get { return GetValue(() => Titles); }
-            set { SetValue(() => Titles, value); }
+            get => GetValue<Titles>();
+            set => SetValue(value);
         }
 
         [XmlArray("Ratings")]
         [XmlArrayItem("Rating")]
         public ObservableCollection<Rating> Ratings
         {
-            get { return GetValue(() => Ratings); }
-            set { SetValue(() => Ratings, value); }
+            get => GetValue<ObservableCollection<Rating>>();
+            set => SetValue(value);
         }
 
         [XmlArray("Categories")]
         [XmlArrayItem("Category")]
         public ObservableCollection<Category> Categories
         {
-            get { return GetValue(() => Categories); }
-            set { SetValue(() => Categories, value); }
+            get => GetValue<ObservableCollection<Category>>();
+            set => SetValue(value);
         }
 
         [XmlArray("Episodes")]
         [XmlArrayItem("Episode")]
         public ObservableCollection<Episode> Episodes
         {
-            get { return GetValue(() => Episodes); }
-            set { SetValue(() => Episodes, value); }
+            get => GetValue<ObservableCollection<Episode>>();
+            set => SetValue(value);
         }
 
         [XmlArray("TopCategories")]
         [XmlArrayItem("Category")]
         public ObservableCollection<Category> TopCategories
         {
-            get { return GetValue(() => TopCategories); }
-            set { SetValue(() => TopCategories, value); }
+            get => GetValue<ObservableCollection<Category>>();
+            set => SetValue(value);
         }
 
         [XmlArray("Relations")]
         [XmlArrayItem("Relation")]
         public ObservableCollection<Relation> Relations
         {
-            get { return GetValue(() => Relations); }
-            set { SetValue(() => Relations, value); }
+            get => GetValue<ObservableCollection<Relation>>();
+            set => SetValue(value);
         }
 
         public bool IsSequal(ulong aid)

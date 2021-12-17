@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using System;
 using System.Xml.Serialization;
 
@@ -10,15 +10,15 @@ namespace Finalspace.Onigiri.Models
         [XmlText]
         public string Path
         {
-            get { return GetValue(() => Path); }
-            set { SetValue(() => Path, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         [XmlAttribute("drive")]
         public string DriveName
         {
-            get { return GetValue(() => DriveName); }
-            set { SetValue(() => DriveName, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
 
         public override string ToString()

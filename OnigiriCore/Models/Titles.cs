@@ -9,7 +9,7 @@ using System.Text;
 using System.Xml;
 using System.Linq;
 using System.Xml.Serialization;
-using Finalspace.Onigiri.MVVM;
+using DevExpress.Mvvm;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -23,8 +23,8 @@ namespace Finalspace.Onigiri.Models
         [XmlArrayItem("Item")]
         public ObservableCollection<Title> Items
         {
-            get { return GetValue(() => Items); }
-            set { SetValue(() => Items, value); }
+            get => GetValue<ObservableCollection<Title>>();
+            set => SetValue(value);
         }
         private readonly Dictionary<ulong, List<Title>> _aidToTitlesMap;
 

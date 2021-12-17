@@ -1,6 +1,5 @@
-﻿using Finalspace.Onigiri.Core;
+﻿using DevExpress.Mvvm;
 using Finalspace.Onigiri.Enums;
-using Finalspace.Onigiri.MVVM;
 using System.Collections.ObjectModel;
 
 namespace Finalspace.Onigiri.Models
@@ -9,8 +8,8 @@ namespace Finalspace.Onigiri.Models
     {
         public ObservableCollection<Issue> Items
         {
-            get { return GetValue(() => Items); }
-            private set { SetValue(() => Items, value); }
+            get => GetValue<ObservableCollection<Issue>>();
+            set => SetValue(value);
         }
         public int Count => Items.Count;
 

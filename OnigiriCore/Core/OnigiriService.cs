@@ -14,6 +14,8 @@ using System.Diagnostics;
 using Finalspace.Onigiri.Persistence;
 using Finalspace.Onigiri.Events;
 using System.Linq;
+using Finalspace.Onigiri.Extensions;
+using Finalspace.Onigiri.Security;
 
 namespace Finalspace.Onigiri.Core
 {
@@ -236,7 +238,7 @@ namespace Finalspace.Onigiri.Core
             if (flags.HasFlag(UpdateFlags.DownloadTitles))
                 ReadTitles(statusChanged, true);
 
-            using (WindowsImpersonationContext imp = _activeIdentity.Impersonate())
+            using (IImpersonationContext imp = _activeIdentity.Impersonate())
             {
                 List<DirectoryInfo> animeDirs = new List<DirectoryInfo>();
                 foreach (SearchPath searchPath in Config.SearchPaths)
@@ -420,7 +422,7 @@ namespace Finalspace.Onigiri.Core
 
         public void RefreshAnimes(StatusChangedEventHandler statusChanged)
         {
-            using (WindowsImpersonationContext imp = _activeIdentity.Impersonate())
+            using (IImpersonationContext imp = _activeIdentity.Impersonate())
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load persistent cache", Subject = "", Percentage = -1 });
                 Cache.Load(Config, statusChanged);

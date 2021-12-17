@@ -1,6 +1,6 @@
-﻿using Finalspace.Onigiri.Helper;
+﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Helper;
 using Finalspace.Onigiri.Models;
-using Finalspace.Onigiri.MVVM;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,22 +16,21 @@ namespace Finalspace.Onigiri.ViewModels
         private BackgroundWorker _filterWorker;
         private System.Threading.Timer _filterTimer;
 
+        public IDispatcherService DispatcherService => GetService<IDispatcherService>();
+
         public MainViewModel Main
         {
-            get { return GetValue(() => Main); }
-            private set { SetValue(() => Main, value); }
+            get => GetValue<MainViewModel>();
+            private set => SetValue(value);
         }
 
         public bool IsNotLoading
         {
-            get { return GetValue(() => IsNotLoading); }
-            internal set { SetValue(() => IsNotLoading, value); }
+            get => GetValue<bool>();
+            private set => SetValue(value);
         }
 
-        public Visibility LoadingWindowVisibility
-        {
-            get { return (!IsNotLoading) ? Visibility.Visible : Visibility.Collapsed; }
-        }
+        public Visibility LoadingWindowVisibility => (!IsNotLoading) ? Visibility.Visible : Visibility.Collapsed;
 
         private void StartedLoading()
         {
@@ -47,8 +46,8 @@ namespace Finalspace.Onigiri.ViewModels
         private readonly IList<Title> _titles;
         public ICollectionView TitlesView
         {
-            get { return GetValue(() => TitlesView); }
-            private set { SetValue(() => TitlesView, value); }
+            get => GetValue<ICollectionView>();
+            private set => SetValue(value);
         }
 
         public IEnumerable<string> FilterTypes
@@ -66,8 +65,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         public string FilterString
         {
-            get { return GetValue(() => FilterString); }
-            set { SetValue(() => FilterString, value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         private string _selectedFilterType;
         public string SelectedFilterType
@@ -83,15 +82,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         public Title SelectedTitle
         {
-            get { return GetValue(() => SelectedTitle); }
-            set
-            {
-                SetValue(() => SelectedTitle, value, () =>
-                {
-                    RaisePropertyChanged(() => HasSelectedTitle);
-                    RaisePropertyChanged(() => SelectedTitleText);
-                });
-            }
+            get => GetValue<Title>();
+            set => SetValue(value, () => RaisePropertiesChanged(nameof(HasSelectedTitle), nameof(SelectedTitleText)));
         }
 
         public bool HasSelectedTitle => SelectedTitle != null;
@@ -158,10 +150,7 @@ namespace Finalspace.Onigiri.ViewModels
         private void _filterWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             StartedLoading();
-            UIInvoke(() =>
-            {
-                TitlesView.Refresh();
-            });
+            DispatcherService.Invoke(() => TitlesView.Refresh());
         }
 
         public void SetTitles(IEnumerable<Title> titles)

@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.MVVM;
+﻿using DevExpress.Mvvm;
 using Finalspace.Onigiri.Services;
 using log4net.Config;
 using System.Windows;
@@ -13,7 +13,7 @@ namespace Finalspace.Onigiri
         public App()
         {
             XmlConfigurator.Configure();
-            ServiceContainer.Instance.Register<IProcessStarterService>(new DefaultProcessStarterService());
+            ServiceContainer.Default.RegisterService(new DefaultProcessStarterService());
         }
     }
 }

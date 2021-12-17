@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32002.261
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onigiri", "Onigiri\Onigiri.csproj", "{6882E120-6904-45A4-9FE5-A170DC5570B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Onigiri", "Onigiri\Onigiri.csproj", "{6882E120-6904-45A4-9FE5-A170DC5570B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnigiriCore", "OnigiriCore\OnigiriCore.csproj", "{8B2F1500-5E20-4022-B1DA-A43380F1784E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriCore", "OnigiriCore\OnigiriCore.csproj", "{8B2F1500-5E20-4022-B1DA-A43380F1784E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnigiriConsole", "OnigiriConsole\OnigiriConsole.csproj", "{429344A0-192C-4E32-A44E-4F98D4156296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriConsole", "OnigiriConsole\OnigiriConsole.csproj", "{429344A0-192C-4E32-A44E-4F98D4156296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
