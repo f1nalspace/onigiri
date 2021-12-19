@@ -5,11 +5,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
     xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
+    xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
     x:Class="Finalspace.Onigiri.Views.CardListPage"
     mc:Ignorable="d"
     d:DesignHeight="450"
-    d:DesignWidth="800"
-    d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
+    d:DesignWidth="1300"
+    d:DataContext="{d:DesignInstance viewmodels:MainViewModel, IsDesignTimeCreatable=True}"
     FontFamily="Arial"
     Title="ListViewPage">
     <Page.Resources>
@@ -17,11 +18,24 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ViewResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <SolidColorBrush x:Key="listboxBackground" >
+                <SolidColorBrush.Color>
+                    <Color R="214" G="224" B="239" A="255" />
+                </SolidColorBrush.Color>
+            </SolidColorBrush>
+            <SolidColorBrush x:Key="listboxItemBackground" >
+                <SolidColorBrush.Color>
+                    <Color R="245" G="246" B="249" A="255" />
+                </SolidColorBrush.Color>
+            </SolidColorBrush>
         </ResourceDictionary>
     </Page.Resources>
-    <ListBox VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="#EDF1F5" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" FontSize="16">
+    <ListBox VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" FontSize="16">
         <ListBox.Style>
-            <Style TargetType="{x:Type ListBox}">
+            <Style TargetType="ListBox">
+                <Style.Setters>
+                    <Setter Property="Background" Value="{StaticResource listboxBackground}" />
+                </Style.Setters>
                 <Style.Triggers>
                     <Trigger Property="HasItems" Value="False">
                         <Setter Property="Template">
@@ -37,94 +51,96 @@
         </ListBox.Style>
         <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
-                <controls:VirtualizingWrapPanel SpacingMode="BetweenItemsOnly" StretchItems="False" Orientation="Vertical" />
+                <controls:VirtualizingWrapPanel SpacingMode="StartAndEndOnly" StretchItems="False" Orientation="Vertical">
+                    <controls:VirtualizingWrapPanel.ChildrenSize>
+                        <Size Width="600" Height="300" />
+                    </controls:VirtualizingWrapPanel.ChildrenSize>
+                </controls:VirtualizingWrapPanel>
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemContainerStyle>
             <Style TargetType="{x:Type ListBoxItem}">
                 <Setter Property="Focusable" Value="False" />
                 <Setter Property="Padding" Value="0" />
-                <Setter Property="Margin" Value="10" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="{StaticResource listboxItemBackground}" />
             </Style>
         </ListBox.ItemContainerStyle>
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <Grid Width="600" Height="256" Background="#FAFCFC" ShowGridLines="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="175*" />
-                        <ColumnDefinition Width="425*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Column="0" Grid.Row="0">
-                        <Image Stretch="UniformToFill">
-                            <Image.Source>
-                                <MultiBinding Converter="{StaticResource animeImageConverter}" TargetNullValue="{StaticResource noPictureImage}">
-                                    <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
-                                    <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
-                                </MultiBinding>
-                            </Image.Source>
-                        </Image>
-                        <Grid VerticalAlignment="Bottom">
-                            <Grid.Background>
-                                <SolidColorBrush Color="Black" Opacity="0.75" />
-                            </Grid.Background>
-                            <TextBlock Padding="10" Foreground="White" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontSize="18" />
-                        </Grid>
-                    </Grid>
-                    <Grid Grid.Column="1" Grid.Row="0">
-                        <DockPanel LastChildFill="True">
-                            <Grid DockPanel.Dock="Bottom" Background="#EFF7FB">
-                                <ItemsControl FontSize="14" ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Padding="4" Margin="2" BorderThickness="1" BorderBrush="Blue" Background="BlueViolet" CornerRadius="4">
-                                                <TextBlock Width="70" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                <Grid>
+                    <DockPanel LastChildFill="True" Margin="0">
+                        <!-- Image block start -->
+                        <Grid DockPanel.Dock="Left" Width="185">
+                            <!-- Picture start -->
+                            <Image Stretch="UniformToFill" Height="280">
+                                <Image.Source>
+                                    <MultiBinding Converter="{StaticResource animeImageConverter}" TargetNullValue="{StaticResource noPictureImage}">
+                                        <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
+                                        <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                            <!-- Picture end -->
+                            <!-- Anime title start -->
+                            <Grid VerticalAlignment="Bottom">
+                                <Grid.Background>
+                                    <SolidColorBrush Color="Black" Opacity="0.75" />
+                                </Grid.Background>
+                                <TextBlock Padding="10" Foreground="White" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontSize="18" />
                             </Grid>
-                            <DockPanel Margin="10" LastChildFill="True" Background="#FAFCFC">
-                                <StackPanel DockPanel.Dock="Top">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="120" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Orientation="Vertical">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                                                <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
-                                                <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                                                <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
-                                                <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 0 10">
-                                            <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
-                                            <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
-                                            <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
-                                            <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
-                                            <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
-                                        </StackPanel>
-                                    </Grid>
+                            <!-- Anime title end -->
+                        </Grid>
+                        <!-- Image block end -->
+                        <!-- Content start -->
+                        <DockPanel LastChildFill="True">
+                            <!-- Tags start, ItemsControl needs a fixed width -->
+                            <ItemsControl Width="392" Height="58" DockPanel.Dock="Bottom" FontSize="14" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
+                                            <TextBlock Width="84" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <!-- Tags end -->
+                            <!-- Header start -->
+                            <DockPanel Margin="0" LastChildFill="True" Background="#FAFCFC" DockPanel.Dock="Top">
+                                <StackPanel DockPanel.Dock="Right"  ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal" Margin="0 0 10 0">
+                                    <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
+                                    <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
+                                    <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
+                                    <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
+                                    <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
                                 </StackPanel>
-                                <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                                    <TextBlock Width="380" Height="Auto" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
-                                </ScrollViewer>
+                                <StackPanel Orientation="Vertical" Margin="10 0 10 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                                        <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                                        <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
+                                        <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                                    </StackPanel>
+                                </StackPanel>
                             </DockPanel>
+                            <!-- Header end -->
+                            <!-- Description start -->
+                            <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Width="400" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
+                            </ScrollViewer>
+                            <!-- Description end -->
                         </DockPanel>
-                    </Grid>
+                        <!-- Content end -->
+                    </DockPanel>
                 </Grid>
             </DataTemplate>
         </ListBox.ItemTemplate>

@@ -33,6 +33,9 @@ namespace Finalspace.Onigiri.Converters
             if (values == null || values.Length < 2)
                 return DependencyProperty.UnsetValue;
 
+            if (!(values[1] is MainViewModel mainViewModel))
+                return DependencyProperty.UnsetValue;
+
             if (values[0] is string)
             {
                 string pictureFile = (string)values[0];
@@ -42,10 +45,9 @@ namespace Finalspace.Onigiri.Converters
             else if (values[0] is ulong)
             {
                 ulong aid = (ulong)values[0];
-                MainViewModel vm = (MainViewModel)values[1];
-                if (aid > 0 && vm != null)
+                if (aid > 0 && mainViewModel != null)
                 {
-                    byte[] imageData = vm.CoreService.Cache.GetImageData(aid);
+                    byte[] imageData = mainViewModel.CoreService.Cache.GetImageData(aid);
                     if (imageData != null)
                         return LoadImage(imageData);
                 }
