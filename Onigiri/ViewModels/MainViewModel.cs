@@ -152,6 +152,13 @@ namespace Finalspace.Onigiri.ViewModels
             _animes.Clear();
             _animes.AddRange(CoreService.Animes.Items);
 
+            if (!_animes.Any())
+            {
+                _animes.Add(new TestAnimeViewModel());
+                _animes.Add(new TestAnimeViewModel());
+                _animes.Add(new TestAnimeViewModel());
+            }
+
             List<CategoryItemViewModel> filterCats = new List<CategoryItemViewModel>();
 
             HashSet<ulong> catIds = new HashSet<ulong>();

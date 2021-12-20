@@ -7,31 +7,21 @@
              xmlns:models="clr-namespace:Finalspace.Onigiri.Models;assembly=OnigiriCore"
              xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="300"
-             d:DesignWidth="600"
+             d:DesignHeight="320"
+             d:DesignWidth="640"
              d:DataContext="{d:DesignInstance viewmodels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
              d:Background="Blue">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Views/ViewResources.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Fuck.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <SolidColorBrush x:Key="tagsBackground">
-                <SolidColorBrush.Color>
-                    <Color R="229" G="233" B="245" A="255" />
-                </SolidColorBrush.Color>
-            </SolidColorBrush>
-            <SolidColorBrush x:Key="headerBackground">
-                <SolidColorBrush.Color>
-                    <Color R="229" G="233" B="245" A="255" />
-                </SolidColorBrush.Color>
-            </SolidColorBrush>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="440" />
         </Grid.ColumnDefinitions>
 
         <!-- Image block start -->
@@ -46,6 +36,7 @@
                 </Image.Source>
             </Image>
             <!-- Picture end -->
+
             <!-- Anime title start -->
             <Grid VerticalAlignment="Bottom">
                 <Grid.Background>
@@ -58,17 +49,61 @@
         <!-- Image block end -->
 
         <!-- Content start -->
-        <DockPanel Grid.Column="1" LastChildFill="True">
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="240" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+
+            <!-- Header start -->
+            <DockPanel Grid.Row="0" LastChildFill="True" Background="{StaticResource headerBackground}">
+                <StackPanel DockPanel.Dock="Right"  ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal">
+                    <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
+                    <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
+                    <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
+                    <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
+                    <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0">
+                        <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                        <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
+                        <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0">
+                        <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                        <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
+                        <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- Header end -->
+
+            <!-- Description start -->
+            <ScrollViewer Grid.Row="1" Padding="4" CanContentScroll="True" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible">
+                <TextBlock Width="410" Height="Auto" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
+            </ScrollViewer>
+            <!-- Description end -->
+
             <!-- Tags start, ItemsControl needs a fixed width -->
-            <Grid DockPanel.Dock="Bottom" Background="{StaticResource tagsBackground}">
+            <Grid Grid.Row="2" Background="{StaticResource tagsBackground}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="1" Orientation="Vertical">
-                    <Button Content="+" Padding="2" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0 0 6 0">
+                    <Button Width="24" Height="24">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <Image Source="/Resources/add_32x32.png" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </StackPanel>
-                <ItemsControl Grid.Column="0" Height="60" FontSize="14" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+                <ItemsControl x:Name="tagItems" Grid.Column="0" Height="30" FontSize="14" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategoriesView}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" />
@@ -77,43 +112,44 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
-                                <TextBlock Width="80" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Width="78" VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
+                    <ItemsControl.Template>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <StackPanel Orientation="Horizontal">
+                                <ScrollViewer x:Name="tagsScrollViewer" HorizontalScrollBarVisibility="Hidden">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Width="24" Height="24">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid>
+                                                    <Image Source="/Resources/prev_tag_32x32.png" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <Button Width="24" Height="24">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid>
+                                                    <Image Source="/Resources/next_tag_32x32.png" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
                 </ItemsControl>
             </Grid>
             <!-- Tags end -->
-            
-            <!-- Header start -->
-            <DockPanel LastChildFill="True" Background="{StaticResource headerBackground}" DockPanel.Dock="Top">
-                <StackPanel DockPanel.Dock="Right"  ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue={x:Reference 2.0}}" Orientation="Horizontal">
-                    <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
-                    <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
-                    <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
-                    <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
-                    <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
-                </StackPanel>
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                        <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
-                        <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                        <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
-                        <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                    </StackPanel>
-                </StackPanel>
-            </DockPanel>
-            <!-- Header end -->
-            <!-- Description start -->
-            <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                <TextBlock Width="400" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
-            </ScrollViewer>
-            <!-- Description end -->
-        </DockPanel>
+
+        </Grid>
         <!-- Content end -->
     </Grid>
 </UserControl>
