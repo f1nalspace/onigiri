@@ -26,9 +26,10 @@
             </SolidColorBrush>
             <SolidColorBrush x:Key="listboxItemBackground" >
                 <SolidColorBrush.Color>
-                    <Color R="245" G="246" B="249" A="255" />
+                    <Color R="245" G="246" B="149" A="222" />
                 </SolidColorBrush.Color>
             </SolidColorBrush>
+            <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
         </ResourceDictionary>
     </Page.Resources>
     <ListBox VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" FontSize="16">
@@ -54,7 +55,8 @@
             <ItemsPanelTemplate>
                 <vwp:VirtualizingWrapPanel SpacingMode="StartAndEndOnly" StretchItems="False" Orientation="Vertical">
                     <vwp:VirtualizingWrapPanel.ChildrenSize>
-                        <Size Width="660" Height="340" />
+                        <!-- Need to add margin to it, because its WPF -->
+                        <Size Width="660" Height="300" />
                     </vwp:VirtualizingWrapPanel.ChildrenSize>
                 </vwp:VirtualizingWrapPanel>
             </ItemsPanelTemplate>
@@ -64,6 +66,7 @@
                 <Setter Property="Focusable" Value="False" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Margin" Value="10" />
+                <Setter Property="Height" Value="280" />
                 <Setter Property="Background" Value="{StaticResource listboxItemBackground}" />
             </Style>
         </ListBox.ItemContainerStyle>
@@ -103,8 +106,8 @@
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="40" />
-                            <RowDefinition Height="240" />
-                            <RowDefinition Height="40" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="56" />
                         </Grid.RowDefinitions>
 
                         <!-- Header start -->
@@ -116,13 +119,13 @@
                                 <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
                                 <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <StackPanel Orientation="Horizontal" Margin="6 0 6 0">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
                                     <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
                                     <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
                                     <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="6 0 6 0">
+                                <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
                                     <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
                                     <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
                                     <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
@@ -132,9 +135,7 @@
                         <!-- Header end -->
 
                         <!-- Description start -->
-                        <ScrollViewer Grid.Row="1" Padding="4" CanContentScroll="True" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible">
-                            <TextBlock Width="410" Height="Auto" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
-                        </ScrollViewer>
+                        <TextBlock Grid.Row="1" Padding="8" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" FontSize="14" />
                         <!-- Description end -->
 
                         <!-- Tags start, ItemsControl needs a fixed width -->
@@ -154,48 +155,19 @@
                                     </Button.Template>
                                 </Button>
                             </StackPanel>
-                            <ItemsControl x:Name="tagItems" Grid.Column="0" Height="30" FontSize="14" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategoriesView}">
+                            <ItemsControl x:Name="tagItems" Grid.Column="0" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
+                                        <WrapPanel Margin="2" Orientation="Horizontal" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
-                                            <TextBlock Width="78" VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
-                                <ItemsControl.Template>
-                                    <ControlTemplate TargetType="ItemsControl">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ScrollViewer x:Name="tagsScrollViewer" HorizontalScrollBarVisibility="Hidden">
-                                                <ItemsPresenter />
-                                            </ScrollViewer>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Button Width="24" Height="24">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Grid>
-                                                                <Image Source="/Resources/prev_tag_32x32.png" />
-                                                            </Grid>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
-                                                <Button Width="24" Height="24">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Grid>
-                                                                <Image Source="/Resources/next_tag_32x32.png" />
-                                                            </Grid>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </ControlTemplate>
-                                </ItemsControl.Template>
                             </ItemsControl>
                         </Grid>
                         <!-- Tags end -->

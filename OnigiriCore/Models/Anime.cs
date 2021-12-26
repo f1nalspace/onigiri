@@ -150,8 +150,6 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value);
         }
 
-        public PagingCollectionView TopCategoriesView { get; }
-
         [XmlArray("Relations")]
         [XmlArrayItem("Relation")]
         public ObservableCollection<Relation> Relations
@@ -223,8 +221,6 @@ namespace Finalspace.Onigiri.Models
             Relations.CollectionChanged += (s, e) => RaisePropertyChanged(() => Relations);
             AddonData = new AdditionalData();
             AddonData.PropertyChanged += (s, e) => RaisePropertyChanged(() => AddonData);
-
-            TopCategoriesView = new PagingCollectionView(TopCategories, 4) {};
         }
 
         public void LoadFromAnimeXML(string filePath, bool skipDetails = false)
