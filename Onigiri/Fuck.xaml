@@ -4,11 +4,15 @@
     <converters:NullImageConverter x:Key="nullImageConverter"/>
     <converters:AnimeImageConverter x:Key="animeImageConverter"/>
     <converters:IsGreaterThanConverter x:Key="isGreaterThanConverter"/>
+    <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
+    
     <BitmapImage x:Key="noPictureImage" UriSource="/Resources/nopicture.png" />
     <BitmapImage x:Key="anniImage" UriSource="/Resources/anni.png" />
+    
     <Style x:Key="actionButton" TargetType="Button">
-        <Setter Property="Width" Value="48" />
-        <Setter Property="Height" Value="48" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Margin" Value="2 1" />
     </Style>
     <Style x:Key="actionIcon" TargetType="Image">
         <Setter Property="Width" Value="48" />
@@ -129,6 +133,19 @@
     <Style x:Key="animeCategory" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="14" />
     </Style>
+
+    <Style x:Key="animeListItem" TargetType="ListBoxItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="Height" Value="280" />
+
+        <Setter Property="Background" Value="{StaticResource listboxItemBackground}" />
+    </Style>
+    
     <SolidColorBrush x:Key="tagsBackground">
         <SolidColorBrush.Color>
             <Color R="229" G="233" B="245" A="255" />
@@ -139,4 +156,15 @@
             <Color R="229" G="233" B="245" A="255" />
         </SolidColorBrush.Color>
     </SolidColorBrush>
-</ResourceDictionary>
+
+    <SolidColorBrush x:Key="listboxBackground" >
+        <SolidColorBrush.Color>
+            <Color R="214" G="224" B="239" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="listboxItemBackground" >
+        <SolidColorBrush.Color>
+            <Color R="245" G="246" B="149" A="222" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+ </ResourceDictionary>

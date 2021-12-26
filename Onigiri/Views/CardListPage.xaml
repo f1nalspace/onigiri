@@ -19,20 +19,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Fuck.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <SolidColorBrush x:Key="listboxBackground" >
-                <SolidColorBrush.Color>
-                    <Color R="214" G="224" B="239" A="255" />
-                </SolidColorBrush.Color>
-            </SolidColorBrush>
-            <SolidColorBrush x:Key="listboxItemBackground" >
-                <SolidColorBrush.Color>
-                    <Color R="245" G="246" B="149" A="222" />
-                </SolidColorBrush.Color>
-            </SolidColorBrush>
-            <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
         </ResourceDictionary>
     </Page.Resources>
-    <ListBox VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" FontSize="16">
+    <ListBox ItemContainerStyle="{StaticResource animeListItem}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16">
         <ListBox.Style>
             <Style TargetType="ListBox">
                 <Style.Setters>
@@ -61,15 +50,6 @@
                 </vwp:VirtualizingWrapPanel>
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
-        <ListBox.ItemContainerStyle>
-            <Style TargetType="{x:Type ListBoxItem}">
-                <Setter Property="Focusable" Value="False" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="Margin" Value="10" />
-                <Setter Property="Height" Value="280" />
-                <Setter Property="Background" Value="{StaticResource listboxItemBackground}" />
-            </Style>
-        </ListBox.ItemContainerStyle>
         <ListBox.ItemTemplate>
             <DataTemplate>
                 <Grid>
@@ -112,7 +92,7 @@
 
                         <!-- Header start -->
                         <DockPanel Grid.Row="0" LastChildFill="True" Background="{StaticResource headerBackground}">
-                            <StackPanel DockPanel.Dock="Right"  ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal" Margin="0 0 6 0">
+                            <StackPanel DockPanel.Dock="Right" Margin="0 0 8 0" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal">
                                 <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                                 <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
                                 <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
@@ -135,17 +115,37 @@
                         <!-- Header end -->
 
                         <!-- Description start -->
-                        <TextBlock Grid.Row="1" Padding="8" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" FontSize="14" />
-                        <!-- Description end -->
-
-                        <!-- Tags start, ItemsControl needs a fixed width -->
-                        <Grid Grid.Row="2" Background="{StaticResource tagsBackground}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0 0 6 0">
-                                <Button Width="24" Height="24">
+                        <Grid Grid.Row="1">
+                            <TextBlock Padding="8" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" FontSize="14" />
+                            <WrapPanel Grid.Column="1" Margin="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                <Button Style="{StaticResource actionButton}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid>
+                                                <Image Source="/Resources/anni_false.png" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Style="{StaticResource actionButton}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid>
+                                                <Image Source="/Resources/final_false.png" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Style="{StaticResource actionButton}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid>
+                                                <Image Source="/Resources/mark_false.png" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Style="{StaticResource actionButton}">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Grid>
@@ -154,22 +154,25 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                            </StackPanel>
-                            <ItemsControl x:Name="tagItems" Grid.Column="0" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Margin="2" Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
-                                            <TextBlock VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            </WrapPanel>
                         </Grid>
+                        <!-- Description end -->
+
+                        <!-- Tags start, ItemsControl needs a fixed width -->
+                        <ItemsControl x:Name="tagItems" Grid.Row="2" Background="{StaticResource tagsBackground}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
+                                        <TextBlock VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <!-- Tags end -->
                         
                     </Grid>
