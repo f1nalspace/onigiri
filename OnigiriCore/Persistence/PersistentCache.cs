@@ -47,7 +47,7 @@ namespace Finalspace.Onigiri.Persistence
             _aidToImageMap = new ConcurrentDictionary<ulong, byte[]>(concurrencyLevel, 4096);
         }
 
-        public Tuple<Anime, byte[]> Read(PersistentAnime persistentAnime)
+        public Tuple<ExecutionResult, Anime, byte[]> Read(PersistentAnime persistentAnime)
         {
             byte[] animeData = persistentAnime.Details;
             if (animeData == null || animeData.Length == 0)
@@ -69,14 +69,15 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed deserialize anime data from anime '{persistentAnime.Aid}'!", e);
-                return null;
+                return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(e), null, null);
             }
-            return new Tuple<Anime, byte[]>(anime, pictureData);
+            return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(), anime, pictureData);
         }
 
-        public void Write(Anime anime, string pictureFilePath)
+        public ExecutionResult Write(Anime anime, string pictureFilePath)
         {
-            if (anime.Aid == 0) return;
+            if (anime.Aid == 0)
+                return new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!"));
             byte[] detailsData = null;
             try
             {
@@ -92,7 +93,7 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed serialize anime '{anime}' to xml!", e);
-                return;
+                return new ExecutionResult(e);
             }
 
             byte[] pictureData = null;
@@ -102,6 +103,7 @@ namespace Finalspace.Onigiri.Persistence
             string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
             PersistentAnime persistentAnime = new PersistentAnime(anime.Aid, detailsData, pictureData);
             persistentAnime.SaveToFile(persistentAnimeFilePath);
+            return new ExecutionResult();
         }
 
         public void Load(Config config, StatusChangedEventHandler statusChanged)
@@ -125,11 +127,11 @@ namespace Finalspace.Onigiri.Persistence
                     PersistentAnime persistentAnime = PersistentAnime.LoadFromFile(persistentFile.FullName);
                     if (persistentAnime != null)
                     {
-                        Tuple<Anime, byte[]> t = Read(persistentAnime);
-                        if (t != null)
+                        var t = Read(persistentAnime);
+                        if (t.Item1.Success)
                         {
-                            _aidToAnimeMap.AddOrUpdate(persistentAnime.Aid, t.Item1, (index, anime) => { return t.Item1; });
-                            _aidToImageMap.AddOrUpdate(persistentAnime.Aid, t.Item2, (index, anime) => { return t.Item2; });
+                            _aidToAnimeMap.AddOrUpdate(persistentAnime.Aid, t.Item2, (index, anime) => { return t.Item2; });
+                            _aidToImageMap.AddOrUpdate(persistentAnime.Aid, t.Item3, (index, anime) => { return t.Item3; });
                         }
                     }
                 });
