@@ -134,6 +134,17 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <SolidColorBrush x:Key="listboxBackground" >
+        <SolidColorBrush.Color>
+            <Color R="214" G="224" B="239" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="listboxItemBackground" >
+        <SolidColorBrush.Color>
+            <Color R="245" G="246" B="149" A="222" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+
     <Style x:Key="animeListItem" TargetType="ListBoxItem">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Focusable" Value="False" />
@@ -157,14 +168,5 @@
         </SolidColorBrush.Color>
     </SolidColorBrush>
 
-    <SolidColorBrush x:Key="listboxBackground" >
-        <SolidColorBrush.Color>
-            <Color R="214" G="224" B="239" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="listboxItemBackground" >
-        <SolidColorBrush.Color>
-            <Color R="245" G="246" B="149" A="222" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
+    
  </ResourceDictionary>
