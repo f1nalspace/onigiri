@@ -5,10 +5,47 @@
     <converters:AnimeImageConverter x:Key="animeImageConverter"/>
     <converters:IsGreaterThanConverter x:Key="isGreaterThanConverter"/>
     <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
-    
+
     <BitmapImage x:Key="noPictureImage" UriSource="/Resources/nopicture.png" />
-    <BitmapImage x:Key="anniImage" UriSource="/Resources/anni.png" />
-    
+
+    <BitmapImage x:Key="starNoImage" UriSource="/Resources/star0.png" />
+    <BitmapImage x:Key="starHalfImage" UriSource="/Resources/star1.png" />
+    <BitmapImage x:Key="starFullImage" UriSource="/Resources/star2.png" />
+
+    <BitmapImage x:Key="markedTrueImage" UriSource="/Resources/marked.png" />
+    <BitmapImage x:Key="markedFalseImage" UriSource="/Resources/marked_false.png" />
+
+    <BitmapImage x:Key="anniWatchedTrueImage" UriSource="/Resources/anni.png" />
+    <BitmapImage x:Key="anniWatchedFalseImage" UriSource="/Resources/anni_false.png" />
+    <BitmapImage x:Key="anniDeleteTrueImage" UriSource="/Resources/anni_delete.png" />
+    <BitmapImage x:Key="anniDeleteFalseImage" UriSource="/Resources/anni_delete_false.png" />
+
+    <BitmapImage x:Key="finalWatchedTrueImage" UriSource="/Resources/final.png" />
+    <BitmapImage x:Key="finalWatchedFalseImage" UriSource="/Resources/final_false.png" />
+    <BitmapImage x:Key="finalDeleteTrueImage" UriSource="/Resources/final_delete.png" />
+    <BitmapImage x:Key="finalDeleteFalseImage" UriSource="/Resources/final_delete_false.png" />
+
+    <SolidColorBrush x:Key="animeListBackground_light" >
+        <SolidColorBrush.Color>
+            <Color R="214" G="224" B="239" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="animeItemBackground_light" >
+        <SolidColorBrush.Color>
+            <Color R="245" G="246" B="149" A="222" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="tagsBackground_light">
+        <SolidColorBrush.Color>
+            <Color R="229" G="233" B="245" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="headerBackground_light">
+        <SolidColorBrush.Color>
+            <Color R="229" G="233" B="245" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+
     <Style x:Key="actionButton" TargetType="Button">
         <Setter Property="Width" Value="32" />
         <Setter Property="Height" Value="32" />
@@ -24,97 +61,97 @@
         <Setter Property="Stretch" Value="UniformToFill" />
     </Style>
     <Style x:Key="actionIconWatchedAnni" TargetType="Image" BasedOn="{StaticResource actionIcon}">
-        <Setter Property="Source" Value="/Resources/anni_false.png" />
+        <Setter Property="Source" Value="{StaticResource anniWatchedFalseImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding AddonData.HasAnniWatched, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Source" Value="/Resources/anni.png" />
+                <Setter Property="Source" Value="{StaticResource anniWatchedTrueImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="actionIconWatchedFinal" TargetType="Image" BasedOn="{StaticResource actionIcon}">
-        <Setter Property="Source" Value="/Resources/final_false.png" />
+        <Setter Property="Source" Value="{StaticResource finalWatchedFalseImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding AddonData.HasFinalWatched, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Source" Value="/Resources/final.png" />
+                <Setter Property="Source" Value="{StaticResource finalWatchedTrueImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="actionIconDeleteitAnni" TargetType="Image" BasedOn="{StaticResource actionIcon}">
-        <Setter Property="Source" Value="/Resources/anni_delete_false.png" />
+        <Setter Property="Source" Value="{StaticResource anniDeleteFalseImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding AddonData.HasAnniDeleteit, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Source" Value="/Resources/anni_delete.png" />
+                <Setter Property="Source" Value="{StaticResource anniDeleteTrueImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="actionIconDeleteitFinal" TargetType="Image" BasedOn="{StaticResource actionIcon}">
-        <Setter Property="Source" Value="/Resources/final_delete_false.png" />
+        <Setter Property="Source" Value="{StaticResource finalDeleteFalseImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding AddonData.HasFinalDeleteit, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Source" Value="/Resources/final_delete.png" />
+                <Setter Property="Source" Value="{StaticResource finalDeleteTrueImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="actionIconMarked" TargetType="Image" BasedOn="{StaticResource actionIcon}">
-        <Setter Property="Source" Value="/Resources/mark_false.png" />
+        <Setter Property="Source" Value="{StaticResource markedFalseImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding AddonData.Marked, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Source" Value="/Resources/mark.png" />
+                <Setter Property="Source" Value="{StaticResource markedTrueImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="ratingIcon0" TargetType="Image" BasedOn="{StaticResource ratingIcon}">
-        <Setter Property="Source" Value="/Resources/star0.png" />
+        <Setter Property="Source" Value="{StaticResource starNoImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=0.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star1.png" />
+                <Setter Property="Source" Value="{StaticResource starHalfImage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=1.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star2.png" />
+                <Setter Property="Source" Value="{StaticResource starFullImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="ratingIcon1" TargetType="Image" BasedOn="{StaticResource ratingIcon}">
-        <Setter Property="Source" Value="/Resources/star0.png" />
+        <Setter Property="Source" Value="{StaticResource starNoImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=2.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star1.png" />
+                <Setter Property="Source" Value="{StaticResource starHalfImage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=3.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star2.png" />
+                <Setter Property="Source" Value="{StaticResource starFullImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="ratingIcon2" TargetType="Image" BasedOn="{StaticResource ratingIcon}">
-        <Setter Property="Source" Value="/Resources/star0.png" />
+        <Setter Property="Source" Value="{StaticResource starNoImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=4.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star1.png" />
+                <Setter Property="Source" Value="{StaticResource starHalfImage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=5.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star2.png" />
+                <Setter Property="Source" Value="{StaticResource starFullImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="ratingIcon3" TargetType="Image" BasedOn="{StaticResource ratingIcon}">
-        <Setter Property="Source" Value="/Resources/star0.png" />
+        <Setter Property="Source" Value="{StaticResource starNoImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=6.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star1.png" />
+                <Setter Property="Source" Value="{StaticResource starHalfImage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=7.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star2.png" />
+                <Setter Property="Source" Value="{StaticResource starFullImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="ratingIcon4" TargetType="Image" BasedOn="{StaticResource ratingIcon}">
-        <Setter Property="Source" Value="/Resources/star0.png" />
+        <Setter Property="Source" Value="{StaticResource starNoImage}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=8.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star1.png" />
+                <Setter Property="Source" Value="{StaticResource starHalfImage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Path=PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource isGreaterThanConverter}, ConverterParameter=9.0}" Value="True">
-                <Setter Property="Source" Value="/Resources/star2.png" />
+                <Setter Property="Source" Value="{StaticResource starFullImage}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -133,19 +170,8 @@
     <Style x:Key="animeCategory" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="14" />
     </Style>
-
-    <SolidColorBrush x:Key="listboxBackground" >
-        <SolidColorBrush.Color>
-            <Color R="214" G="224" B="239" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="listboxItemBackground" >
-        <SolidColorBrush.Color>
-            <Color R="245" G="246" B="149" A="222" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <Style x:Key="animeListItem" TargetType="ListBoxItem">
+    
+    <Style x:Key="animeItem" TargetType="ListBoxItem">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="IsHitTestVisible" Value="False" />
@@ -154,19 +180,33 @@
         <Setter Property="Margin" Value="10" />
         <Setter Property="Height" Value="280" />
 
-        <Setter Property="Background" Value="{StaticResource listboxItemBackground}" />
+        <Setter Property="Background" Value="{StaticResource animeItemBackground_light}" />
     </Style>
-    
-    <SolidColorBrush x:Key="tagsBackground">
-        <SolidColorBrush.Color>
-            <Color R="229" G="233" B="245" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="headerBackground">
-        <SolidColorBrush.Color>
-            <Color R="229" G="233" B="245" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
+
+    <Style x:Key="animeList" TargetType="ListBox">
+        <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
+        <Setter Property="FontSize" Value="16" />
+
+        <Style.Triggers>
+            <Trigger Property="HasItems" Value="False">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListBox}">
+                            <TextBlock Text="No animes found."/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="headerPanel" TargetType="DockPanel">
+        <Setter Property="Background" Value="{StaticResource headerBackground_light}" />
+    </Style>
+
+    <Style x:Key="tagsItemsControl" TargetType="ItemsControl">
+        <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
+    </Style>
 
     
- </ResourceDictionary>
+</ResourceDictionary>

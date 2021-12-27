@@ -3,9 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Finalspace.Onigiri.Controls"
-             xmlns:models="clr-namespace:Finalspace.Onigiri.Models;assembly=OnigiriCore"
-             xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
              xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="280"
@@ -15,7 +12,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Fuck.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -58,7 +55,7 @@
             </Grid.RowDefinitions>
 
             <!-- Header start -->
-            <DockPanel Grid.Row="0" LastChildFill="True" Background="{StaticResource headerBackground}">
+            <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
                 <StackPanel DockPanel.Dock="Right" Margin="0 0 8 0" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal">
                     <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                     <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
@@ -126,7 +123,7 @@
             <!-- Description end -->
 
             <!-- Tags start, ItemsControl needs a fixed width -->
-            <ItemsControl x:Name="tagItems" Grid.Row="2" Background="{StaticResource tagsBackground}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+            <ItemsControl Grid.Row="2" Style="{StaticResource tagsItemsControl}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" />

@@ -17,29 +17,11 @@
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Fuck.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Page.Resources>
-    <ListBox ItemContainerStyle="{StaticResource animeListItem}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16">
-        <ListBox.Style>
-            <Style TargetType="ListBox">
-                <Style.Setters>
-                    <Setter Property="Background" Value="{StaticResource listboxBackground}" />
-                </Style.Setters>
-                <Style.Triggers>
-                    <Trigger Property="HasItems" Value="False">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListBox}">
-                                    <TextBlock Text="No animes found."/>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </ListBox.Style>
+    <ListBox ItemContainerStyle="{StaticResource animeItem}" Style="{StaticResource animeList}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
         <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
                 <vwp:VirtualizingWrapPanel SpacingMode="StartAndEndOnly" StretchItems="False" Orientation="Vertical">
@@ -91,7 +73,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header start -->
-                        <DockPanel Grid.Row="0" LastChildFill="True" Background="{StaticResource headerBackground}">
+                        <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
                             <StackPanel DockPanel.Dock="Right" Margin="0 0 8 0" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal">
                                 <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                                 <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
@@ -159,7 +141,7 @@
                         <!-- Description end -->
 
                         <!-- Tags start, ItemsControl needs a fixed width -->
-                        <ItemsControl x:Name="tagItems" Grid.Row="2" Background="{StaticResource tagsBackground}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+                        <ItemsControl x:Name="tagItems" Grid.Row="2" Style="{StaticResource tagsItemsControl}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
