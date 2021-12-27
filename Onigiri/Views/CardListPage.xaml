@@ -58,7 +58,7 @@
                             <Grid.Background>
                                 <SolidColorBrush Color="Black" Opacity="0.75" />
                             </Grid.Background>
-                            <TextBlock Padding="10" Foreground="White" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" TextWrapping="Wrap" FontSize="18" />
+                            <TextBlock Style="{StaticResource animeTitleText}" Padding="10" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" TextWrapping="Wrap" />
                         </Grid>
                         <!-- Anime title end -->
                     </Grid>
@@ -83,14 +83,14 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                                    <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                                    <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
-                                    <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                                    <TextBlock Style="{StaticResource animeMainlineText}" Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Style="{StaticResource animeMainlineText}" Text=" " />
+                                    <TextBlock Style="{StaticResource animeMainlineText}" Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                                    <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                                    <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
-                                    <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                                    <TextBlock Style="{StaticResource animeSublineText}" Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Style="{StaticResource animeSublineText}" Text="/" />
+                                    <TextBlock Style="{StaticResource animeSublineText}" Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
                             </StackPanel>
                         </DockPanel>
@@ -98,7 +98,7 @@
 
                         <!-- Description start -->
                         <Grid Grid.Row="1">
-                            <TextBlock Padding="8" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" FontSize="14" />
+                            <TextBlock Style="{StaticResource descriptionText}" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=490}" />
                             <WrapPanel Margin="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                                 <Button Style="{StaticResource actionButton}">
                                     <Button.Template>
@@ -149,8 +149,8 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
-                                        <TextBlock FontSize="12" VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="None" />
+                                    <Border Padding="4" Margin="2" CornerRadius="4" Style="{StaticResource tagItem}">
+                                        <TextBlock Style="{StaticResource tagItemText}" VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap" TextTrimming="None" />
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

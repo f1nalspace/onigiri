@@ -481,6 +481,8 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<Anime> CmdOpenRelations { get; }
         #endregion
 
+        public bool IsDarkMode { get => GetValue<bool>(); private set => SetValue(value); }
+
         public void WindowLoaded()
         {
 #if false
@@ -526,6 +528,9 @@ namespace Finalspace.Onigiri.ViewModels
         #region Constructor
         public MainViewModel()
         {
+            // Dark mode
+            IsDarkMode = false;
+
             // Services
             CoreService = new OnigiriService();
 
