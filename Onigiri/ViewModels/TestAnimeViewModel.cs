@@ -11,6 +11,7 @@ namespace Finalspace.Onigiri.ViewModels
             
             Ratings.Add(new Rating() { Count = 1000, Value = 7.3, Name = "permanent" });
 
+            TopCategories.Add(new Category() { Name = "Blubb", Weight = 9 });
             TopCategories.Add(new Category() { Name = "Mystery", Weight = 8 });
             TopCategories.Add(new Category() { Name = "Violence", Weight = 7 });
             TopCategories.Add(new Category() { Name = "Action", Weight = 6 });

@@ -12,8 +12,8 @@
     <BitmapImage x:Key="starHalfImage" UriSource="/Resources/star1.png" />
     <BitmapImage x:Key="starFullImage" UriSource="/Resources/star2.png" />
 
-    <BitmapImage x:Key="markedTrueImage" UriSource="/Resources/marked.png" />
-    <BitmapImage x:Key="markedFalseImage" UriSource="/Resources/marked_false.png" />
+    <BitmapImage x:Key="markedTrueImage" UriSource="/Resources/mark.png" />
+    <BitmapImage x:Key="markedFalseImage" UriSource="/Resources/mark_false.png" />
 
     <BitmapImage x:Key="anniWatchedTrueImage" UriSource="/Resources/anni.png" />
     <BitmapImage x:Key="anniWatchedFalseImage" UriSource="/Resources/anni_false.png" />
@@ -25,7 +25,7 @@
     <BitmapImage x:Key="finalDeleteTrueImage" UriSource="/Resources/final_delete.png" />
     <BitmapImage x:Key="finalDeleteFalseImage" UriSource="/Resources/final_delete_false.png" />
 
-    <SolidColorBrush x:Key="animeListBackground_light" >
+    <SolidColorBrush x:Key="animeListBackground_light">
         <SolidColorBrush.Color>
             <Color R="214" G="224" B="239" A="255" />
         </SolidColorBrush.Color>
@@ -170,21 +170,20 @@
     <Style x:Key="animeCategory" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="14" />
     </Style>
-    
+
     <Style x:Key="animeItem" TargetType="ListBoxItem">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Focusable" Value="False" />
-        <Setter Property="IsHitTestVisible" Value="False" />
-
+        
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="10" />
-        <Setter Property="Height" Value="280" />
 
         <Setter Property="Background" Value="{StaticResource animeItemBackground_light}" />
     </Style>
 
     <Style x:Key="animeList" TargetType="ListBox">
         <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
+
         <Setter Property="FontSize" Value="16" />
 
         <Style.Triggers>
@@ -192,7 +191,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListBox}">
-                            <TextBlock Text="No animes found."/>
+                            <TextBlock Text="No Animes found."/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -208,5 +207,4 @@
         <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
     </Style>
 
-    
 </ResourceDictionary>
