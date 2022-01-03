@@ -4,6 +4,7 @@
               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+              xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
               mc:Ignorable="d"
         Title="Onigiri" Height="600" Width="800" Icon="../Resources/onigiri.ico" Loaded="RibbonWindow_Loaded">
     <dxmvvm:Interaction.Behaviors>
@@ -13,6 +14,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Styles/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -29,14 +31,12 @@
                     </RibbonApplicationMenu.AuxiliaryPaneContent>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
-            <RibbonTab Header="Home" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
-                <RibbonGroup Header="Actions">
-                    <RibbonButton ToolTip="Reload Database" Command="{Binding CmdRefresh}" Label="Refresh" LargeImageSource="/Resources/refresh_32x32.png" />
-                    <RibbonButton ToolTip="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database" Label="Rebuild Database" LargeImageSource="/Resources/download_32x32.png" />
-                    <RibbonButton ToolTip="Update titles from the internet" Command="{Binding CmdUpdate}" CommandParameter="Titles" Label="Update Titles" LargeImageSource="/Resources/download_32x32.png" />
-                    <RibbonButton ToolTip="Update files from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store" Label="Update Files" LargeImageSource="/Resources/download_32x32.png" />
-                    <RibbonButton ToolTip="Show titles" Command="{Binding CmdTitles}" Label="Titles" LargeImageSource="/Resources/download_32x32.png" />
-                    <RibbonButton ToolTip="Show issues" Command="{Binding CmdIssues}" Label="Issues" LargeImageSource="/Resources/download_32x32.png" />
+            
+            <RibbonTab Header="View" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
+                <RibbonGroup Header="Theme">
+                    <RibbonRadioButton GroupName="theme" ToolTip="Automatic detection" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Automatic}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Automatic}}" Label="Auto" LargeImageSource="/Resources/darkmode_trigger_32x32.png" />
+                    <RibbonRadioButton GroupName="theme" ToolTip="Light" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Light}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Light}}" Label="Light" LargeImageSource="/Resources/sun_32x32.png" />
+                    <RibbonRadioButton GroupName="theme" ToolTip="Dark" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Dark}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Dark}}" Label="Dark" LargeImageSource="/Resources/moon_32x32.png" />
                 </RibbonGroup>
                 <RibbonGroup Header="Sorting">
                     <StackPanel>
@@ -92,6 +92,18 @@
                     <RibbonCheckBox Label="To remove" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterRemove, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </RibbonGroup>
             </RibbonTab>
+
+            <RibbonTab Header="Home" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
+                <RibbonGroup Header="Actions">
+                    <RibbonButton ToolTip="Reload Database" Command="{Binding CmdRefresh}" Label="Refresh" LargeImageSource="/Resources/refresh_32x32.png" />
+                    <RibbonButton ToolTip="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database" Label="Rebuild Database" LargeImageSource="/Resources/rebuild_database_32x32.png" />
+                    <RibbonButton ToolTip="Update folders from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store" Label="Update Folders" LargeImageSource="/Resources/download_to_local_store_32x32.png" />
+                    <RibbonButton ToolTip="Update titles from the internet" Command="{Binding CmdUpdate}" CommandParameter="Titles" Label="Update Titles" LargeImageSource="/Resources/download_32x32.png" />
+                    <RibbonButton ToolTip="Show titles" Command="{Binding CmdTitles}" Label="Titles" LargeImageSource="/Resources/titles_32x32.png" />
+                    <RibbonButton ToolTip="Show issues" Command="{Binding CmdIssues}" Label="Issues" LargeImageSource="/Resources/suggestion_32x32.png" />
+                </RibbonGroup>
+            </RibbonTab>
+
         </Ribbon>
         <StatusBar DockPanel.Dock="Bottom" FontSize="16">
             <StatusBar.ItemsPanel>

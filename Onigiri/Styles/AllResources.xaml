@@ -5,6 +5,7 @@
     <converters:AnimeImageConverter x:Key="animeImageConverter"/>
     <converters:IsGreaterThanConverter x:Key="isGreaterThanConverter"/>
     <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
+    <converters:ThemeToBoolConverter x:Key="themeBoolConv" />
 
     <BitmapImage x:Key="noPictureImage" UriSource="/Resources/nopicture.png" />
 
@@ -97,6 +98,17 @@
         </SolidColorBrush.Color>
     </SolidColorBrush>
     <SolidColorBrush x:Key="sublineForeground_dark">
+        <SolidColorBrush.Color>
+            <Color R="129" G="140" B="153" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+
+    <SolidColorBrush x:Key="noAnimesForeground_light">
+        <SolidColorBrush.Color>
+            <Color R="92" G="114" B="138" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="noAnimesForeground_dark">
         <SolidColorBrush.Color>
             <Color R="129" G="140" B="153" A="255" />
         </SolidColorBrush.Color>
@@ -258,7 +270,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListBox}">
-                            <TextBlock Text="No Animes found."/>
+                            <TextBlock Text="No Animes found." Foreground="{StaticResource noAnimesForeground_light}">
+                            </TextBlock>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -335,5 +348,19 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <Style x:Key="noAnimesText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
+        <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                <DataTrigger.Setters>
+                    <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
+                </DataTrigger.Setters>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    
 
 </ResourceDictionary>

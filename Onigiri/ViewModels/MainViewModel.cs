@@ -217,7 +217,7 @@ namespace Finalspace.Onigiri.ViewModels
 
             StartedLoading();
 
-            UpdateFlags updateFlags = UpdateFlags.WriteCache;
+            UpdateFlags updateFlags;
             if ("Store".Equals(updateType))
                 updateFlags = UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteCache;
             else if ("Titles".Equals(updateType))
@@ -479,9 +479,28 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand CmdIssues { get; }
         public DelegateCommand<Anime> CmdOpenPage { get; }
         public DelegateCommand<Anime> CmdOpenRelations { get; }
+        public DelegateCommand<MainTheme> CmdChangeTheme { get; }
         #endregion
 
         public bool IsDarkMode { get => GetValue<bool>(); private set => SetValue(value); }
+
+        public MainTheme Theme { get => GetValue<MainTheme>(); private set => SetValue(value, () => ChangedTheme(value)); }
+
+        private void ChangedTheme(MainTheme theme)
+        {
+            IDarkModeDetectionService service = GetService<IDarkModeDetectionService>();
+            service.DarkModeChanged -= OnDarkModeChanged;
+
+            if (theme == MainTheme.Automatic)
+            {
+                IsDarkMode = service.IsDarkMode;
+                service.DarkModeChanged += OnDarkModeChanged;
+            }
+            else if (theme == MainTheme.Dark)
+                IsDarkMode = true;
+            else
+                IsDarkMode = false;
+        }
 
         public void WindowLoaded()
         {
@@ -525,13 +544,25 @@ namespace Finalspace.Onigiri.ViewModels
             ProcessStarterService.Start(url);
         }
 
+        private void OnDarkModeChanged(object sender, bool e)
+        {
+            IsDarkMode = e;
+        }
+
+        private void ChangeTheme(MainTheme newTheme)
+        {
+            Theme = newTheme;
+        }
+
         #region Constructor
         public MainViewModel()
         {
             IDarkModeDetectionService darkModeService = GetService<IDarkModeDetectionService>();
 
             // Dark mode
-            IsDarkMode = darkModeService.IsDarkMode;
+            darkModeService.DarkModeChanged += OnDarkModeChanged;
+            Theme = MainTheme.Automatic;
+            ChangedTheme(Theme);
 
             // Services
             CoreService = new OnigiriService();
@@ -576,6 +607,7 @@ namespace Finalspace.Onigiri.ViewModels
             CmdOpenRelations = new DelegateCommand<Anime>(OpenRelations);
             CmdTitles = new DelegateCommand(ShowTitlesDialog);
             CmdIssues = new DelegateCommand(ShowIssuesDialog);
+            CmdChangeTheme = new DelegateCommand<MainTheme>(ChangeTheme);
 
             // Refresh directly at startup
             RefreshWorker.RunWorkerAsync();

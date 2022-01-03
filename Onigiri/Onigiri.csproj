@@ -25,10 +25,17 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\add_32x32.png" />
+    <None Remove="Resources\darkmode_trigger_32x32.png" />
+    <None Remove="Resources\download_to_local_store_32x32.png" />
+    <None Remove="Resources\moon_32x32.png" />
     <None Remove="Resources\next_32x32.png" />
     <None Remove="Resources\next_tag_32x32.png" />
     <None Remove="Resources\prev_32x32.png" />
     <None Remove="Resources\prev_tag_32x32.png" />
+    <None Remove="Resources\rebuild_database_32x32.png" />
+    <None Remove="Resources\suggestion_32x32.png" />
+    <None Remove="Resources\sun_32x32.png" />
+    <None Remove="Resources\titles_32x32.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -43,6 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\add_32x32.png" />
+    <Resource Include="Resources\darkmode_trigger_32x32.png" />
+    <Resource Include="Resources\download_to_local_store_32x32.png" />
+    <Resource Include="Resources\moon_32x32.png" />
     <Resource Include="Resources\next_tag_32x32.png" />
     <Resource Include="Resources\next_32x32.png" />
     <Resource Include="Resources\onigiri.ico" />
@@ -68,9 +78,12 @@
     <Resource Include="Resources\mark_false.png" />
     <Resource Include="Resources\prev_tag_32x32.png" />
     <Resource Include="Resources\prev_32x32.png" />
+    <Resource Include="Resources\rebuild_database_32x32.png" />
     <Resource Include="Resources\star0.png" />
     <Resource Include="Resources\star1.png" />
     <Resource Include="Resources\star2.png" />
+    <Resource Include="Resources\suggestion_32x32.png" />
+    <Resource Include="Resources\sun_32x32.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Testfiles\.adata.xml" />
@@ -96,6 +109,7 @@
   <ItemGroup>
     <Resource Include="Resources\close_16x16.png" />
     <Resource Include="Resources\close_32x32.png" />
+    <Resource Include="Resources\titles_32x32.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
