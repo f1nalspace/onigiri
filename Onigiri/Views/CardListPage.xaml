@@ -43,7 +43,7 @@
                     <!-- Image block start -->
                     <Grid Grid.Column="0">
                         <!-- Picture start -->
-                        <Image Stretch="UniformToFill" Height="280">
+                        <Image Stretch="UniformToFill" Width="200" Height="280">
                             <Image.Source>
                                 <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
                                     <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
@@ -68,7 +68,7 @@
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="40" />
-                            <RowDefinition Height="*" />
+                            <RowDefinition Height="186" />
                             <RowDefinition Height="54" />
                         </Grid.RowDefinitions>
 
@@ -98,7 +98,7 @@
 
                         <!-- Description start -->
                         <Grid Grid.Row="1">
-                            <TextBlock Style="{StaticResource descriptionText}" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=490}" />
+                            <TextBlock Style="{StaticResource descriptionText}" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" />
                             <WrapPanel Margin="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                                 <Button Style="{StaticResource actionButton}">
                                     <Button.Template>
