@@ -14,6 +14,7 @@ namespace Finalspace.Onigiri
         {
             XmlConfigurator.Configure();
             ServiceContainer.Default.RegisterService(new DefaultProcessStarterService());
+            ServiceContainer.Default.RegisterService(new Win32DarkModeDetectionService());
         }
     }
 }

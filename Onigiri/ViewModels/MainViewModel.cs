@@ -528,8 +528,10 @@ namespace Finalspace.Onigiri.ViewModels
         #region Constructor
         public MainViewModel()
         {
+            IDarkModeDetectionService darkModeService = GetService<IDarkModeDetectionService>();
+
             // Dark mode
-            IsDarkMode = false;
+            IsDarkMode = darkModeService.IsDarkMode;
 
             // Services
             CoreService = new OnigiriService();
