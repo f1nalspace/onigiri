@@ -15,7 +15,7 @@ using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Persistence
 {
-    public class AnimeFilesCache : IAnimeDatabase
+    public class FolderAnimeFilesCache : IAnimeCache
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -40,7 +40,7 @@ namespace Finalspace.Onigiri.Persistence
             return null;
         }
 
-        public AnimeFilesCache(int concurrencyLevel, string path)
+        public FolderAnimeFilesCache(int concurrencyLevel, string path)
         {
             _path = path;
             _aidToAnimeMap = new ConcurrentDictionary<ulong, Anime>(concurrencyLevel, 4096);

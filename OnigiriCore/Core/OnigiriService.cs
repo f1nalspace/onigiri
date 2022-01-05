@@ -39,7 +39,7 @@ namespace Finalspace.Onigiri.Core
         private readonly object _animesLock = new object();
         public Animes Animes { get; }
         public Issues Issues { get; }
-        public AnimeFilesCache Cache { get; }
+        public IAnimeCache Cache { get; }
 
         public OnigiriService()
         {
@@ -52,7 +52,7 @@ namespace Finalspace.Onigiri.Core
             _animeTitlesDumpRawFilePath = Path.Combine(_appSettingsPath, "animetitles.xml.gz");
             _animeTitlesDumpXMLFilePath = Path.Combine(_appSettingsPath, "animetitles.xml");
             Config = new Config();
-            Cache = new AnimeFilesCache(Config.MaxThreadCount, _persistentPath);
+            Cache = new FolderAnimeFilesCache(Config.MaxThreadCount, _persistentPath);
             Titles = new Titles();
             Animes = new Animes();
             Issues = new Issues();

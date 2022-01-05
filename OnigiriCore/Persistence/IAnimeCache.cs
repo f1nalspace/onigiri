@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Finalspace.Onigiri.Persistence
 {
-    public interface IAnimeDatabase
+    public interface IAnimeCache
     {
         IEnumerable<Anime> Animes { get; }
 
