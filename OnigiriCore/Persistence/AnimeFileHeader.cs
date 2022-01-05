@@ -5,7 +5,7 @@ namespace Finalspace.Onigiri.Persistence
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    struct PersistentFileHeader
+    struct AnimeFileHeader
     {
         public static ulong MagicKey = 0x8c450d2b; // CRC32 hash from ONIGIRI_PERSISTENCE
         public static ulong CurrentVersion = 1;

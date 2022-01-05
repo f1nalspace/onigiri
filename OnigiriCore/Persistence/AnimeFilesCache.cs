@@ -15,7 +15,7 @@ using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Persistence
 {
-    public class PersistentCache
+    public class AnimeFilesCache : IAnimeDatabase
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -40,22 +40,24 @@ namespace Finalspace.Onigiri.Persistence
             return null;
         }
 
-        public PersistentCache(int concurrencyLevel, string path)
+        public AnimeFilesCache(int concurrencyLevel, string path)
         {
             _path = path;
             _aidToAnimeMap = new ConcurrentDictionary<ulong, Anime>(concurrencyLevel, 4096);
             _aidToImageMap = new ConcurrentDictionary<ulong, byte[]>(concurrencyLevel, 4096);
         }
 
-        public Tuple<ExecutionResult, Anime, byte[]> Read(PersistentAnime persistentAnime)
+        public Tuple<ExecutionResult, Anime, byte[]> Deserialize(AnimeFile animeFile)
         {
-            byte[] animeData = persistentAnime.Details;
+            if (animeFile == null)
+                throw new ArgumentNullException(nameof(animeFile));
+            byte[] animeData = animeFile.Details;
             if (animeData == null || animeData.Length == 0)
             {
-                log.Error($"Failed decode details from anime '{persistentAnime.Aid}'!");
+                log.Error($"Failed to decode details from anime '{animeFile.Aid}'!");
                 return null;
             }
-            byte[] pictureData = persistentAnime.Picture;
+            byte[] pictureData = animeFile.Picture;
 
             Anime anime = null;
             try
@@ -68,16 +70,16 @@ namespace Finalspace.Onigiri.Persistence
             }
             catch (Exception e)
             {
-                log.Error($"Failed deserialize anime data from anime '{persistentAnime.Aid}'!", e);
+                log.Error($"Failed to deserialize anime data from anime '{animeFile.Aid}'!", e);
                 return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(e), null, null);
             }
             return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(), anime, pictureData);
         }
 
-        public ExecutionResult Write(Anime anime, string pictureFilePath)
+        public Tuple<ExecutionResult, AnimeFile> Serialize(Anime anime, string pictureFilePath)
         {
             if (anime.Aid == 0)
-                return new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!"));
+                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!")), null);
             byte[] detailsData = null;
             try
             {
@@ -92,18 +94,20 @@ namespace Finalspace.Onigiri.Persistence
             }
             catch (Exception e)
             {
-                log.Error($"Failed serialize anime '{anime}' to xml!", e);
-                return new ExecutionResult(e);
+                log.Error($"Failed to serialize anime '{anime}' to xml!", e);
+                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(e), null);
             }
 
             byte[] pictureData = null;
             if (!string.IsNullOrEmpty(pictureFilePath))
                 pictureData = FileUtils.LoadFileData(pictureFilePath);
 
+            AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData, pictureData);
+
             string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
-            PersistentAnime persistentAnime = new PersistentAnime(anime.Aid, detailsData, pictureData);
-            persistentAnime.SaveToFile(persistentAnimeFilePath);
-            return new ExecutionResult();
+            animeFile.SaveToFile(persistentAnimeFilePath);
+
+            return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(), animeFile);
         }
 
         public void Load(Config config, StatusChangedEventHandler statusChanged)
@@ -124,15 +128,20 @@ namespace Finalspace.Onigiri.Persistence
                     int percentage = (int)((c / (double)totalFileCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = persistentFile.Name, Percentage = percentage });
 
-                    PersistentAnime persistentAnime = PersistentAnime.LoadFromFile(persistentFile.FullName);
-                    if (persistentAnime != null)
+                    Tuple<ExecutionResult, AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
+                    if (res.Item1.Success)
                     {
-                        var t = Read(persistentAnime);
+                        AnimeFile animeFile = res.Item2;
+                        Tuple<ExecutionResult, Anime, byte[]> t = Deserialize(animeFile);
                         if (t.Item1.Success)
                         {
-                            _aidToAnimeMap.AddOrUpdate(persistentAnime.Aid, t.Item2, (index, anime) => { return t.Item2; });
-                            _aidToImageMap.AddOrUpdate(persistentAnime.Aid, t.Item3, (index, anime) => { return t.Item3; });
+                            _aidToAnimeMap.AddOrUpdate(animeFile.Aid, t.Item2, (index, anime) => { return t.Item2; });
+                            _aidToImageMap.AddOrUpdate(animeFile.Aid, t.Item3, (index, anime) => { return t.Item3; });
                         }
+                    }
+                    else
+                    {
+                        // TODO(tspaete): Log issue!
                     }
                 });
             }

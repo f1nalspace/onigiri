@@ -250,7 +250,7 @@ namespace Finalspace.Onigiri.ViewModels
             string addonFilePath = Path.Combine(anime.FoundPath, OnigiriService.AnimeXMLAddonFilename);
             anime.AddonData.SaveToFile(addonFilePath);
             string pictureFilePath = CoreService.FindImage(animeDir);
-            CoreService.Cache.Write(anime, pictureFilePath);
+            Tuple<ExecutionResult, Persistence.AnimeFile> res = CoreService.Cache.Serialize(anime, pictureFilePath);
         }
         private bool CanAddonDataByChanged(Anime anime)
         {
