@@ -219,14 +219,11 @@ namespace Finalspace.Onigiri.ViewModels
 
             UpdateFlags updateFlags;
             if ("Store".Equals(updateType))
-                updateFlags = UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteCache;
-            else if ("Titles".Equals(updateType))
-                updateFlags = UpdateFlags.DownloadTitles;
+                updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteCache;
             else if ("Database".Equals(updateType))
                 updateFlags = UpdateFlags.WriteCache;
             else
                 throw new NotSupportedException($"The update type '{updateType}' is not supported");
-
 
             LoadingHeader = $"Updating {updateType}...";
 
