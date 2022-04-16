@@ -2,6 +2,7 @@
 using Finalspace.Onigiri.Models;
 using log4net;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -19,11 +20,11 @@ namespace Finalspace.Onigiri.Persistence
 
         public ulong Aid { get; }
 
-        public byte[] Details { get; }
+        public ImmutableArray<byte> Details { get; }
 
-        public byte[] Picture { get; }
+        public ImmutableArray<byte> Picture { get; }
 
-        public AnimeFile(ulong aid, byte[] details, byte[] picture)
+        public AnimeFile(ulong aid, ImmutableArray<byte> details, ImmutableArray<byte> picture)
         {
             Aid = aid;
             Details = details;
@@ -44,16 +45,13 @@ namespace Finalspace.Onigiri.Persistence
                 header.Version = AnimeFileHeader.CurrentVersion;
                 header.Aid = Aid;
                 header.DetailsLength = (ulong)Details.Length;
-                if (Picture != null && Picture.Length > 0)
-                    header.PictureLength = (ulong)Picture.Length;
-                else
-                    header.PictureLength = 0;
+                header.PictureLength = (ulong)Picture.Length;
                 stream.WriteStruct(header);
 
-                stream.Write(Details, 0, Details.Length);
+                stream.Write(Details.AsSpan());
 
-                if (header.PictureLength > 0)
-                    stream.Write(Picture, 0, Picture.Length);
+                if (Picture.Length > 0)
+                    stream.Write(Picture.AsSpan());
 
                 stream.Flush();
             }
@@ -113,7 +111,7 @@ namespace Finalspace.Onigiri.Persistence
                     stream.Read(pictureData, 0, (int)header.PictureLength);
                 }
 
-                animeFile = new AnimeFile(header.Aid, detailsData, pictureData);
+                animeFile = new AnimeFile(header.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
             }
             catch (Exception e)
             {

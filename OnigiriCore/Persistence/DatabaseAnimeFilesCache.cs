@@ -2,6 +2,7 @@
 using Finalspace.Onigiri.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Finalspace.Onigiri.Persistence
 {
@@ -9,12 +10,7 @@ namespace Finalspace.Onigiri.Persistence
     {
         public IEnumerable<Anime> Animes => throw new NotImplementedException();
 
-        public byte[] GetImageData(ulong aid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Tuple<ExecutionResult, Anime, byte[]> Deserialize(AnimeFile animeFile)
+        public Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
         {
             throw new NotImplementedException();
         }

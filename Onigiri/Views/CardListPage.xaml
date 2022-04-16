@@ -46,7 +46,7 @@
                         <Image Stretch="UniformToFill" Width="200" Height="280">
                             <Image.Source>
                                 <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
-                                    <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
+                                    <Binding Path="Image" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
                                     <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
                                 </MultiBinding>
                             </Image.Source>

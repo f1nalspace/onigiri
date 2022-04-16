@@ -197,6 +197,11 @@ namespace Finalspace.Onigiri.Models
             }
         }
 
+        [XmlIgnore]
+        public AnimeImage Image {
+            get => GetValue<AnimeImage>(); 
+            set => SetValue(value); }
+
         public Anime()
         {
             Titles = new Titles();
@@ -221,6 +226,8 @@ namespace Finalspace.Onigiri.Models
             Relations.CollectionChanged += (s, e) => RaisePropertyChanged(() => Relations);
             AddonData = new AdditionalData();
             AddonData.PropertyChanged += (s, e) => RaisePropertyChanged(() => AddonData);
+
+            Image = null;
         }
 
         public void LoadFromAnimeXML(string filePath, bool skipDetails = false)

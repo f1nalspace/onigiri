@@ -5,7 +5,9 @@ using log4net;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -21,7 +23,6 @@ namespace Finalspace.Onigiri.Persistence
 
         private readonly string _path;
         private readonly ConcurrentDictionary<ulong, Anime> _aidToAnimeMap;
-        private readonly ConcurrentDictionary<ulong, byte[]> _aidToImageMap;
 
         public IEnumerable<Anime> Animes
         {
@@ -31,39 +32,30 @@ namespace Finalspace.Onigiri.Persistence
             }
         }
 
-        public byte[] GetImageData(ulong aid)
-        {
-            if (_aidToImageMap.ContainsKey(aid))
-            {
-                return _aidToImageMap[aid];
-            }
-            return null;
-        }
-
         public FolderAnimeFilesCache(int concurrencyLevel, string path)
         {
             _path = path;
             _aidToAnimeMap = new ConcurrentDictionary<ulong, Anime>(concurrencyLevel, 4096);
-            _aidToImageMap = new ConcurrentDictionary<ulong, byte[]>(concurrencyLevel, 4096);
         }
 
-        public Tuple<ExecutionResult, Anime, byte[]> Deserialize(AnimeFile animeFile)
+        public Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
         {
             if (animeFile == null)
                 throw new ArgumentNullException(nameof(animeFile));
-            byte[] animeData = animeFile.Details;
-            if (animeData == null || animeData.Length == 0)
+            ImmutableArray<byte> animeData = animeFile.Details;
+            if (animeData.Length == 0)
             {
                 log.Error($"Failed to decode details from anime '{animeFile.Aid}'!");
                 return null;
             }
-            byte[] pictureData = animeFile.Picture;
+
+            ImmutableArray<byte> pictureData = animeFile.Picture;
 
             Anime anime = null;
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(Anime));
-                using (MemoryStream stream = new MemoryStream(animeData))
+                using (MemoryStream stream = new MemoryStream(animeData.ToArray()))
                 {
                     anime = (Anime)serializer.Deserialize(stream);
                 }
@@ -71,9 +63,9 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed to deserialize anime data from anime '{animeFile.Aid}'!", e);
-                return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(e), null, null);
+                return new Tuple<ExecutionResult, Anime, ImmutableArray<byte>>(new ExecutionResult(e), null, ImmutableArray<byte>.Empty);
             }
-            return new Tuple<ExecutionResult, Anime, byte[]>(new ExecutionResult(), anime, pictureData);
+            return new Tuple<ExecutionResult, Anime, ImmutableArray<byte>>(new ExecutionResult(), anime, pictureData);
         }
 
         public Tuple<ExecutionResult, AnimeFile> Serialize(Anime anime, string pictureFilePath)
@@ -102,7 +94,7 @@ namespace Finalspace.Onigiri.Persistence
             if (!string.IsNullOrEmpty(pictureFilePath))
                 pictureData = FileUtils.LoadFileData(pictureFilePath);
 
-            AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData, pictureData);
+            AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
 
             string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
             animeFile.SaveToFile(persistentAnimeFilePath);
@@ -113,7 +105,6 @@ namespace Finalspace.Onigiri.Persistence
         public void Load(Config config, StatusChangedEventHandler statusChanged)
         {
             _aidToAnimeMap.Clear();
-            _aidToImageMap.Clear();
 
             DirectoryInfo rootDir = new DirectoryInfo(_path);
             if (rootDir.Exists)
@@ -132,11 +123,14 @@ namespace Finalspace.Onigiri.Persistence
                     if (res.Item1.Success)
                     {
                         AnimeFile animeFile = res.Item2;
-                        Tuple<ExecutionResult, Anime, byte[]> t = Deserialize(animeFile);
+                        Tuple<ExecutionResult, Anime, ImmutableArray<byte>> t = Deserialize(animeFile);
                         if (t.Item1.Success)
                         {
-                            _aidToAnimeMap.AddOrUpdate(animeFile.Aid, t.Item2, (index, anime) => { return t.Item2; });
-                            _aidToImageMap.AddOrUpdate(animeFile.Aid, t.Item3, (index, anime) => { return t.Item3; });
+                            Anime anime = t.Item2;
+                            _aidToAnimeMap.TryAdd(animeFile.Aid, anime);
+
+                            if (t.Item3.Length > 0)
+                                anime.Image = new AnimeImage(100, 100, anime.ImageFilePath, t.Item3);
                         }
                     }
                     else

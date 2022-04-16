@@ -1,7 +1,10 @@
-﻿using Finalspace.Onigiri.ViewModels;
+﻿using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.ViewModels;
 using System;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -10,13 +13,14 @@ namespace Finalspace.Onigiri.Converters
 {
     public class AnimeImageConverter : IMultiValueConverter
     {
-        private static BitmapImage LoadImage(byte[] imageData)
+        private static BitmapImage LoadImage(ReadOnlySpan<byte> imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;
             BitmapImage image = new BitmapImage();
-            using (MemoryStream mem = new MemoryStream(imageData))
+            using (MemoryStream mem = new MemoryStream(imageData.Length))
             {
-                mem.Position = 0;
+                mem.Write(imageData);
+                mem.Seek(0, SeekOrigin.Begin);
                 image.BeginInit();
                 image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
                 image.CacheOption = BitmapCacheOption.OnLoad;
@@ -42,16 +46,8 @@ namespace Finalspace.Onigiri.Converters
                 if (!string.IsNullOrEmpty(pictureFile))
                     return new BitmapImage(new Uri(pictureFile));
             }
-            else if (values[0] is ulong)
-            {
-                ulong aid = (ulong)values[0];
-                if (aid > 0 && mainViewModel != null)
-                {
-                    byte[] imageData = mainViewModel.CoreService.Cache.GetImageData(aid);
-                    if (imageData != null)
-                        return LoadImage(imageData);
-                }
-            }
+            else if (values[0] is AnimeImage animeIage)
+                return LoadImage(animeIage.Data.AsSpan());
             return DependencyProperty.UnsetValue;
         }
 
