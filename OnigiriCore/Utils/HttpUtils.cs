@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Finalspace.Onigiri.Types;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net;

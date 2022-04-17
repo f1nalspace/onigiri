@@ -1,4 +1,4 @@
-﻿using Finalspace.Onigiri.Utils;
+﻿using Finalspace.Onigiri.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;

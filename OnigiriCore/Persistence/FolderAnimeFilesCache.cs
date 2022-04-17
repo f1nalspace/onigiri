@@ -1,5 +1,6 @@
 ﻿using Finalspace.Onigiri.Events;
 using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
 using log4net;
 using System;
@@ -30,7 +31,7 @@ namespace Finalspace.Onigiri.Persistence
             _path = path;
         }
 
-        private static Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
+        private static ExecutionResult<Anime> Deserialize(AnimeFile animeFile)
         {
             if (animeFile == null)
                 throw new ArgumentNullException(nameof(animeFile));
@@ -38,7 +39,7 @@ namespace Finalspace.Onigiri.Persistence
             if (animeData.Length == 0)
             {
                 log.Error($"Failed to decode details from anime '{animeFile.Aid}'!");
-                return null;
+                return new ExecutionResult<Anime>(new FileNotFoundException("Anime details are empty!"));
             }
 
             ImmutableArray<byte> pictureData = animeFile.Picture;
@@ -55,15 +56,18 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed to deserialize anime data from anime '{animeFile.Aid}'!", e);
-                return new Tuple<ExecutionResult, Anime, ImmutableArray<byte>>(new ExecutionResult(e), null, ImmutableArray<byte>.Empty);
+                return new ExecutionResult<Anime>(e);
             }
-            return new Tuple<ExecutionResult, Anime, ImmutableArray<byte>>(new ExecutionResult(), anime, pictureData);
+
+            anime.Image = pictureData.Length > 0 ? new AnimeImage(anime.Picture, pictureData) : null;
+
+            return new ExecutionResult<Anime>(anime);
         }
 
-        private static (ExecutionResult res, AnimeFile file) Serialize(Anime anime, string pictureFilePath)
+        private static ExecutionResult<AnimeFile> Serialize(Anime anime, string pictureFilePath)
         {
             if (anime.Aid == 0)
-                return (new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!")), null);
+                return new ExecutionResult<AnimeFile>(new FormatException($"Anime '{anime}' has in valid aid!"));
             byte[] detailsData = null;
             try
             {
@@ -79,7 +83,7 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed to serialize anime '{anime}' to xml!", e);
-                return (new ExecutionResult(e), null);
+                return new ExecutionResult<AnimeFile>(e);
             }
 
             byte[] pictureData = null;
@@ -88,7 +92,7 @@ namespace Finalspace.Onigiri.Persistence
 
             AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
 
-            return (new ExecutionResult(), animeFile);
+            return new ExecutionResult<AnimeFile>(animeFile);
         }
 
         public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
@@ -108,18 +112,15 @@ namespace Finalspace.Onigiri.Persistence
                     int percentage = (int)((c / (double)totalFileCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = persistentFile.Name, Percentage = percentage });
 
-                    Tuple<ExecutionResult, AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
-                    if (res.Item1.Success)
+                    ExecutionResult<AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
+                    if (res.Success)
                     {
-                        AnimeFile animeFile = res.Item2;
-                        Tuple<ExecutionResult, Anime, ImmutableArray<byte>> t = Deserialize(animeFile);
-                        if (t.Item1.Success)
+                        AnimeFile animeFile = res.Value;
+                        ExecutionResult<Anime> t = Deserialize(animeFile);
+                        if (t.Success)
                         {
-                            Anime anime = t.Item2;
+                            Anime anime = t.Value;
                             list.Add(anime);
-
-                            if (t.Item3.Length > 0)
-                                anime.Image = new AnimeImage(anime.ImageFilePath, t.Item3);
                         }
                     }
                     else
@@ -144,10 +145,10 @@ namespace Finalspace.Onigiri.Persistence
                 int percentage = (int)((c / (double)totalCount) * 100.0);
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = anime.MainTitle, Percentage = percentage });
 
-                (ExecutionResult res, AnimeFile file) res = Serialize(anime, anime.ImageFilePath);
-                if (res.res.Success)
+                ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);
+                if (res.Success)
                 {
-                    AnimeFile animeFile = res.file;
+                    AnimeFile animeFile = res.Value;
                     string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
                     animeFile.SaveToFile(persistentAnimeFilePath);
                 }
@@ -163,10 +164,10 @@ namespace Finalspace.Onigiri.Persistence
         {
             if (anime == null)
                 throw new ArgumentNullException(nameof(anime));
-            (ExecutionResult res, AnimeFile file) res = Serialize(anime, anime.ImageFilePath);
-            if (res.res.Success)
+            ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);
+            if (res.Success)
             {
-                AnimeFile animeFile = res.file;
+                AnimeFile animeFile = res.Value;
                 string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
                 animeFile.SaveToFile(persistentAnimeFilePath);
                 return true;

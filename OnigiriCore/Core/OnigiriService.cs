@@ -17,6 +17,7 @@ using System.Linq;
 using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Security;
 using System.Collections.Immutable;
+using Finalspace.Onigiri.Types;
 
 namespace Finalspace.Onigiri.Core
 {
@@ -324,7 +325,8 @@ namespace Finalspace.Onigiri.Core
             ".mpeg",
             ".mp4"
         };
-        public IEnumerable<string> FindMediaFileNames(DirectoryInfo dir)
+        
+        private static IEnumerable<string> FindMediaFileNames(DirectoryInfo dir)
         {
             FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
             foreach (FileInfo file in files)

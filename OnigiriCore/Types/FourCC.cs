@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Finalspace.Onigiri.Utils
+namespace Finalspace.Onigiri.Types
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
@@ -25,7 +21,7 @@ namespace Finalspace.Onigiri.Utils
             char[] c = str?.ToCharArray();
             if (c.Length != 4)
                 throw new FormatException($"The format of the FourCC string '{str}' is invalid!");
-            uint value = (uint)((c[3] << 24) | (c[2] << 16) | (c[1] << 8) | c[0]);
+            uint value = (uint)(c[3] << 24 | c[2] << 16 | c[1] << 8 | c[0]);
             return new FourCC(value);
         }
 
@@ -36,10 +32,10 @@ namespace Finalspace.Onigiri.Utils
             else
             {
                 char[] c = new char[4];
-                c[0] = (char)((Value >> 0) & 0xFF);
-                c[1] = (char)((Value >> 8) & 0xFF);
-                c[2] = (char)((Value >> 16) & 0xFF);
-                c[3] = (char)((Value >> 24) & 0xFF);
+                c[0] = (char)(Value >> 0 & 0xFF);
+                c[1] = (char)(Value >> 8 & 0xFF);
+                c[2] = (char)(Value >> 16 & 0xFF);
+                c[3] = (char)(Value >> 24 & 0xFF);
                 string result = new string(c);
                 return result;
             }

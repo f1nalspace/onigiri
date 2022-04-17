@@ -1,4 +1,5 @@
-﻿using Finalspace.Onigiri.Utils;
+﻿using Finalspace.Onigiri.Types;
+using Finalspace.Onigiri.Utils;
 using log4net;
 using System;
 using System.IO;

@@ -10,9 +10,6 @@ using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using DevExpress.Mvvm;
-using System.ComponentModel;
-using System.Windows.Data;
-using Finalspace.Onigiri.Helper;
 
 namespace Finalspace.Onigiri.Models
 {

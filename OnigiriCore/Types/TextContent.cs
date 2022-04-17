@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Finalspace.Onigiri.Utils
+namespace Finalspace.Onigiri.Types
 {
     public class TextContent
     {

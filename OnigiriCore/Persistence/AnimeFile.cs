@@ -1,5 +1,5 @@
 ﻿using Finalspace.Onigiri.Extensions;
-using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Types;
 using log4net;
 using System;
 using System.Collections.Immutable;
@@ -84,7 +84,7 @@ namespace Finalspace.Onigiri.Persistence
             return new ExecutionResult();
         }
 
-        public static Tuple<ExecutionResult, AnimeFile> LoadFromStream(Stream stream, string streamName)
+        public static ExecutionResult<AnimeFile> LoadFromStream(Stream stream, string streamName)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -117,13 +117,13 @@ namespace Finalspace.Onigiri.Persistence
             {
                 Exception failed = new Exception($"Failed to load anime database from stream '{stream}'!", e);
                 log.Error(failed.Message, failed);
-                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(failed), null);
+                return new ExecutionResult<AnimeFile>(failed);
 
             }
-            return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(), animeFile);
+            return new ExecutionResult<AnimeFile>(animeFile);
         }
 
-        public static Tuple<ExecutionResult, AnimeFile> LoadFromFile(string filePath)
+        public static ExecutionResult<AnimeFile> LoadFromFile(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentNullException(nameof(filePath));
@@ -134,19 +134,19 @@ namespace Finalspace.Onigiri.Persistence
                     throw new FileNotFoundException($"File '{filePath}' was not found", filePath);
                 using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    Tuple<ExecutionResult, AnimeFile> res = LoadFromStream(stream, filePath);
-                    if (!res.Item1.Success)
-                        throw res.Item1.Error;
-                    animeFile = res.Item2;
+                    ExecutionResult<AnimeFile> res = LoadFromStream(stream, filePath);
+                    if (!res.Success)
+                        throw res.Error;
+                    animeFile = res.Value;
                 }
             }
             catch (Exception e)
             {
                 Exception failed = new Exception($"Failed to load anime database file '{filePath}'!", e);
                 log.Error(failed.Message, e);
-                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(failed), null);
+                return new ExecutionResult<AnimeFile>(failed);
             }
-            return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(), animeFile);
+            return new ExecutionResult<AnimeFile>(animeFile);
         }
     }
 }
