@@ -16,6 +16,7 @@ using Finalspace.Onigiri.Events;
 using System.Linq;
 using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Security;
+using System.Collections.Immutable;
 
 namespace Finalspace.Onigiri.Core
 {
@@ -52,7 +53,7 @@ namespace Finalspace.Onigiri.Core
             _animeTitlesDumpRawFilePath = Path.Combine(_appSettingsPath, "animetitles.xml.gz");
             _animeTitlesDumpXMLFilePath = Path.Combine(_appSettingsPath, "animetitles.xml");
             Config = new Config();
-            Cache = new FolderAnimeFilesCache(Config.MaxThreadCount, _persistentPath);
+            Cache = new FolderAnimeFilesCache(Config, _persistentPath);
             Titles = new Titles();
             Animes = new Animes();
             Issues = new Issues();
@@ -194,10 +195,10 @@ namespace Finalspace.Onigiri.Core
             Debug.Assert(anime != null);
 
             // Download picture
-            string pictureFile = FindImage(dir);
+            string imageFilePath = FindImage(dir);
             if (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture))
             {
-                bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(pictureFile);
+                bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
                 if (updatePicture)
                 {
                     if (string.IsNullOrEmpty(anime.Picture))
@@ -207,23 +208,38 @@ namespace Finalspace.Onigiri.Core
                     }
                     else
                     {
-                        pictureFile = Path.Combine(dir.FullName, anime.Picture);
-                        HttpApi.DownloadPicture(anime.Picture, pictureFile);
-                        if (!File.Exists(pictureFile))
+                        imageFilePath = Path.Combine(dir.FullName, anime.Picture);
+                        HttpApi.DownloadPicture(anime.Picture, imageFilePath);
+                        if (!File.Exists(imageFilePath))
                         {
-                            log.Warn($"Failed downloading picture '{anime.Picture}' to '{pictureFile}' for '{anime}'!");
+                            log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
                             Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", dir.FullName);
+                        }
+                        else
+                        {
+                            // TODO(tspaete): More robust image file read
+                            byte[] imageData = File.ReadAllBytes(imageFilePath);
+                            if (imageData != null && imageData.Length > 0)
+                            {
+                                anime.Image = new AnimeImage(imageFilePath, imageData.ToImmutableArray());
+                                anime.ImageFilePath = imageFilePath;
+                            }
+                            else
+                            {
+                                log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
+                                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", dir.FullName);
+                            }
                         }
                     }
                 }
                 else
-                    log.Debug($"Picture '{pictureFile}' for '{anime}' already found.");
+                    log.Debug($"Picture '{imageFilePath}' for '{anime}' already found.");
             }
 
             if (flags.HasFlag(UpdateFlags.WriteCache))
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Write to persistent cache: {anime.MainTitle}" });
-                Cache.Serialize(anime, pictureFile);
+                Cache.Save(anime);
             }
         }
 
@@ -425,13 +441,13 @@ namespace Finalspace.Onigiri.Core
             using (IImpersonationContext imp = _activeIdentity.Impersonate())
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load persistent cache", Subject = "", Percentage = -1 });
-                Cache.Load(Config, statusChanged);
+                ImmutableArray<Anime> loadedAnimes = Cache.Load(statusChanged);
 
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Update list", Subject = "", Percentage = -1 });
                 lock (_animesLock)
                 {
                     Animes.Clear();
-                    IOrderedEnumerable<Anime> sorted = Cache.Animes.OrderBy(a => a.FoundPath);
+                    IOrderedEnumerable<Anime> sorted = loadedAnimes.OrderBy(a => a.FoundPath);
                     Animes.Items.AddRange(sorted);
                     Animes.RefreshGroups();
                 }

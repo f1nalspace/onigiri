@@ -21,24 +21,16 @@ namespace Finalspace.Onigiri.Persistence
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly Config _config;
         private readonly string _path;
-        private readonly ConcurrentDictionary<ulong, Anime> _aidToAnimeMap;
 
-        public IEnumerable<Anime> Animes
+        public FolderAnimeFilesCache(Config config, string path)
         {
-            get
-            {
-                return _aidToAnimeMap.Values;
-            }
-        }
-
-        public FolderAnimeFilesCache(int concurrencyLevel, string path)
-        {
+            _config = config;
             _path = path;
-            _aidToAnimeMap = new ConcurrentDictionary<ulong, Anime>(concurrencyLevel, 4096);
         }
 
-        public Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
+        private static Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
         {
             if (animeFile == null)
                 throw new ArgumentNullException(nameof(animeFile));
@@ -68,10 +60,10 @@ namespace Finalspace.Onigiri.Persistence
             return new Tuple<ExecutionResult, Anime, ImmutableArray<byte>>(new ExecutionResult(), anime, pictureData);
         }
 
-        public Tuple<ExecutionResult, AnimeFile> Serialize(Anime anime, string pictureFilePath)
+        private static (ExecutionResult res, AnimeFile file) Serialize(Anime anime, string pictureFilePath)
         {
             if (anime.Aid == 0)
-                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!")), null);
+                return (new ExecutionResult(new FormatException($"Anime '{anime}' has in valid aid!")), null);
             byte[] detailsData = null;
             try
             {
@@ -87,7 +79,7 @@ namespace Finalspace.Onigiri.Persistence
             catch (Exception e)
             {
                 log.Error($"Failed to serialize anime '{anime}' to xml!", e);
-                return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(e), null);
+                return (new ExecutionResult(e), null);
             }
 
             byte[] pictureData = null;
@@ -96,15 +88,12 @@ namespace Finalspace.Onigiri.Persistence
 
             AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
 
-            string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
-            animeFile.SaveToFile(persistentAnimeFilePath);
-
-            return new Tuple<ExecutionResult, AnimeFile>(new ExecutionResult(), animeFile);
+            return (new ExecutionResult(), animeFile);
         }
 
-        public void Load(Config config, StatusChangedEventHandler statusChanged)
+        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
         {
-            _aidToAnimeMap.Clear();
+            ConcurrentBag<Anime> list = new ConcurrentBag<Anime>();
 
             DirectoryInfo rootDir = new DirectoryInfo(_path);
             if (rootDir.Exists)
@@ -112,7 +101,7 @@ namespace Finalspace.Onigiri.Persistence
                 int count = 0;
                 FileInfo[] persistentFiles = rootDir.GetFiles("p*.onigiri");
                 int totalFileCount = persistentFiles.Length;
-                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = config.MaxThreadCount };
+                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _config.MaxThreadCount };
                 Parallel.ForEach(persistentFiles, poptions, (persistentFile) =>
                 {
                     int c = Interlocked.Increment(ref count);
@@ -127,10 +116,10 @@ namespace Finalspace.Onigiri.Persistence
                         if (t.Item1.Success)
                         {
                             Anime anime = t.Item2;
-                            _aidToAnimeMap.TryAdd(animeFile.Aid, anime);
+                            list.Add(anime);
 
                             if (t.Item3.Length > 0)
-                                anime.Image = new AnimeImage(100, 100, anime.ImageFilePath, t.Item3);
+                                anime.Image = new AnimeImage(anime.ImageFilePath, t.Item3);
                         }
                     }
                     else
@@ -138,6 +127,54 @@ namespace Finalspace.Onigiri.Persistence
                         // TODO(tspaete): Log issue!
                     }
                 });
+            }
+
+            ImmutableArray<Anime> result = list.ToImmutableArray();
+            return result;
+        }
+
+        public bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
+        {
+            int totalCount = animes.Length;
+            int count = 0;
+            ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _config.MaxThreadCount };
+            Parallel.ForEach(animes, poptions, (anime) =>
+            {
+                int c = Interlocked.Increment(ref count);
+                int percentage = (int)((c / (double)totalCount) * 100.0);
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = anime.MainTitle, Percentage = percentage });
+
+                (ExecutionResult res, AnimeFile file) res = Serialize(anime, anime.ImageFilePath);
+                if (res.res.Success)
+                {
+                    AnimeFile animeFile = res.file;
+                    string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
+                    animeFile.SaveToFile(persistentAnimeFilePath);
+                }
+                else
+                {
+                    // TODO(tspaete): Log issue!
+                }
+            });
+            return true;
+        }
+
+        public bool Save(Anime anime)
+        {
+            if (anime == null)
+                throw new ArgumentNullException(nameof(anime));
+            (ExecutionResult res, AnimeFile file) res = Serialize(anime, anime.ImageFilePath);
+            if (res.res.Success)
+            {
+                AnimeFile animeFile = res.file;
+                string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
+                animeFile.SaveToFile(persistentAnimeFilePath);
+                return true;
+            }
+            else
+            {
+                // TODO(tspaete): Log issue!
+                return false;
             }
         }
     }

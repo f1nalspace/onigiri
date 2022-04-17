@@ -8,11 +8,8 @@ namespace Finalspace.Onigiri.Persistence
 {
     public interface IAnimeCache
     {
-        IEnumerable<Anime> Animes { get; }
-
-        void Load(Config config, StatusChangedEventHandler statusChanged);
-
-        Tuple<ExecutionResult, AnimeFile> Serialize(Anime anime, string pictureFilePath);
-        Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile);
+        ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged);
+        bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged);
+        bool Save(Anime anime);
     }
 }

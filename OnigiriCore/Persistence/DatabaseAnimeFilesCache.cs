@@ -8,19 +8,22 @@ namespace Finalspace.Onigiri.Persistence
 {
     public class DatabaseAnimeFilesCache : IAnimeCache
     {
-        public IEnumerable<Anime> Animes => throw new NotImplementedException();
-
-        public Tuple<ExecutionResult, Anime, ImmutableArray<byte>> Deserialize(AnimeFile animeFile)
+        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
         {
             throw new NotImplementedException();
         }
 
-        public Tuple<ExecutionResult, AnimeFile> Serialize(Anime anime, string pictureFilePath)
+        public void Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
         {
             throw new NotImplementedException();
         }
 
-        public void Load(Config config, StatusChangedEventHandler statusChanged)
+        public bool Save(Anime anime)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IAnimeCache.Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
         {
             throw new NotImplementedException();
         }
