@@ -2,7 +2,7 @@
 using Finalspace.Onigiri.Models;
 using System.Collections.Immutable;
 
-namespace Finalspace.Onigiri.Persistence
+namespace Finalspace.Onigiri.Storage
 {
     public interface IAnimeCache
     {

@@ -11,13 +11,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
-using Finalspace.Onigiri.Persistence;
 using Finalspace.Onigiri.Events;
 using System.Linq;
 using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Security;
 using System.Collections.Immutable;
 using Finalspace.Onigiri.Types;
+using Finalspace.Onigiri.Storage;
 
 namespace Finalspace.Onigiri.Core
 {

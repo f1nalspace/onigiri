@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Finalspace.Onigiri.Persistence
+namespace Finalspace.Onigiri.Storage
 {
     public class DatabaseAnimeFilesCache : IAnimeCache
     {

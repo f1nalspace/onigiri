@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Finalspace.Onigiri.Persistence
+namespace Finalspace.Onigiri.Storage
 {
     public class FolderAnimeFilesCache : IAnimeCache
     {
@@ -109,7 +109,7 @@ namespace Finalspace.Onigiri.Persistence
                 Parallel.ForEach(persistentFiles, poptions, (persistentFile) =>
                 {
                     int c = Interlocked.Increment(ref count);
-                    int percentage = (int)((c / (double)totalFileCount) * 100.0);
+                    int percentage = (int)(c / (double)totalFileCount * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = persistentFile.Name, Percentage = percentage });
 
                     ExecutionResult<AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
@@ -142,7 +142,7 @@ namespace Finalspace.Onigiri.Persistence
             Parallel.ForEach(animes, poptions, (anime) =>
             {
                 int c = Interlocked.Increment(ref count);
-                int percentage = (int)((c / (double)totalCount) * 100.0);
+                int percentage = (int)(c / (double)totalCount * 100.0);
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = anime.MainTitle, Percentage = percentage });
 
                 ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);

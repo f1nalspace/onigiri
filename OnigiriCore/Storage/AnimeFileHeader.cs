@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Finalspace.Onigiri.Persistence
+namespace Finalspace.Onigiri.Storage
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 0)]

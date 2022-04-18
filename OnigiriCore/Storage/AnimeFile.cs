@@ -12,7 +12,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Finalspace.Onigiri.Persistence
+namespace Finalspace.Onigiri.Storage
 {
     public class AnimeFile
     {

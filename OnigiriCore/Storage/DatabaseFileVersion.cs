@@ -1,4 +1,4 @@
-﻿namespace Finalspace.Onigiri.Persistence
+﻿namespace Finalspace.Onigiri.Storage
 {
     enum DatabaseFileVersion : uint
     {
