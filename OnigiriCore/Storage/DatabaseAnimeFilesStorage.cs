@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Xml.Serialization;
@@ -42,6 +43,8 @@ namespace Finalspace.Onigiri.Storage
             public uint Reserved;
 
             public ulong TableOffset;
+
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DatabaseFileHeader));
         }
 
         [Serializable]
@@ -53,6 +56,8 @@ namespace Finalspace.Onigiri.Storage
             public ulong Size; // The compressed data size
             public FourCC Type;
             public FourCC Format;
+
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DatabaseFileTableEntry));
         }
 
         [Serializable]
@@ -69,6 +74,8 @@ namespace Finalspace.Onigiri.Storage
             public DateTime Date; // Stored in UTC
             public ulong UmcompressedSize; // The uncompressed data size
             // ... the compressed byte data
+
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DatabaseFileEntryHeader));
         }
 
         private static readonly FourCC DetailsType = FourCC.FromString("DTLS");
@@ -87,8 +94,77 @@ namespace Finalspace.Onigiri.Storage
             _filePath = filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TestHeader(DatabaseFileHeader header, string filePath, long fileLen)
+        {
+            if (header.Magic != DatabaseFileHeader.MagicKey ||
+                header.EntryCount == uint.MaxValue ||
+                header.AnimeCount == uint.MaxValue ||
+                header.TableOffset == ulong.MaxValue)
+                throw new FormatException($"Invalid header in database file '{filePath}'!");
+
+            if (header.Version == 0 || header.Version == uint.MaxValue || header.Version > (uint)DatabaseFileVersion.Latest)
+                throw new FormatException($"Header version of '{header.Version}' is not supported in database file '{filePath}'!");
+
+            long lastTableOffset = (long)header.TableOffset + header.EntryCount * DatabaseFileTableEntry.RecordSize;
+            if (header.TableOffset == 0 || (long)header.TableOffset >= fileLen || lastTableOffset > fileLen)
+                throw new FormatException($"Invalid table offset '{header.TableOffset}' in database file '{filePath}'!");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TestEntry(DatabaseFileTableEntry entry, int entryIndex, long fileLen)
+        {
+            if (entry.Aid == 0 || entry.Aid >= uint.MaxValue)
+                throw new FormatException($"Invalid aid of '{entry.Aid}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+            if (entry.Type == FourCC.Empty)
+                throw new FormatException($"Invalid type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+            if (!(entry.Type == DetailsType || entry.Type == PictureType))
+                throw new FormatException($"Unsupported type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+            if (entry.Format == FourCC.Empty)
+                throw new FormatException($"Invalid format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+            if (!(entry.Format == BinaryFormatType || entry.Format == XMLFormatType))
+                throw new FormatException($"Unsupported format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+            if (entry.Size == 0 || entry.Size >= uint.MaxValue)
+                throw new FormatException($"Invalid size of '{entry.Size}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+            if (entry.Offset == 0 || entry.Offset >= uint.MaxValue || entry.Offset > ((ulong)fileLen - entry.Size))
+                throw new FormatException($"Invalid offset of '{entry.Offset}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TestFileEntry(DatabaseFileTableEntry entry, int entryIndex, DatabaseFileEntryHeader dataHeader)
+        {
+            if (dataHeader.Magic != DatabaseFileEntryHeader.MagicKey)
+                throw new FormatException($"Invalid magic for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+            if (dataHeader.Compression != FourCC.Empty && (dataHeader.UmcompressedSize == 0 || dataHeader.UmcompressedSize == ulong.MaxValue))
+                throw new FormatException($"Invalid uncompression size for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+        }
+
         public bool Save(Anime anime, StatusChangedEventHandler statusChanged)
         {
+            if (!File.Exists(_filePath))
+            {
+                Anime[] animes = new[] { anime };
+                bool result = Save(animes.ToImmutableArray(), statusChanged);
+                return result;
+            }
+
+            FileInfo fileInfo = new FileInfo(_filePath);
+            long fileLen = fileInfo.Length;
+            if (fileLen < DatabaseFileHeader.RecordSize)
+                throw new FormatException($"Anime database file '{_filePath}' is too small!");
+
+            using FileStream fileStream = new FileStream(_filePath, FileMode.Append, FileAccess.ReadWrite);
+
+            DatabaseFileHeader header = fileStream.ReadStruct<DatabaseFileHeader>();
+
+            TestHeader(header, _filePath, fileLen);
+
+            fileStream.Seek((long)header.TableOffset, SeekOrigin.Begin);
+
             // - Load database file
             // - Load table entries into array
             // - Jump to table offset
@@ -106,7 +182,7 @@ namespace Finalspace.Onigiri.Storage
             // Write empty header first, so we can fill it out later
             fileStream.WriteStruct(new DatabaseFileHeader());
 
-            ulong offset = (ulong)Marshal.SizeOf(typeof(DatabaseFileHeader));
+            ulong offset = DatabaseFileHeader.RecordSize;
 
             uint animeCount = (uint)animes.Length;
 
@@ -159,7 +235,7 @@ namespace Finalspace.Onigiri.Storage
                     };
                     entries.Add(entry);
 
-                    offset += (ulong)Marshal.SizeOf(typeof(DatabaseFileEntryHeader));
+                    offset += DatabaseFileEntryHeader.RecordSize;
                     offset += size;
                 }
                 {
@@ -195,7 +271,7 @@ namespace Finalspace.Onigiri.Storage
                         };
                         entries.Add(entry);
 
-                        offset += (ulong)Marshal.SizeOf(typeof(DatabaseFileEntryHeader));
+                        offset += DatabaseFileEntryHeader.RecordSize;
                         offset += size;
                     }
                 }
@@ -235,24 +311,16 @@ namespace Finalspace.Onigiri.Storage
 
             FileInfo fileInfo = new FileInfo(_filePath);
             long fileLen = fileInfo.Length;
+            if (fileLen < DatabaseFileHeader.RecordSize)
+                throw new FormatException($"Anime database file '{_filePath}' is too small!");
 
             Dictionary<ulong, Anime> idToAnimeMap = new Dictionary<ulong, Anime>();
 
             using (FileStream fileStream = new FileStream(_filePath, FileMode.Open, FileAccess.Read))
             {
                 DatabaseFileHeader header = fileStream.ReadStruct<DatabaseFileHeader>();
-                if (header.Magic != DatabaseFileHeader.MagicKey ||
-                    header.EntryCount == uint.MaxValue ||
-                    header.AnimeCount == uint.MaxValue ||
-                    header.TableOffset == ulong.MaxValue)
-                    throw new FormatException($"Invalid header in database file '{_filePath}'!");
 
-                if (header.Version == 0 || header.Version == uint.MaxValue || header.Version > (uint)DatabaseFileVersion.Latest)
-                    throw new FormatException($"Header version of '{header.Version}' is not supported in database file '{_filePath}'!");
-
-                long lastTableOffset = (long)header.TableOffset + header.EntryCount * Marshal.SizeOf(typeof(DatabaseFileTableEntry));
-                if (header.TableOffset == 0 || (long)header.TableOffset >= fileLen || lastTableOffset > fileLen)
-                    throw new FormatException($"Invalid table offset '{header.TableOffset}' in database file '{_filePath}'!");
+                TestHeader(header, _filePath, fileLen);
 
                 fileStream.Seek((long)header.TableOffset, SeekOrigin.Begin);
 
@@ -265,24 +333,7 @@ namespace Finalspace.Onigiri.Storage
                 int entryCount = entries.Length;
                 foreach (DatabaseFileTableEntry entry in entries)
                 {
-                    if (entry.Aid == 0 || entry.Aid >= uint.MaxValue)
-                        throw new FormatException($"Invalid aid of '{entry.Aid}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-
-                    if (entry.Type == FourCC.Empty)
-                        throw new FormatException($"Invalid type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-                    if (!(entry.Type == DetailsType || entry.Type == PictureType))
-                        throw new FormatException($"Unsupported type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-
-                    if (entry.Format == FourCC.Empty)
-                        throw new FormatException($"Invalid format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-                    if (!(entry.Format == BinaryFormatType || entry.Format == XMLFormatType))
-                        throw new FormatException($"Unsupported format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-
-                    if (entry.Size == 0 || entry.Size >= uint.MaxValue)
-                        throw new FormatException($"Invalid size of '{entry.Size}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-
-                    if (entry.Offset == 0 || entry.Offset >= uint.MaxValue || entry.Offset > ((ulong)fileLen - entry.Size))
-                        throw new FormatException($"Invalid offset of '{entry.Offset}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+                    TestEntry(entry, entryIndex, fileLen);
 
                     int c = entryIndex + 1;
                     int percentage = (int)(c / (double)entryCount * 100.0);
@@ -291,14 +342,10 @@ namespace Finalspace.Onigiri.Storage
                     fileStream.Seek((long)entry.Offset, SeekOrigin.Begin);
 
                     DatabaseFileEntryHeader dataHeader = fileStream.ReadStruct<DatabaseFileEntryHeader>();
-                    if (dataHeader.Magic != DatabaseFileEntryHeader.MagicKey)
-                        throw new FormatException($"Invalid magic for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-                    if (dataHeader.Compression != FourCC.Empty && (dataHeader.UmcompressedSize == 0 || dataHeader.UmcompressedSize == ulong.MaxValue))
-                        throw new FormatException($"Invalid uncompression size for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+                    TestFileEntry(entry, entryIndex, dataHeader);
 
                     // TODO(final): Read in blocks of int32?
-                    if (entry.Size > int.MaxValue)
-                        throw new FormatException($"Size of '{entry.Size}' is too large for entry {entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
                     byte[] rawData = new byte[entry.Size];
                     int read = fileStream.Read(rawData, 0, rawData.Length);
                     if (read != (int)entry.Size)
