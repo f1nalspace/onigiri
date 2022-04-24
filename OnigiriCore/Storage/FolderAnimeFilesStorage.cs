@@ -222,7 +222,7 @@ namespace Finalspace.Onigiri.Storage
             return new ExecutionResult<AnimeFile>(animeFile);
         }
 
-        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
+        public AnimeStorageData Load(StatusChangedEventHandler statusChanged)
         {
             ConcurrentBag<Anime> list = new ConcurrentBag<Anime>();
 
@@ -257,23 +257,24 @@ namespace Finalspace.Onigiri.Storage
                 });
             }
 
-            ImmutableArray<Anime> result = list.ToImmutableArray();
+            AnimeStorageData result = new AnimeStorageData(list.ToImmutableArray(), ImmutableArray<Title>.Empty);
+
             return result;
         }
 
-        public bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
+        public bool Save(AnimeStorageData data, StatusChangedEventHandler statusChanged)
         {
-            if (animes == null)
-                throw new ArgumentNullException(nameof(animes));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
 
             DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
             if (!rootDir.Exists)
                 return false;
 
-            int totalCount = animes.Length;
+            int totalCount = data.Animes.Length;
             int count = 0;
             ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
-            Parallel.ForEach(animes, poptions, (anime) =>
+            Parallel.ForEach(data.Animes, poptions, (anime) =>
             {
                 int c = Interlocked.Increment(ref count);
                 int percentage = (int)(c / (double)totalCount * 100.0);

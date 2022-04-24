@@ -484,17 +484,16 @@ namespace Finalspace.Onigiri
 
                 watch = Stopwatch.StartNew();
                 log.Info($"Load animes from '{storage}' animes");
-                ImmutableArray<Anime> loadedAnimes = storage.Load(statusChanged);
+                AnimeStorageData data = storage.Load(statusChanged);
                 watch.Stop();
                 log.Debug($"Load animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
 
                 watch.Restart();
-                log.Debug($"Refresh {loadedAnimes.Length} animes");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{loadedAnimes.Length}' animes", Subject = "", Percentage = -1 });
+                log.Debug($"Refresh {data.Animes.Length} animes");
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{data.Animes.Length}' animes", Subject = "", Percentage = -1 });
 
-                Anime[] sorted = loadedAnimes.OrderBy(a => a.FoundPath).ToArray();
-
-                Animes.Set(sorted);
+                Anime[] sortedAnimes = data.Animes.OrderBy(a => a.FoundPath).ToArray();
+                Animes.Set(sortedAnimes);
 
                 watch.Stop();
                 log.Debug($"Refresh animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
@@ -518,9 +517,13 @@ namespace Finalspace.Onigiri
 
                 ImmutableArray<Anime> animes = Animes.Items.ToImmutableArray();
 
+                ImmutableArray<Title> titles = Titles.Items.ToImmutableArray();
+
+                AnimeStorageData data = new AnimeStorageData(animes, titles);
+
                 Stopwatch watch = Stopwatch.StartNew();
                 log.Info($"Save '{animes}' animes to storage '{storage}'");
-                storage.Save(animes, statusChanged);
+                storage.Save(data, statusChanged);
                 watch.Stop();
                 log.Info($"Save '{animes}' animes to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
             }

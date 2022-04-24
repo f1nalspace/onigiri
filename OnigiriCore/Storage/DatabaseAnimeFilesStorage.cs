@@ -7,14 +7,11 @@ using log4net;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Storage
 {
@@ -37,9 +34,9 @@ namespace Finalspace.Onigiri.Storage
 
             public uint Magic;
             public uint Version;
-            public uint IsReadonly;
             public uint EntryCount;
-            public uint AnimeCount;
+            public uint AnimeCount; // Just for validation
+            public uint TitleCount; // Just for validation
             public uint Reserved;
 
             public ulong TableOffset;
@@ -49,40 +46,58 @@ namespace Finalspace.Onigiri.Storage
 
         [Serializable]
         [StructLayout(LayoutKind.Sequential, Pack = 0)]
-        struct DatabaseFileTableEntry
+        struct TitleIndex
         {
-            public ulong Aid;
-            public ulong Offset; // The offset to the DatabaseFileEntryHeader
-            public ulong Size; // The compressed data size
-            public FourCC Type;
-            public FourCC Format;
+            public uint LanguageId;
+            public uint TypeId;
+            public uint TextId;
+            public uint Reserved;
 
-            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DatabaseFileTableEntry));
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(TitleIndex));
         }
 
         [Serializable]
         [StructLayout(LayoutKind.Sequential, Pack = 0)]
-        struct DatabaseFileEntryHeader
+        struct TableEntry
+        {
+            public ulong Aid; // The anime id
+            public ulong Offset; // The offset to the DatabaseFileEntryHeader
+            public ulong Size; // The compressed data size
+            public FourCC Type; // Type as FourCC
+            public FourCC Format; // Format as FourCC
+
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(TableEntry));
+        }
+
+        [Serializable]
+        [StructLayout(LayoutKind.Sequential, Pack = 0)]
+        struct DataEntryHeader
         {
             public static uint MagicKey = 1440374961; // CRC32 hash from DatabaseFileEntryHeader
 
             public uint Magic; // The magic key for the file entry header
-            public uint CRC32; // CRC32 hash from uncompressed data
+            public uint Hash; // Hash from uncompressed data
+            public uint ID; // The id
             public FourCC Compression; // The compression format
-            public uint Reserved;
 
             public DateTime Date; // Stored in UTC
             public ulong UmcompressedSize; // The uncompressed data size
+
             // ... the compressed byte data
 
-            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DatabaseFileEntryHeader));
+            public static readonly uint RecordSize = (uint)Marshal.SizeOf(typeof(DataEntryHeader));
         }
 
-        private static readonly FourCC DetailsType = FourCC.FromString("DTLS");
-        private static readonly FourCC PictureType = FourCC.FromString("PICT");
+        private static readonly FourCC DetailsEntryType = FourCC.FromString("DTLS");
+        private static readonly FourCC PictureEntryType = FourCC.FromString("PICT");
+        private static readonly FourCC TitleEntryType = FourCC.FromString("TITL");
+        private static readonly FourCC StringEntryType = FourCC.FromString("STR_");
 
+        private static readonly FourCC TextFormatType = FourCC.FromString("TEXT");
         private static readonly FourCC XMLFormatType = FourCC.FromString("XML_");
         private static readonly FourCC BinaryFormatType = FourCC.FromString("BINY");
+        private static readonly FourCC LanguageFormatKind = FourCC.FromString("LANG");
+        private static readonly FourCC TitleTypeFormatKind = FourCC.FromString("TTYP");
 
         private static readonly FourCC DeflateCompressionType = FourCC.FromString("DEFL");
         private static readonly FourCC GZipCompressionType = FourCC.FromString("GZIP");
@@ -100,31 +115,32 @@ namespace Finalspace.Onigiri.Storage
             if (header.Magic != DatabaseFileHeader.MagicKey ||
                 header.EntryCount == uint.MaxValue ||
                 header.AnimeCount == uint.MaxValue ||
+                header.TitleCount == uint.MaxValue ||
                 header.TableOffset == ulong.MaxValue)
                 throw new FormatException($"Invalid header in database file '{filePath}'!");
 
             if (header.Version == 0 || header.Version == uint.MaxValue || header.Version > (uint)DatabaseFileVersion.Latest)
                 throw new FormatException($"Header version of '{header.Version}' is not supported in database file '{filePath}'!");
 
-            long lastTableOffset = (long)header.TableOffset + header.EntryCount * DatabaseFileTableEntry.RecordSize;
+            long lastTableOffset = (long)header.TableOffset + header.EntryCount * TableEntry.RecordSize;
             if (header.TableOffset == 0 || (long)header.TableOffset >= fileLen || lastTableOffset > fileLen)
                 throw new FormatException($"Invalid table offset '{header.TableOffset}' in database file '{filePath}'!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void TestEntry(DatabaseFileTableEntry entry, int entryIndex, long fileLen)
+        private static void TestEntry(TableEntry entry, int entryIndex, long fileLen)
         {
             if (entry.Aid == 0 || entry.Aid >= uint.MaxValue)
                 throw new FormatException($"Invalid aid of '{entry.Aid}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
 
             if (entry.Type == FourCC.Empty)
                 throw new FormatException($"Invalid type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-            if (!(entry.Type == DetailsType || entry.Type == PictureType))
+            if (!(entry.Type == DetailsEntryType || entry.Type == PictureEntryType || entry.Type == TitleEntryType))
                 throw new FormatException($"Unsupported type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
 
             if (entry.Format == FourCC.Empty)
                 throw new FormatException($"Invalid format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
-            if (!(entry.Format == BinaryFormatType || entry.Format == XMLFormatType))
+            if (!(entry.Format == BinaryFormatType || entry.Format == XMLFormatType || entry.Format == TextFormatType))
                 throw new FormatException($"Unsupported format of '{entry.Format}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
 
             if (entry.Size == 0 || entry.Size >= uint.MaxValue)
@@ -135,9 +151,9 @@ namespace Finalspace.Onigiri.Storage
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void TestFileEntry(DatabaseFileTableEntry entry, int entryIndex, DatabaseFileEntryHeader dataHeader)
+        private static void TestFileEntry(TableEntry entry, int entryIndex, DataEntryHeader dataHeader)
         {
-            if (dataHeader.Magic != DatabaseFileEntryHeader.MagicKey)
+            if (dataHeader.Magic != DataEntryHeader.MagicKey)
                 throw new FormatException($"Invalid magic for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
             if (dataHeader.Compression != FourCC.Empty && (dataHeader.UmcompressedSize == 0 || dataHeader.UmcompressedSize == ulong.MaxValue))
                 throw new FormatException($"Invalid uncompression size for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
@@ -148,7 +164,10 @@ namespace Finalspace.Onigiri.Storage
             if (!File.Exists(_filePath))
             {
                 Anime[] animes = new[] { anime };
-                bool result = Save(animes.ToImmutableArray(), statusChanged);
+
+                AnimeStorageData data = new AnimeStorageData(animes.ToImmutableArray(), ImmutableArray<Title>.Empty);
+
+                bool result = Save(data, statusChanged);
                 return result;
             }
 
@@ -175,8 +194,11 @@ namespace Finalspace.Onigiri.Storage
             return false;
         }
 
-        public bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
+        public bool Save(AnimeStorageData data, StatusChangedEventHandler statusChanged)
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
             using FileStream fileStream = new FileStream(_filePath, FileMode.Create, FileAccess.Write);
 
             // Write empty header first, so we can fill it out later
@@ -184,14 +206,19 @@ namespace Finalspace.Onigiri.Storage
 
             ulong offset = DatabaseFileHeader.RecordSize;
 
-            uint animeCount = (uint)animes.Length;
+            uint animeCount = (uint)data.Animes.Length;
 
-            List<DatabaseFileTableEntry> entries = new List<DatabaseFileTableEntry>();
+            uint titleCount = (uint)data.Titles.Length;
+
+            List<TableEntry> entries = new List<TableEntry>();
+
+            int animeIdCounter = 0;
+            int imageIdCounter = 0;
 
             // Write details & picture foreach
             int count = 0;
-            int totalCount = animes.Length;
-            foreach (Anime anime in animes)
+            int totalCount = data.Animes.Length;
+            foreach (Anime anime in data.Animes)
             {
                 int c = Interlocked.Increment(ref count);
                 int percentage = (int)(c / (double)totalCount * 100.0);
@@ -212,11 +239,13 @@ namespace Finalspace.Onigiri.Storage
                     uint crc = 0;
                     // TODO(final): Read last update date from anime
                     DateTime date = DateTime.MinValue;
+                    uint id = (uint)++animeIdCounter;
 
-                    DatabaseFileEntryHeader dataHeader = new DatabaseFileEntryHeader()
+                    DataEntryHeader dataHeader = new DataEntryHeader()
                     {
-                        Magic = DatabaseFileEntryHeader.MagicKey,
-                        CRC32 = crc,
+                        Magic = DataEntryHeader.MagicKey,
+                        ID = id,
+                        Hash = crc,
                         Date = date,
                         UmcompressedSize = uncompressedSize,
                         Compression = GZipCompressionType,
@@ -225,17 +254,17 @@ namespace Finalspace.Onigiri.Storage
 
                     compressedStream.CopyTo(fileStream);
 
-                    DatabaseFileTableEntry entry = new DatabaseFileTableEntry()
+                    TableEntry entry = new TableEntry()
                     {
                         Aid = anime.Aid,
                         Offset = offset,
                         Size = size,
                         Format = XMLFormatType,
-                        Type = DetailsType,
+                        Type = DetailsEntryType,
                     };
                     entries.Add(entry);
 
-                    offset += DatabaseFileEntryHeader.RecordSize;
+                    offset += DataEntryHeader.RecordSize;
                     offset += size;
                 }
                 {
@@ -249,10 +278,13 @@ namespace Finalspace.Onigiri.Storage
 
                         ulong size = (ulong)image.Data.Length;
 
-                        DatabaseFileEntryHeader dataHeader = new DatabaseFileEntryHeader()
+                        uint id = (uint)++imageIdCounter;
+
+                        DataEntryHeader dataHeader = new DataEntryHeader()
                         {
-                            Magic = DatabaseFileEntryHeader.MagicKey,
-                            CRC32 = crc,
+                            Magic = DataEntryHeader.MagicKey,
+                            ID = id,
+                            Hash = crc,
                             Date = date,
                             Compression = FourCC.Empty,
                             UmcompressedSize = size,
@@ -261,17 +293,17 @@ namespace Finalspace.Onigiri.Storage
 
                         fileStream.Write(image.Data.AsSpan());
 
-                        DatabaseFileTableEntry entry = new DatabaseFileTableEntry()
+                        TableEntry entry = new TableEntry()
                         {
                             Aid = anime.Aid,
                             Offset = offset,
                             Size = size,
                             Format = BinaryFormatType,
-                            Type = PictureType,
+                            Type = PictureEntryType,
                         };
                         entries.Add(entry);
 
-                        offset += DatabaseFileEntryHeader.RecordSize;
+                        offset += DataEntryHeader.RecordSize;
                         offset += size;
                     }
                 }
@@ -283,7 +315,7 @@ namespace Finalspace.Onigiri.Storage
             if (offset != expectedTableOffset)
                 throw new InvalidOperationException($"Wrong table offset, expect '{expectedTableOffset}' but got '{offset}'!");
             ulong tableOffset = offset;
-            foreach (DatabaseFileTableEntry entry in entries)
+            foreach (TableEntry entry in entries)
                 fileStream.WriteStruct(entry);
             fileStream.Flush();
 
@@ -291,9 +323,9 @@ namespace Finalspace.Onigiri.Storage
             DatabaseFileHeader header = new DatabaseFileHeader()
             {
                 Magic = DatabaseFileHeader.MagicKey,
-                IsReadonly = 0,
                 EntryCount = (uint)entries.Count,
                 AnimeCount = animeCount,
+                TitleCount = titleCount,
                 TableOffset = tableOffset,
                 Version = (uint)DatabaseFileVersion.Latest,
             };
@@ -304,10 +336,10 @@ namespace Finalspace.Onigiri.Storage
             return true;
         }
 
-        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
+        public AnimeStorageData Load(StatusChangedEventHandler statusChanged)
         {
             if (!File.Exists(_filePath))
-                return ImmutableArray<Anime>.Empty;
+                return null;
 
             FileInfo fileInfo = new FileInfo(_filePath);
             long fileLen = fileInfo.Length;
@@ -324,14 +356,14 @@ namespace Finalspace.Onigiri.Storage
 
                 fileStream.Seek((long)header.TableOffset, SeekOrigin.Begin);
 
-                DatabaseFileTableEntry[] entries = new DatabaseFileTableEntry[header.EntryCount];
+                TableEntry[] entries = new TableEntry[header.EntryCount];
                 for (int i = 0; i < entries.Length; i++)
-                    entries[i] = fileStream.ReadStruct<DatabaseFileTableEntry>();
+                    entries[i] = fileStream.ReadStruct<TableEntry>();
 
                 // TODO(final): Parallel load!
                 int entryIndex = 0;
                 int entryCount = entries.Length;
-                foreach (DatabaseFileTableEntry entry in entries)
+                foreach (TableEntry entry in entries)
                 {
                     TestEntry(entry, entryIndex, fileLen);
 
@@ -341,7 +373,7 @@ namespace Finalspace.Onigiri.Storage
 
                     fileStream.Seek((long)entry.Offset, SeekOrigin.Begin);
 
-                    DatabaseFileEntryHeader dataHeader = fileStream.ReadStruct<DatabaseFileEntryHeader>();
+                    DataEntryHeader dataHeader = fileStream.ReadStruct<DataEntryHeader>();
 
                     TestFileEntry(entry, entryIndex, dataHeader);
 
@@ -378,12 +410,12 @@ namespace Finalspace.Onigiri.Storage
                     if (idToAnimeMap.ContainsKey(entry.Aid))
                         anime = idToAnimeMap[entry.Aid];
 
-                    if (entry.Type == DetailsType)
+                    if (entry.Type == DetailsEntryType)
                     {
                         anime = AnimeSerialization.DeserializeAnime(dataStream.ToArray(), entry.Aid);
                         idToAnimeMap[entry.Aid] = anime;
                     }
-                    else if (entry.Type == PictureType)
+                    else if (entry.Type == PictureEntryType)
                     {
                         if (anime != null)
                         {
@@ -400,7 +432,10 @@ namespace Finalspace.Onigiri.Storage
             }
 
             List<Anime> list = new List<Anime>(idToAnimeMap.Values);
-            return list.ToImmutableArray();
+
+            AnimeStorageData result = new AnimeStorageData(list.ToImmutableArray(), ImmutableArray<Title>.Empty);
+
+            return result;
         }
 
         public override string ToString() => _filePath;
