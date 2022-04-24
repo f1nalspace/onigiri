@@ -129,7 +129,7 @@ namespace Finalspace.Onigiri.ViewModels
             CoreService.Startup(new StatusChangedEventHandler(ChangedStatus));
 
             CoreService.ClearIssues();
-            CoreService.RefreshAnimes(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
+            CoreService.Load(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
             LoadingPercentage = -1;
 
             LoadingHeader = "Update listview...";
@@ -233,9 +233,9 @@ namespace Finalspace.Onigiri.ViewModels
 
             CoreService.ClearIssues();
 
-            CoreService.UpdateAnimes(_currentStorage, updateFlags, new StatusChangedEventHandler(ChangedStatus));
+            CoreService.UpdateSources(updateFlags, _currentStorage, new StatusChangedEventHandler(ChangedStatus));
 
-            CoreService.RefreshAnimes(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
+            CoreService.Load(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
 
             LoadingPercentage = -1;
 

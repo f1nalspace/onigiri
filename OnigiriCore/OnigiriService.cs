@@ -32,8 +32,6 @@ namespace Finalspace.Onigiri
         public Animes Animes { get; }
         public Issues Issues { get; }
 
-        private readonly object _updateAnimesLock = new object();
-
         public OnigiriService()
         {
             _userIdentity = new Win32UserIdentity();
@@ -100,14 +98,24 @@ namespace Finalspace.Onigiri
             return path;
         }
 
-        public void Update(IAnimeStorage storage, string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+        /// <summary>
+        /// <para>Updates the details and the picture in the specified <paramref name="sourcePath"/>.</para>
+        /// <para>If <see cref="UpdateFlags.WriteStorage"/> is set, the <see cref="IAnimeStorage"/> is updated as well.</para>
+        /// </summary>
+        /// <param name="sourcePath">The anime source path.</param>
+        /// <param name="flags">The <see cref="UpdateFlags"/>.</param>
+        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
+        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sourcePath"/> or <paramref name="storage"/> argument is <c>null</c> or invalid.</exception>
+        /// <exception cref="ArgumentException">Thrown when the specified <paramref name="flags"/> is <see cref="UpdateFlags.None"/>.</exception>
+        public void UpdateAnime(string sourcePath, UpdateFlags flags, IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
-            if (storage == null)
-                throw new ArgumentNullException(nameof(storage));
             if (string.IsNullOrWhiteSpace(sourcePath))
                 throw new ArgumentNullException(nameof(sourcePath));
             if (flags == UpdateFlags.None)
                 throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+            if (storage == null && flags.HasFlag(UpdateFlags.WriteStorage))
+                throw new ArgumentNullException(nameof(storage));
 
             log.Info($"Update anime from path '{sourcePath}' and storage '{storage}' with flags {flags}");
 
@@ -185,7 +193,7 @@ namespace Finalspace.Onigiri
                 }
             }
 
-            Anime anime = Aquire(sourceDir, statusChanged);
+            Anime anime = LoadAnimeFromSourceDir(sourceDir, statusChanged);
             Debug.Assert(anime != null);
 
             // Download picture
@@ -243,10 +251,14 @@ namespace Finalspace.Onigiri
             Issues.Clear();
         }
 
-        public void UpdateAnimes(IAnimeStorage storage, UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
+        public void UpdateSources(UpdateFlags flags, IAnimeStorage storage, StatusChangedEventHandler statusChanged = null)
         {
-            if (storage == null)
+            if (flags == UpdateFlags.None)
+                throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+            if (storage == null && flags.HasFlag(UpdateFlags.WriteStorage))
                 throw new ArgumentNullException(nameof(storage));
+
+            log.Info($"Update animes with storage '{storage}' and flags {flags}");
 
             // Download anime titles dump raw file from anidb if needed
             if (flags.HasFlag(UpdateFlags.DownloadTitles))
@@ -290,7 +302,7 @@ namespace Finalspace.Onigiri
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                    Update(storage, animeDir.FullName, flags, statusChanged);
+                    UpdateAnime(animeDir.FullName, flags, storage, statusChanged);
                 });
             }
         }
@@ -353,23 +365,33 @@ namespace Finalspace.Onigiri
             return result;
         }
 
-        public Anime Aquire(DirectoryInfo dir, StatusChangedEventHandler statusChanged)
+        /// <summary>
+        /// Loads an <see cref="Anime"/> from the specified source <see cref="DirectoryInfo"/>.
+        /// </summary>
+        /// <param name="sourceDir">The source <see cref="DirectoryInfo"/>.</param>
+        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+        /// <returns>The resulting <see cref="Anime"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="sourceDir"/> is <c>null</c>.</exception>
+        private Anime LoadAnimeFromSourceDir(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
         {
+            if (sourceDir == null)
+                throw new ArgumentNullException(nameof(sourceDir));
+
             Stopwatch watch = new Stopwatch();
 
             // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
-            string cleanTitleName = AnimeUtils.GetCleanAnimeName(dir.Name);
+            string cleanTitleName = AnimeUtils.GetCleanAnimeName(sourceDir.Name);
 
             // Find AID
             ulong aid = 0;
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find aid from: {dir.Name}" });
-            log.Info($"Find title for anime '{cleanTitleName}' in folder '{dir.FullName}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find aid from: {sourceDir.Name}" });
+            log.Info($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
             watch.Restart();
             Title foundTitle = FindTitle(cleanTitleName);
             watch.Stop();
-            log.Debug($"Find title for anime '{cleanTitleName}' in folder '{dir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
+            log.Debug($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
             if (foundTitle == null)
-                log.Warn($"No title found for anime '{cleanTitleName}' in folder '{dir.FullName}'!");
+                log.Warn($"No title found for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'!");
             else
                 aid = foundTitle.Aid;
 
@@ -377,12 +399,12 @@ namespace Finalspace.Onigiri
             Anime result = new Anime()
             {
                 Aid = aid,
-                FoundPath = dir.FullName
+                FoundPath = sourceDir.FullName
             };
 
             // Load anime details into the anime
-            string animeXmlFilePath = Path.Combine(dir.FullName, OnigiriPaths.AnimeXMLDetailsFilename);
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Load details: {dir.Name}" });
+            string animeXmlFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLDetailsFilename);
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Load details: {sourceDir.Name}" });
             if (!File.Exists(animeXmlFilePath))
             {
                 log.Warn($"Not found anime details file '{animeXmlFilePath}', aid='{aid}', title='{cleanTitleName}'!");
@@ -404,23 +426,23 @@ namespace Finalspace.Onigiri
                 if (databaseTitle != null)
                     result.Titles.Add(databaseTitle);
                 else
-                    result.Titles.Add(CreateFallbackTitle(aid, dir.Name));
+                    result.Titles.Add(CreateFallbackTitle(aid, sourceDir.Name));
             }
 
             // Find image
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {dir.Name}" });
-            log.Info($"Find image for anime '{cleanTitleName}' in folder '{dir.FullName}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {sourceDir.Name}" });
+            log.Info($"Find image for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
             watch.Restart();
-            string imageFile = FindImage(dir);
+            string imageFile = FindImage(sourceDir);
             watch.Stop();
-            log.Debug($"Find image in folder '{dir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
+            log.Debug($"Find image in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
             if (!string.IsNullOrEmpty(imageFile))
                 result.ImageFilePath = imageFile;
             else
                 log.Warn($"Not found anime image '{result.Picture}' aid='{aid}', title='{cleanTitleName}'!");
 
             // Find additional data
-            string addonFilePath = Path.Combine(dir.FullName, OnigiriPaths.AnimeXMLAddonFilename);
+            string addonFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLAddonFilename);
             if (File.Exists(addonFilePath))
             {
                 log.Info($"Loading addon data file '{addonFilePath}'");
@@ -431,10 +453,10 @@ namespace Finalspace.Onigiri
             }
 
             // Find media files
-            log.Info($"Find media files from path '{dir.FullName}'");
-            IEnumerable<string> mediaFiles = FindMediaFileNames(dir);
+            log.Info($"Find media files from path '{sourceDir.FullName}'");
+            IEnumerable<string> mediaFiles = FindMediaFileNames(sourceDir);
             result.MediaFiles = new List<string>(mediaFiles);
-            log.Debug($"Found {result.MediaFiles.Count} media files in path '{dir.FullName}'");
+            log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}'");
 
             return result;
         }
@@ -445,7 +467,7 @@ namespace Finalspace.Onigiri
         /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
         /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
         /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
-        public void RefreshAnimes(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
+        public void Load(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
@@ -454,16 +476,50 @@ namespace Finalspace.Onigiri
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load from '{storage}'", Subject = "", Percentage = -1 });
 
-                ImmutableArray<Anime> loadedAnimes = storage.Load(statusChanged);
+                Stopwatch watch;
 
+                watch = Stopwatch.StartNew();
+                log.Info($"Load animes from '{storage}' animes");
+                ImmutableArray<Anime> loadedAnimes = storage.Load(statusChanged);
+                watch.Stop();
+                log.Debug($"Load animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+
+                watch.Restart();
+                log.Debug($"Refresh {loadedAnimes.Length} animes");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{loadedAnimes.Length}' animes", Subject = "", Percentage = -1 });
-                lock (_updateAnimesLock)
-                {
-                    IOrderedEnumerable<Anime> sorted = loadedAnimes.OrderBy(a => a.FoundPath);
-                    Animes.Clear();
-                    Animes.Items.AddRange(sorted);
-                    Animes.RefreshGroups();
-                }
+
+                IOrderedEnumerable<Anime> sorted = loadedAnimes.OrderBy(a => a.FoundPath);
+
+                Animes.Clear();
+                Animes.Items.AddRange(sorted);
+                Animes.RefreshGroups();
+                watch.Stop();
+                log.Debug($"Refresh animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+            }
+        }
+
+        /// <summary>
+        /// Saves the <see cref="Animes"/> to the specified <see cref="IAnimeStorage"/>.
+        /// </summary>
+        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
+        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
+        public void Save(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
+        {
+            if (storage == null)
+                throw new ArgumentNullException(nameof(storage));
+
+            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            {
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
+
+                ImmutableArray<Anime> animes = Animes.Items.ToImmutableArray();
+
+                Stopwatch watch = Stopwatch.StartNew();
+                log.Info($"Save '{animes}' animes to storage '{storage}'");
+                storage.Save(animes, statusChanged);
+                watch.Stop();
+                log.Info($"Save '{animes}' animes to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
             }
         }
 
