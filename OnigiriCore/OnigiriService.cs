@@ -13,34 +13,19 @@ using System.Threading;
 using System.Diagnostics;
 using Finalspace.Onigiri.Events;
 using System.Linq;
-using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Security;
 using System.Collections.Immutable;
 using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Storage;
 
-namespace Finalspace.Onigiri.Core
+namespace Finalspace.Onigiri
 {
     public class OnigiriService
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public const string AnimeXMLDetailsFilename = ".anime.xml";
-        public const string AnimeXMLAddonFilename = ".adata.xml";
-        public const string AnimeAIDFilename = "aid.txt";
-
         private readonly IUserIdentity _userIdentity;
         private readonly IIdentityImpersonator _identityImpersonator;
-
-        private readonly string _appSettingsPath;
-        private readonly string _configFilePath;
-        private readonly string _persistentPath;
-
-        private readonly string _animeTitlesDumpRawFilePath;
-        private readonly string _animeTitlesDumpXMLFilePath;
-
-        public string AppSettingsPath => _appSettingsPath;
-        public string PersistentCachePath => _persistentPath;
 
         public Config Config { get; }
         public Titles Titles { get; }
@@ -53,19 +38,12 @@ namespace Finalspace.Onigiri.Core
         {
             _userIdentity = new Win32UserIdentity();
             _identityImpersonator = new Win32IdentityImpersonator();
-            _appSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Onigiri");
-            if (!Directory.Exists(_appSettingsPath)) 
-                Directory.CreateDirectory(_appSettingsPath);
 
-            // REMOVE(final): Remove persistent path from here!
-            _persistentPath = Path.Combine(_appSettingsPath, "PersistentCache");
-            if (!Directory.Exists(_persistentPath)) 
-                Directory.CreateDirectory(_persistentPath);
+            if (!Directory.Exists(OnigiriPaths.AppSettingsPath)) 
+                Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
 
-            _configFilePath = Path.Combine(_appSettingsPath, "config.xml");
-
-            _animeTitlesDumpRawFilePath = Path.Combine(_appSettingsPath, "animetitles.xml.gz");
-            _animeTitlesDumpXMLFilePath = Path.Combine(_appSettingsPath, "animetitles.xml");
+            if (!Directory.Exists(OnigiriPaths.PersistentPath)) 
+                Directory.CreateDirectory(OnigiriPaths.PersistentPath);
 
             Config = new Config();
             Titles = new Titles();
@@ -122,7 +100,7 @@ namespace Finalspace.Onigiri.Core
             return path;
         }
 
-        public void Update(IAnimeCache storage, string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+        public void Update(IAnimeStorage storage, string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
         {
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
@@ -148,8 +126,8 @@ namespace Finalspace.Onigiri.Core
 
             string folderName = sourceDir.Name;
             string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
-            string animeXmlFilePath = Path.Combine(sourcePath, AnimeXMLDetailsFilename);
-            string animeAidFilePath = Path.Combine(sourcePath, AnimeAIDFilename);
+            string animeXmlFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeXMLDetailsFilename);
+            string animeAidFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeAIDFilename);
 
             ulong aid = 0;
 
@@ -252,7 +230,7 @@ namespace Finalspace.Onigiri.Core
                     log.Debug($"Picture '{imageFilePath}' for '{anime}' already found.");
             }
 
-            if (flags.HasFlag(UpdateFlags.WriteCache))
+            if (flags.HasFlag(UpdateFlags.WriteStorage))
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Write to storage: {anime.MainTitle}" });
 
@@ -265,7 +243,7 @@ namespace Finalspace.Onigiri.Core
             Issues.Clear();
         }
 
-        public void UpdateAnimes(IAnimeCache storage, UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
+        public void UpdateAnimes(IAnimeStorage storage, UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
         {
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
@@ -403,7 +381,7 @@ namespace Finalspace.Onigiri.Core
             };
 
             // Load anime details into the anime
-            string animeXmlFilePath = Path.Combine(dir.FullName, AnimeXMLDetailsFilename);
+            string animeXmlFilePath = Path.Combine(dir.FullName, OnigiriPaths.AnimeXMLDetailsFilename);
             statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Load details: {dir.Name}" });
             if (!File.Exists(animeXmlFilePath))
             {
@@ -442,7 +420,7 @@ namespace Finalspace.Onigiri.Core
                 log.Warn($"Not found anime image '{result.Picture}' aid='{aid}', title='{cleanTitleName}'!");
 
             // Find additional data
-            string addonFilePath = Path.Combine(dir.FullName, AnimeXMLAddonFilename);
+            string addonFilePath = Path.Combine(dir.FullName, OnigiriPaths.AnimeXMLAddonFilename);
             if (File.Exists(addonFilePath))
             {
                 log.Info($"Loading addon data file '{addonFilePath}'");
@@ -462,12 +440,12 @@ namespace Finalspace.Onigiri.Core
         }
 
         /// <summary>
-        /// Loads all <see cref="Animes"/> and <see cref="Issues"/> from the specified <see cref="IAnimeCache"/>.
+        /// Loads all <see cref="Animes"/> and <see cref="Issues"/> from the specified <see cref="IAnimeStorage"/>.
         /// </summary>
-        /// <param name="storage">The <see cref="IAnimeCache"/>.</param>
+        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
         /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
         /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
-        public void RefreshAnimes(IAnimeCache storage, StatusChangedEventHandler statusChanged)
+        public void RefreshAnimes(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
@@ -491,39 +469,42 @@ namespace Finalspace.Onigiri.Core
 
         private void ReadTitles(StatusChangedEventHandler statusChanged, bool overwrite)
         {
+            string xmlFilePath = OnigiriPaths.AnimeTitlesDumpXMLFilePath;
+            string rawFilePath = OnigiriPaths.AnimeTitlesDumpRawFilePath;
+
             // Download anime titles dump raw file from anidb if needed
-            bool updateTitlesRaw = !File.Exists(_animeTitlesDumpRawFilePath);
+            bool updateTitlesRaw = !File.Exists(rawFilePath);
             if (updateTitlesRaw || overwrite)
             {
-                log.Info($"Download anime titles dump to '{_animeTitlesDumpRawFilePath}'");
+                log.Info($"Download anime titles dump to '{rawFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Downloading titles database", Percentage = -1 });
-                HttpApi.DownloadTitlesDump(_animeTitlesDumpRawFilePath);
+                HttpApi.DownloadTitlesDump(rawFilePath);
             }
-            if (!File.Exists(_animeTitlesDumpRawFilePath))
-                log.Warn($"Not found anime titles dump file '{_animeTitlesDumpRawFilePath}'!");
+            if (!File.Exists(rawFilePath))
+                log.Warn($"Not found anime titles dump file '{rawFilePath}'!");
             else
-                log.Debug($"Use already existing anime titles dump file '{_animeTitlesDumpRawFilePath}'");
+                log.Debug($"Use already existing anime titles dump file '{rawFilePath}'");
 
             // Decompress anime dump raw file if needed and save it to disk
-            bool updateTitlesXML = updateTitlesRaw || overwrite || !File.Exists(_animeTitlesDumpXMLFilePath);
-            if (File.Exists(_animeTitlesDumpRawFilePath) && updateTitlesXML)
+            bool updateTitlesXML = updateTitlesRaw || overwrite || !File.Exists(xmlFilePath);
+            if (File.Exists(rawFilePath) && updateTitlesXML)
             {
-                log.Info($"Decompress anime titles dump '{_animeTitlesDumpRawFilePath}' to '{_animeTitlesDumpXMLFilePath}'");
+                log.Info($"Decompress anime titles dump '{rawFilePath}' to '{xmlFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Decompress titles database", Percentage = -1 });
-                FileUtils.DecompressFile(_animeTitlesDumpRawFilePath, _animeTitlesDumpXMLFilePath);
+                FileUtils.DecompressFile(rawFilePath, xmlFilePath);
             }
-            else if (File.Exists(_animeTitlesDumpXMLFilePath))
-                log.Debug($"Use already existing anime titles xml file '{_animeTitlesDumpXMLFilePath}'");
+            else if (File.Exists(xmlFilePath))
+                log.Debug($"Use already existing anime titles xml file '{xmlFilePath}'");
 
             // Read anime titles
-            if (File.Exists(_animeTitlesDumpXMLFilePath))
+            if (File.Exists(xmlFilePath))
             {
-                log.Info($"Parse titles dump xml file '{_animeTitlesDumpXMLFilePath}'");
+                log.Info($"Parse titles dump xml file '{xmlFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Parse titles database", Percentage = -1 });
-                Titles.ReadFromFile(_animeTitlesDumpXMLFilePath);
+                Titles.ReadFromFile(xmlFilePath);
             }
             else
-                log.Warn($"Not found anime titles xml file '{_animeTitlesDumpXMLFilePath}'!");
+                log.Warn($"Not found anime titles xml file '{xmlFilePath}'!");
 
             // Print out anime title statistics
             log.Info($"Found {Titles.Items.Count} anime titles total");
@@ -535,18 +516,20 @@ namespace Finalspace.Onigiri.Core
             log.Info("Started service");
             statusChanged?.Invoke(this, new StatusChangedArgs() { Header = "Startup", Subject = "", Percentage = -1 });
 
+            string configFilePath = OnigiriPaths.ConfigFilePath;
+
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             log.Info($"Use identity: {identity.Name}");
 
             // Read config
-            if (File.Exists(_configFilePath))
+            if (File.Exists(configFilePath))
             {
-                log.Info($"Loading config file '{_configFilePath}'");
+                log.Info($"Loading config file '{configFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Loading config file", Percentage = -1 });
-                Config.LoadFromFile(_configFilePath);
+                Config.LoadFromFile(configFilePath);
             }
             else
-                log.Warn($"Not found config file '{_configFilePath}'!");
+                log.Warn($"Not found config file '{configFilePath}'!");
 
             // Download anime titles dump raw file from anidb if needed
             ReadTitles(statusChanged, false);
@@ -554,8 +537,9 @@ namespace Finalspace.Onigiri.Core
 
         public void SaveConfig()
         {
-            log.Info($"Saving config file '{_configFilePath}'");
-            Config.SaveToFile(_configFilePath);
+            string configFilePath = OnigiriPaths.ConfigFilePath;
+            log.Info($"Saving config file '{configFilePath}'");
+            Config.SaveToFile(configFilePath);
         }
     }
 }

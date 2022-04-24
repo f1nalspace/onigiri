@@ -5,26 +5,23 @@ using Finalspace.Onigiri.Utils;
 using log4net;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Storage
 {
-    public class FolderAnimeFilesCache : IAnimeCache
+    public class FolderAnimeFilesStorage : IAnimeStorage
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private readonly string _persistentPath;
         private readonly int _maxThreadCount;
 
-        public FolderAnimeFilesCache(string persistentPath, int? maxThreadCount = null)
+        public FolderAnimeFilesStorage(string persistentPath, int? maxThreadCount = null)
         {
             if (string.IsNullOrWhiteSpace(persistentPath))
                 throw new ArgumentNullException(nameof(persistentPath));

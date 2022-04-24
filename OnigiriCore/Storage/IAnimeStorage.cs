@@ -3,8 +3,8 @@ using Finalspace.Onigiri.Models;
 using System.Collections.Immutable;
 
 namespace Finalspace.Onigiri.Storage
-{
-    public interface IAnimeCache
+{ 
+    public interface IAnimeStorage
     {
         ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged);
         bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged);

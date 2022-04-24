@@ -1,5 +1,4 @@
-﻿using Finalspace.Onigiri.Core;
-using Finalspace.Onigiri.Enums;
+﻿using Finalspace.Onigiri.Enums;
 using Finalspace.Onigiri.Events;
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Storage;
@@ -63,7 +62,7 @@ namespace Finalspace.Onigiri
             }
         }
 
-        static void ProcessArguments(string[] args, OnigiriService system, IAnimeCache storage)
+        static void ProcessArguments(string[] args, OnigiriService system, IAnimeStorage storage)
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
@@ -162,9 +161,11 @@ namespace Finalspace.Onigiri
 
             OnigiriService system = new OnigiriService();
 
-            FolderAnimeFilesCache storage = new FolderAnimeFilesCache(system.PersistentCachePath, system.Config.MaxThreadCount);
+            string persistentPath = OnigiriPaths.PersistentPath;
 
-            ProcessArguments(args, system, storage);
+            FolderAnimeFilesStorage persistenceStorage = new FolderAnimeFilesStorage(persistentPath, system.Config.MaxThreadCount);
+
+            ProcessArguments(args, system, persistenceStorage);
 
             Console.ReadKey();
         }

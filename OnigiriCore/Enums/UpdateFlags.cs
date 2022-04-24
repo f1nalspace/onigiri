@@ -38,6 +38,6 @@ namespace Finalspace.Onigiri.Enums
         /// <summary>
         /// Rebuild and write the persistent cache.
         /// </summary>
-        WriteCache = 1 << 5,
+        WriteStorage = 1 << 5,
     }
 }

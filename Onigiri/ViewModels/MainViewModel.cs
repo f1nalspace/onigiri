@@ -1,5 +1,4 @@
-﻿using Finalspace.Onigiri.Core;
-using Finalspace.Onigiri.Models;
+﻿using Finalspace.Onigiri.Models;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -35,7 +34,7 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Storage
-        private IAnimeCache _currentStorage = null;
+        private IAnimeStorage _currentStorage = null;
         #endregion
 
         #region Anime list & properties
@@ -224,9 +223,9 @@ namespace Finalspace.Onigiri.ViewModels
 
             UpdateFlags updateFlags;
             if ("Store".Equals(updateType))
-                updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteCache;
+                updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteStorage;
             else if ("Database".Equals(updateType))
-                updateFlags = UpdateFlags.WriteCache;
+                updateFlags = UpdateFlags.WriteStorage;
             else
                 throw new NotSupportedException($"The update type '{updateType}' is not supported");
 
@@ -251,7 +250,7 @@ namespace Finalspace.Onigiri.ViewModels
         #region Action icons
         private void SaveAddonData(Anime anime)
         {
-            string addonFilePath = Path.Combine(anime.FoundPath, OnigiriService.AnimeXMLAddonFilename);
+            string addonFilePath = Path.Combine(anime.FoundPath, OnigiriPaths.AnimeXMLAddonFilename);
             anime.AddonData.SaveToFile(addonFilePath);
         }
         private bool CanAddonDataByChanged(Anime anime)
@@ -567,7 +566,7 @@ namespace Finalspace.Onigiri.ViewModels
             CoreService = new OnigiriService();
 
             // Storages
-            _currentStorage = new FolderAnimeFilesCache(CoreService.PersistentCachePath, CoreService.Config.MaxThreadCount);
+            _currentStorage = new FolderAnimeFilesStorage(OnigiriPaths.PersistentPath, CoreService.Config.MaxThreadCount);
 
             // Collections
             _animes = new List<Anime>(4096);

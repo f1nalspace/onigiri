@@ -1,5 +1,4 @@
 ﻿using DevExpress.Mvvm;
-using Finalspace.Onigiri.Core;
 using Finalspace.Onigiri.Helper;
 using Finalspace.Onigiri.Models;
 using System.Collections.Generic;
@@ -63,7 +62,7 @@ namespace Finalspace.Onigiri.ViewModels
                         Debug.Assert(issue.Path != null);
                         if (!Directory.Exists(issue.Path))
                             throw new DirectoryNotFoundException(issue.Path);
-                        string animeAidFilePath = Path.Combine(issue.Path, OnigiriService.AnimeAIDFilename);
+                        string animeAidFilePath = Path.Combine(issue.Path, OnigiriPaths.AnimeAIDFilename);
                         using (StreamWriter writer = new StreamWriter(animeAidFilePath, false, Encoding.UTF8))
                             writer.Write(title.Aid);
                         issue.IsSolved = true;
