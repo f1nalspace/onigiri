@@ -205,26 +205,27 @@ namespace Finalspace.Onigiri
                         {
                             log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
                             Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", sourceDir.FullName);
-                        }
-                        else
-                        {
-                            // TODO(tspaete): More robust image file read
-                            byte[] imageData = File.ReadAllBytes(imageFilePath);
-                            if (imageData != null && imageData.Length > 0)
-                            {
-                                anime.Image = new AnimeImage(imageFilePath, imageData.ToImmutableArray());
-                                anime.ImageFilePath = imageFilePath;
-                            }
-                            else
-                            {
-                                log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
-                                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", sourceDir.FullName);
-                            }
-                        }
+                        }                       
                     }
                 }
+            }
+
+            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) && 
+                !string.IsNullOrWhiteSpace(imageFilePath) && 
+                File.Exists(imageFilePath))
+            {
+                // TODO(tspaete): More robust image file read
+                byte[] imageData = File.ReadAllBytes(imageFilePath);
+                if (imageData != null && imageData.Length > 0)
+                {
+                    string filename = Path.GetFileName(imageFilePath);
+                    anime.Image = new AnimeImage(filename, imageData.ToImmutableArray());
+                }
                 else
-                    log.Debug($"Picture '{imageFilePath}' for '{anime}' already found.");
+                {
+                    log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
+                    Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", sourceDir.FullName);
+                }
             }
 
             return (anime);
@@ -423,11 +424,24 @@ namespace Finalspace.Onigiri
             statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {sourceDir.Name}" });
             log.Info($"Find image for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
             watch.Restart();
-            string imageFile = FindImage(sourceDir);
+            string imageFilePath = FindImage(sourceDir);
             watch.Stop();
             log.Debug($"Find image in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
-            if (!string.IsNullOrEmpty(imageFile))
-                result.ImageFilePath = imageFile;
+            if (!string.IsNullOrEmpty(imageFilePath) && File.Exists(imageFilePath))
+            {
+                // TODO(tspaete): More robust image file read
+                byte[] imageData = File.ReadAllBytes(imageFilePath);
+                if (imageData != null && imageData.Length > 0)
+                {
+                    string filename = Path.GetFileName(imageFilePath);
+                    result.Image = new AnimeImage(filename, imageData.ToImmutableArray());
+                }
+                else
+                {
+                    log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{result}'!");
+                    Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{result}'", sourceDir.FullName);
+                }
+            }
             else
                 log.Warn($"Not found anime image '{result.Picture}' aid='{aid}', title='{cleanTitleName}'!");
 

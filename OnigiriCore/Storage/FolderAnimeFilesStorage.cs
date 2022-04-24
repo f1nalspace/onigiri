@@ -204,22 +204,20 @@ namespace Finalspace.Onigiri.Storage
             return new ExecutionResult<Anime>(anime);
         }
 
-        private static ExecutionResult<AnimeFile> Serialize(Anime anime, string pictureFilePath)
+        private static ExecutionResult<AnimeFile> Serialize(Anime anime)
         {
             if (anime == null)
                 throw new ArgumentNullException(nameof(anime));
             if (anime.Aid == 0)
                 return new ExecutionResult<AnimeFile>(new FormatException($"Anime '{anime}' has in valid aid!"));
 
-            byte[] detailsData;
+            ImmutableArray<byte> detailsData;
             using (MemoryStream stream = AnimeSerialization.SerializeAnime(anime))
-                detailsData = stream.ToArray();
+                detailsData = stream.ToArray().ToImmutableArray();
 
-            byte[] pictureData = null;
-            if (!string.IsNullOrEmpty(pictureFilePath))
-                pictureData = FileUtils.LoadFileData(pictureFilePath);
+            ImmutableArray<byte> pictureData = anime.Image?.Data ?? ImmutableArray<byte>.Empty;
 
-            AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
+            AnimeFile animeFile = new AnimeFile(anime.Aid, detailsData, pictureData);
 
             return new ExecutionResult<AnimeFile>(animeFile);
         }
@@ -281,7 +279,7 @@ namespace Finalspace.Onigiri.Storage
                 int percentage = (int)(c / (double)totalCount * 100.0);
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = anime.MainTitle, Percentage = percentage });
 
-                ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);
+                ExecutionResult<AnimeFile> res = Serialize(anime);
                 if (res.Success)
                 {
                     AnimeFile animeFile = res.Value;
@@ -305,7 +303,7 @@ namespace Finalspace.Onigiri.Storage
             if (!rootDir.Exists)
                 return false;
 
-            ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);
+            ExecutionResult<AnimeFile> res = Serialize(anime);
             if (res.Success)
             {
                 AnimeFile animeFile = res.Value;

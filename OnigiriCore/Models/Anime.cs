@@ -45,13 +45,6 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value);
         }
 
-        [XmlElement]
-        public string ImageFilePath
-        {
-            get => GetValue<string>();
-            set => SetValue(value);
-        }
-
         [XmlAttribute]
         public bool Restricted
         {
@@ -195,9 +188,11 @@ namespace Finalspace.Onigiri.Models
         }
 
         [XmlIgnore]
-        public AnimeImage Image {
-            get => GetValue<AnimeImage>(); 
-            set => SetValue(value); }
+        public AnimeImage Image
+        {
+            get => GetValue<AnimeImage>();
+            set => SetValue(value);
+        }
 
         public Anime()
         {

@@ -38,10 +38,10 @@ namespace Finalspace.Onigiri.Storage
             public uint Version;
             public uint IsReadonly;
             public uint EntryCount;
+            public uint AnimeCount;
+            public uint Reserved;
 
             public ulong TableOffset;
-
-            public ulong Reserved;
         }
 
         [Serializable]
@@ -107,6 +107,8 @@ namespace Finalspace.Onigiri.Storage
             fileStream.WriteStruct(new DatabaseFileHeader());
 
             ulong offset = (ulong)Marshal.SizeOf(typeof(DatabaseFileHeader));
+
+            uint animeCount = (uint)animes.Length;
 
             List<DatabaseFileTableEntry> entries = new List<DatabaseFileTableEntry>();
 
@@ -215,6 +217,7 @@ namespace Finalspace.Onigiri.Storage
                 Magic = DatabaseFileHeader.MagicKey,
                 IsReadonly = 0,
                 EntryCount = (uint)entries.Count,
+                AnimeCount = animeCount,
                 TableOffset = tableOffset,
                 Version = (uint)DatabaseFileVersion.Latest,
             };
@@ -240,6 +243,7 @@ namespace Finalspace.Onigiri.Storage
                 DatabaseFileHeader header = fileStream.ReadStruct<DatabaseFileHeader>();
                 if (header.Magic != DatabaseFileHeader.MagicKey ||
                     header.EntryCount == uint.MaxValue ||
+                    header.AnimeCount == uint.MaxValue ||
                     header.TableOffset == ulong.MaxValue)
                     throw new FormatException($"Invalid header in database file '{_filePath}'!");
 
@@ -258,13 +262,14 @@ namespace Finalspace.Onigiri.Storage
 
                 // TODO(final): Parallel load!
                 int entryIndex = 0;
+                int entryCount = entries.Length;
                 foreach (DatabaseFileTableEntry entry in entries)
                 {
                     if (entry.Aid == 0 || entry.Aid >= uint.MaxValue)
                         throw new FormatException($"Invalid aid of '{entry.Aid}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
 
                     if (entry.Type == FourCC.Empty)
-                            throw new FormatException($"Invalid type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+                        throw new FormatException($"Invalid type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
                     if (!(entry.Type == DetailsType || entry.Type == PictureType))
                         throw new FormatException($"Unsupported type of '{entry.Type}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
 
@@ -278,6 +283,10 @@ namespace Finalspace.Onigiri.Storage
 
                     if (entry.Offset == 0 || entry.Offset >= uint.MaxValue || entry.Offset > ((ulong)fileLen - entry.Size))
                         throw new FormatException($"Invalid offset of '{entry.Offset}' for entry '{entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'!");
+
+                    int c = entryIndex + 1;
+                    int percentage = (int)(c / (double)entryCount * 100.0);
+                    statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Entry {c} of {entryCount}", Percentage = percentage });
 
                     fileStream.Seek((long)entry.Offset, SeekOrigin.Begin);
 
@@ -330,7 +339,11 @@ namespace Finalspace.Onigiri.Storage
                     else if (entry.Type == PictureType)
                     {
                         if (anime != null)
-                            anime.Image = new AnimeImage(anime.ImageFilePath, dataStream.ToArray());
+                        {
+                            // TODO(final): Wrong image filename, dont assume its from anidb always!
+                            string filename = anime.Picture;
+                            anime.Image = new AnimeImage(filename, dataStream.ToArray());
+                        }
                     }
 
                     dataStream.Dispose();
