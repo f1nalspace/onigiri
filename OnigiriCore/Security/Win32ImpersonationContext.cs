@@ -1,14 +1,15 @@
-﻿using System.Security.Principal;
+﻿using System;
+using System.Security.Principal;
 
 namespace Finalspace.Onigiri.Security
 {
     class Win32ImpersonationContext : IImpersonationContext
     {
-        private readonly WindowsIdentity _identity;
+        private readonly IUserIdentity _identity;
 
-        public Win32ImpersonationContext(WindowsIdentity identity)
+        public Win32ImpersonationContext(IUserIdentity identity)
         {
-            _identity = identity;
+            _identity = identity ?? throw new ArgumentNullException(nameof(identity));
         }
 
         public void Dispose()

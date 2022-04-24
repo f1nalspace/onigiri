@@ -8,22 +8,17 @@ namespace Finalspace.Onigiri.Storage
 {
     public class DatabaseAnimeFilesCache : IAnimeCache
     {
-        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool Save(Anime anime)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
-        bool IAnimeCache.Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
+        public bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
+        {
+            return false;
+        }
+
+        public ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged)
         {
             throw new NotImplementedException();
         }

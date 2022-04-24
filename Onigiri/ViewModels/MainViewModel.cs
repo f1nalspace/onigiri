@@ -15,6 +15,7 @@ using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
 using DevExpress.Mvvm;
+using Finalspace.Onigiri.Storage;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -31,6 +32,10 @@ namespace Finalspace.Onigiri.ViewModels
 
         #region Events
         public event Action CloseRequested;
+        #endregion
+
+        #region Storage
+        private IAnimeCache _currentStorage = null;
         #endregion
 
         #region Anime list & properties
@@ -125,7 +130,7 @@ namespace Finalspace.Onigiri.ViewModels
             CoreService.Startup(new StatusChangedEventHandler(ChangedStatus));
 
             CoreService.ClearIssues();
-            CoreService.RefreshAnimes(new StatusChangedEventHandler(ChangedStatus));
+            CoreService.RefreshAnimes(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
             LoadingPercentage = -1;
 
             LoadingHeader = "Update listview...";
@@ -229,9 +234,9 @@ namespace Finalspace.Onigiri.ViewModels
 
             CoreService.ClearIssues();
 
-            CoreService.UpdateAnimes(updateFlags, new StatusChangedEventHandler(ChangedStatus));
+            CoreService.UpdateAnimes(_currentStorage, updateFlags, new StatusChangedEventHandler(ChangedStatus));
 
-            CoreService.RefreshAnimes(new StatusChangedEventHandler(ChangedStatus));
+            CoreService.RefreshAnimes(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
 
             LoadingPercentage = -1;
 
@@ -560,6 +565,9 @@ namespace Finalspace.Onigiri.ViewModels
 
             // Services
             CoreService = new OnigiriService();
+
+            // Storages
+            _currentStorage = new FolderAnimeFilesCache(CoreService.PersistentCachePath, CoreService.Config.MaxThreadCount);
 
             // Collections
             _animes = new List<Anime>(4096);

@@ -21,14 +21,15 @@ namespace Finalspace.Onigiri.Storage
     public class FolderAnimeFilesCache : IAnimeCache
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly string _persistentPath;
+        private readonly int _maxThreadCount;
 
-        private readonly Config _config;
-        private readonly string _path;
-
-        public FolderAnimeFilesCache(Config config, string path)
+        public FolderAnimeFilesCache(string persistentPath, int? maxThreadCount = null)
         {
-            _config = config;
-            _path = path;
+            if (string.IsNullOrWhiteSpace(persistentPath))
+                throw new ArgumentNullException(nameof(persistentPath));
+            _persistentPath = persistentPath;
+            _maxThreadCount = maxThreadCount ?? Environment.ProcessorCount;
         }
 
         private static ExecutionResult<Anime> Deserialize(AnimeFile animeFile)
@@ -99,13 +100,13 @@ namespace Finalspace.Onigiri.Storage
         {
             ConcurrentBag<Anime> list = new ConcurrentBag<Anime>();
 
-            DirectoryInfo rootDir = new DirectoryInfo(_path);
+            DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
             if (rootDir.Exists)
             {
                 int count = 0;
                 FileInfo[] persistentFiles = rootDir.GetFiles("p*.onigiri");
                 int totalFileCount = persistentFiles.Length;
-                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _config.MaxThreadCount };
+                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
                 Parallel.ForEach(persistentFiles, poptions, (persistentFile) =>
                 {
                     int c = Interlocked.Increment(ref count);
@@ -136,9 +137,16 @@ namespace Finalspace.Onigiri.Storage
 
         public bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged)
         {
+            if (animes == null)
+                throw new ArgumentNullException(nameof(animes));
+
+            DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
+            if (!rootDir.Exists)
+                return false;
+
             int totalCount = animes.Length;
             int count = 0;
-            ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _config.MaxThreadCount };
+            ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
             Parallel.ForEach(animes, poptions, (anime) =>
             {
                 int c = Interlocked.Increment(ref count);
@@ -149,7 +157,7 @@ namespace Finalspace.Onigiri.Storage
                 if (res.Success)
                 {
                     AnimeFile animeFile = res.Value;
-                    string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
+                    string persistentAnimeFilePath = Path.Combine(rootDir.FullName, $"p{anime.Aid}.onigiri");
                     animeFile.SaveToFile(persistentAnimeFilePath);
                 }
                 else
@@ -164,11 +172,16 @@ namespace Finalspace.Onigiri.Storage
         {
             if (anime == null)
                 throw new ArgumentNullException(nameof(anime));
+
+            DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
+            if (!rootDir.Exists)
+                return false;
+
             ExecutionResult<AnimeFile> res = Serialize(anime, anime.ImageFilePath);
             if (res.Success)
             {
                 AnimeFile animeFile = res.Value;
-                string persistentAnimeFilePath = Path.Combine(_path, $"p{anime.Aid}.onigiri");
+                string persistentAnimeFilePath = Path.Combine(rootDir.FullName, $"p{anime.Aid}.onigiri");
                 animeFile.SaveToFile(persistentAnimeFilePath);
                 return true;
             }

@@ -4,6 +4,6 @@ namespace Finalspace.Onigiri.Security
 {
     interface IIdentityImpersonator
     {
-        IImpersonationContext Impersonate(WindowsIdentity identity);
+        IImpersonationContext Impersonate(IUserIdentity identity);
     }
 }

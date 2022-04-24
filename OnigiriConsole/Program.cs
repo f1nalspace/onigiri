@@ -2,6 +2,7 @@
 using Finalspace.Onigiri.Enums;
 using Finalspace.Onigiri.Events;
 using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Storage;
 using log4net.Config;
 using System;
 using System.Collections.Generic;
@@ -62,8 +63,15 @@ namespace Finalspace.Onigiri
             }
         }
 
-        static void ProcessArguments(string[] args, OnigiriService system)
+        static void ProcessArguments(string[] args, OnigiriService system, IAnimeCache storage)
         {
+            if (args == null)
+                throw new ArgumentNullException(nameof(args));
+            if (system == null)
+                throw new ArgumentNullException(nameof(system));
+            if (storage == null)
+                throw new ArgumentNullException(nameof(storage));
+
             // Set search path
             int addSearchArgIndex = GetArgumentIndex(args, "setsearch");
             if (addSearchArgIndex > -1)
@@ -90,7 +98,7 @@ namespace Finalspace.Onigiri
             if (updateArgIndex > -1)
             {
                 system.ClearIssues();
-                system.UpdateAnimes(UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture);
+                system.UpdateAnimes(storage, UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture);
             }
 
             // Show
@@ -151,8 +159,13 @@ namespace Finalspace.Onigiri
                 Console.ReadKey();
                 return;
             }
+
             OnigiriService system = new OnigiriService();
-            ProcessArguments(args, system);
+
+            FolderAnimeFilesCache storage = new FolderAnimeFilesCache(system.PersistentCachePath, system.Config.MaxThreadCount);
+
+            ProcessArguments(args, system, storage);
+
             Console.ReadKey();
         }
     }

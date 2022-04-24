@@ -29,32 +29,45 @@ namespace Finalspace.Onigiri.Core
         public const string AnimeXMLAddonFilename = ".adata.xml";
         public const string AnimeAIDFilename = "aid.txt";
 
-        private WindowsIdentity _activeIdentity;
+        private readonly IUserIdentity _userIdentity;
+        private readonly IIdentityImpersonator _identityImpersonator;
+
         private readonly string _appSettingsPath;
         private readonly string _configFilePath;
         private readonly string _persistentPath;
+
         private readonly string _animeTitlesDumpRawFilePath;
         private readonly string _animeTitlesDumpXMLFilePath;
 
+        public string AppSettingsPath => _appSettingsPath;
+        public string PersistentCachePath => _persistentPath;
+
         public Config Config { get; }
         public Titles Titles { get; }
-        private readonly object _animesLock = new object();
         public Animes Animes { get; }
         public Issues Issues { get; }
-        public IAnimeCache Cache { get; }
+
+        private readonly object _updateAnimesLock = new object();
 
         public OnigiriService()
         {
-            _activeIdentity = WindowsIdentity.GetCurrent();
+            _userIdentity = new Win32UserIdentity();
+            _identityImpersonator = new Win32IdentityImpersonator();
             _appSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Onigiri");
-            if (!Directory.Exists(_appSettingsPath)) Directory.CreateDirectory(_appSettingsPath);
+            if (!Directory.Exists(_appSettingsPath)) 
+                Directory.CreateDirectory(_appSettingsPath);
+
+            // REMOVE(final): Remove persistent path from here!
             _persistentPath = Path.Combine(_appSettingsPath, "PersistentCache");
-            if (!Directory.Exists(_persistentPath)) Directory.CreateDirectory(_persistentPath);
+            if (!Directory.Exists(_persistentPath)) 
+                Directory.CreateDirectory(_persistentPath);
+
             _configFilePath = Path.Combine(_appSettingsPath, "config.xml");
+
             _animeTitlesDumpRawFilePath = Path.Combine(_appSettingsPath, "animetitles.xml.gz");
             _animeTitlesDumpXMLFilePath = Path.Combine(_appSettingsPath, "animetitles.xml");
+
             Config = new Config();
-            Cache = new FolderAnimeFilesCache(Config, _persistentPath);
             Titles = new Titles();
             Animes = new Animes();
             Issues = new Issues();
@@ -89,7 +102,7 @@ namespace Finalspace.Onigiri.Core
             return result;
         }
 
-        private string ResolveSearchPath(SearchPath searchPath)
+        private static string ResolveSearchPath(SearchPath searchPath)
         {
             string path = searchPath.Path;
             if (!string.IsNullOrEmpty(searchPath.DriveName))
@@ -109,32 +122,34 @@ namespace Finalspace.Onigiri.Core
             return path;
         }
 
-        public void Update(string path, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+        public void Update(IAnimeCache storage, string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            if (storage == null)
+                throw new ArgumentNullException(nameof(storage));
+            if (string.IsNullOrWhiteSpace(sourcePath))
+                throw new ArgumentNullException(nameof(sourcePath));
             if (flags == UpdateFlags.None)
                 throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
 
-            log.Info($"Update anime from path '{path}' with flags {flags}");
+            log.Info($"Update anime from path '{sourcePath}' and storage '{storage}' with flags {flags}");
 
-            DirectoryInfo dir = new DirectoryInfo(path);
-            if (!dir.Exists)
+            DirectoryInfo sourceDir = new DirectoryInfo(sourcePath);
+            if (!sourceDir.Exists)
             {
-                log.Warn($"Anime directory '{path}' could not be found. Skipping path.");
+                log.Warn($"Anime directory '{sourcePath}' could not be found. Skipping path.");
                 return;
             }
 
-            if (dir.Attributes.HasFlag(FileAttributes.System))
+            if (sourceDir.Attributes.HasFlag(FileAttributes.System))
             {
-                log.Warn($"Skip system directory '{path}'");
+                log.Warn($"Anime directory '{sourcePath}' is a system directory, skipping!");
                 return;
             }
 
-            string folderName = dir.Name;
+            string folderName = sourceDir.Name;
             string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
-            string animeXmlFilePath = Path.Combine(path, AnimeXMLDetailsFilename);
-            string animeAidFilePath = Path.Combine(path, AnimeAIDFilename);
+            string animeXmlFilePath = Path.Combine(sourcePath, AnimeXMLDetailsFilename);
+            string animeAidFilePath = Path.Combine(sourcePath, AnimeAIDFilename);
 
             ulong aid = 0;
 
@@ -168,8 +183,8 @@ namespace Finalspace.Onigiri.Core
                 else
                 {
                     // Still no aid, dont update anything
-                    Issues.Add(IssueKind.TitleNotFound, $"No title for anime '{cleanTitleName}' found!", path, folderName);
-                    log.Warn($"No title for anime '{path}' as '{cleanTitleName}' - no aid found!");
+                    Issues.Add(IssueKind.TitleNotFound, $"No title for anime '{cleanTitleName}' found!", sourcePath, folderName);
+                    log.Warn($"No title for anime '{sourcePath}' as '{cleanTitleName}' - no aid found!");
                     return;
                 }
             }
@@ -192,11 +207,11 @@ namespace Finalspace.Onigiri.Core
                 }
             }
 
-            Anime anime = Aquire(dir, statusChanged);
+            Anime anime = Aquire(sourceDir, statusChanged);
             Debug.Assert(anime != null);
 
             // Download picture
-            string imageFilePath = FindImage(dir);
+            string imageFilePath = FindImage(sourceDir);
             if (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture))
             {
                 bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
@@ -205,16 +220,16 @@ namespace Finalspace.Onigiri.Core
                     if (string.IsNullOrEmpty(anime.Picture))
                     {
                         log.Warn($"Missing picture file in anime '{anime}'!");
-                        Issues.Add(IssueKind.PictureUndefined, $"No picture name in anime '{anime}' defined", dir.FullName);
+                        Issues.Add(IssueKind.PictureUndefined, $"No picture name in anime '{anime}' defined", sourceDir.FullName);
                     }
                     else
                     {
-                        imageFilePath = Path.Combine(dir.FullName, anime.Picture);
+                        imageFilePath = Path.Combine(sourceDir.FullName, anime.Picture);
                         HttpApi.DownloadPicture(anime.Picture, imageFilePath);
                         if (!File.Exists(imageFilePath))
                         {
                             log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
-                            Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", dir.FullName);
+                            Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", sourceDir.FullName);
                         }
                         else
                         {
@@ -228,7 +243,7 @@ namespace Finalspace.Onigiri.Core
                             else
                             {
                                 log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
-                                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", dir.FullName);
+                                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", sourceDir.FullName);
                             }
                         }
                     }
@@ -239,8 +254,9 @@ namespace Finalspace.Onigiri.Core
 
             if (flags.HasFlag(UpdateFlags.WriteCache))
             {
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Write to persistent cache: {anime.MainTitle}" });
-                Cache.Save(anime);
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Write to storage: {anime.MainTitle}" });
+
+                storage.Save(anime);
             }
         }
 
@@ -249,13 +265,16 @@ namespace Finalspace.Onigiri.Core
             Issues.Clear();
         }
 
-        public void UpdateAnimes(UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
+        public void UpdateAnimes(IAnimeCache storage, UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
         {
+            if (storage == null)
+                throw new ArgumentNullException(nameof(storage));
+
             // Download anime titles dump raw file from anidb if needed
             if (flags.HasFlag(UpdateFlags.DownloadTitles))
                 ReadTitles(statusChanged, true);
 
-            using (IImpersonationContext imp = _activeIdentity.Impersonate())
+            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
             {
                 List<DirectoryInfo> animeDirs = new List<DirectoryInfo>();
                 foreach (SearchPath searchPath in Config.SearchPaths)
@@ -273,7 +292,8 @@ namespace Finalspace.Onigiri.Core
                         log.Warn($"Search path '{path}' not found!");
                         continue;
                     }
-                    log.Info($"Update animes in '{searchDir.FullName}'");
+
+                    log.Info($"Get anime folders from search dir '{searchDir.FullName}'");
                     DirectoryInfo[] dirs = searchDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     foreach (DirectoryInfo dir in dirs)
                     {
@@ -283,18 +303,21 @@ namespace Finalspace.Onigiri.Core
 
                 int count = 0;
                 int totalDirCount = animeDirs.Count;
+
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
+
                 ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = Config.MaxThreadCount };
-                Parallel.ForEach(animeDirs, poptions, (dir) =>
+                Parallel.ForEach(animeDirs, poptions, (animeDir) =>
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                    Update(dir.FullName, flags, statusChanged);
+                    Update(storage, animeDir.FullName, flags, statusChanged);
                 });
             }
         }
 
-        public string FindImage(DirectoryInfo dir)
+        private static string FindImage(DirectoryInfo dir)
         {
             FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
             DateTime? bestDate = null;
@@ -325,7 +348,7 @@ namespace Finalspace.Onigiri.Core
             ".mpeg",
             ".mp4"
         };
-        
+
         private static IEnumerable<string> FindMediaFileNames(DirectoryInfo dir)
         {
             FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
@@ -338,7 +361,7 @@ namespace Finalspace.Onigiri.Core
             }
         }
 
-        private Title CreateFallbackTitle(ulong aid, string folderName)
+        private static Title CreateFallbackTitle(ulong aid, string folderName)
         {
             // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
             string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
@@ -438,18 +461,28 @@ namespace Finalspace.Onigiri.Core
             return result;
         }
 
-        public void RefreshAnimes(StatusChangedEventHandler statusChanged)
+        /// <summary>
+        /// Loads all <see cref="Animes"/> and <see cref="Issues"/> from the specified <see cref="IAnimeCache"/>.
+        /// </summary>
+        /// <param name="storage">The <see cref="IAnimeCache"/>.</param>
+        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+        /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
+        public void RefreshAnimes(IAnimeCache storage, StatusChangedEventHandler statusChanged)
         {
-            using (IImpersonationContext imp = _activeIdentity.Impersonate())
-            {
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load persistent cache", Subject = "", Percentage = -1 });
-                ImmutableArray<Anime> loadedAnimes = Cache.Load(statusChanged);
+            if (storage == null)
+                throw new ArgumentNullException(nameof(storage));
 
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Update list", Subject = "", Percentage = -1 });
-                lock (_animesLock)
+            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            {
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load from '{storage}'", Subject = "", Percentage = -1 });
+
+                ImmutableArray<Anime> loadedAnimes = storage.Load(statusChanged);
+
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{loadedAnimes.Length}' animes", Subject = "", Percentage = -1 });
+                lock (_updateAnimesLock)
                 {
-                    Animes.Clear();
                     IOrderedEnumerable<Anime> sorted = loadedAnimes.OrderBy(a => a.FoundPath);
+                    Animes.Clear();
                     Animes.Items.AddRange(sorted);
                     Animes.RefreshGroups();
                 }
