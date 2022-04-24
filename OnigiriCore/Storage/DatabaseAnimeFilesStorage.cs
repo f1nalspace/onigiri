@@ -355,5 +355,7 @@ namespace Finalspace.Onigiri.Storage
             List<Anime> list = new List<Anime>(idToAnimeMap.Values);
             return list.ToImmutableArray();
         }
+
+        public override string ToString() => _filePath;
     }
 }

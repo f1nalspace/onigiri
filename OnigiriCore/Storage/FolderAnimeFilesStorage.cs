@@ -317,5 +317,7 @@ namespace Finalspace.Onigiri.Storage
                 return false;
             }
         }
+
+       public override string ToString() => "Persistent-Cache";
     }
 }
