@@ -34,10 +34,5 @@ namespace Finalspace.Onigiri.Enums
         /// Download the titles XML, without touching the persistent cache or the local store.
         /// </summary>
         DownloadTitles = 1 << 4,
-
-        /// <summary>
-        /// Rebuild and write the persistent cache.
-        /// </summary>
-        WriteStorage = 1 << 5,
     }
 }

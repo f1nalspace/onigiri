@@ -165,7 +165,7 @@ namespace Finalspace.Onigiri.Storage
             return true;
         }
 
-        public bool Save(Anime anime)
+        public bool Save(Anime anime, StatusChangedEventHandler statusChanged)
         {
             if (anime == null)
                 throw new ArgumentNullException(nameof(anime));

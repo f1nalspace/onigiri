@@ -7,7 +7,7 @@ namespace Finalspace.Onigiri.Storage
 {
     public class DatabaseAnimeFilesStorage : IAnimeStorage
     {
-        public bool Save(Anime anime)
+        public bool Save(Anime anime, StatusChangedEventHandler statusChanged)
         {
             return false;
         }

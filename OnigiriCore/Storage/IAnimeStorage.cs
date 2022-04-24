@@ -8,6 +8,6 @@ namespace Finalspace.Onigiri.Storage
     {
         ImmutableArray<Anime> Load(StatusChangedEventHandler statusChanged);
         bool Save(ImmutableArray<Anime> animes, StatusChangedEventHandler statusChanged);
-        bool Save(Anime anime);
+        bool Save(Anime anime, StatusChangedEventHandler statusChanged);
     }
 }

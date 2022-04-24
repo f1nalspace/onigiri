@@ -221,11 +221,15 @@ namespace Finalspace.Onigiri.ViewModels
 
             StartedLoading();
 
-            UpdateFlags updateFlags;
+            bool writeStorage = false;
+            UpdateFlags updateFlags = UpdateFlags.None;
             if ("Store".Equals(updateType))
-                updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture | UpdateFlags.WriteStorage;
+            {
+                updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture;
+                writeStorage = true;
+            }
             else if ("Database".Equals(updateType))
-                updateFlags = UpdateFlags.WriteStorage;
+                writeStorage = true;
             else
                 throw new NotSupportedException($"The update type '{updateType}' is not supported");
 
@@ -233,9 +237,11 @@ namespace Finalspace.Onigiri.ViewModels
 
             CoreService.ClearIssues();
 
-            CoreService.UpdateSources(updateFlags, _currentStorage, new StatusChangedEventHandler(ChangedStatus));
+            if (updateFlags != UpdateFlags.None)
+                CoreService.UpdateSources(updateFlags, new StatusChangedEventHandler(ChangedStatus));
 
-            CoreService.Load(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
+            if (writeStorage)
+                CoreService.Save(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
 
             LoadingPercentage = -1;
 

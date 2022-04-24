@@ -1,7 +1,11 @@
 ﻿using log4net;
 using System.Reflection;
+using System.Threading;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections;
+using System;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -9,9 +13,11 @@ namespace Finalspace.Onigiri.Models
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public List<Anime> Items { get; }
+        public IEnumerable<Anime> Items => _items;
+        private ImmutableArray<Anime> _items = ImmutableArray<Anime>.Empty;
 
-        public List<AnimeGroup> Groups { get; }
+        public IEnumerable<AnimeGroup> Groups => _groups;
+        private ImmutableArray<AnimeGroup> _groups = ImmutableArray<AnimeGroup>.Empty;
 
         public Anime FindByAid(ulong aid)
         {
@@ -23,26 +29,23 @@ namespace Finalspace.Onigiri.Models
 
         public Animes()
         {
-            Items = new List<Anime>(1024);
-            Groups = new List<AnimeGroup>(1024);
         }
 
         public void Clear()
         {
-            Items.Clear();
-            Groups.Clear();
+            _items = ImmutableArray<Anime>.Empty;
+            _groups = ImmutableArray<AnimeGroup>.Empty;
         }
 
-        private Anime FindSequel(ulong prequelAid)
+        public void Set(params Anime[] animes)
         {
-            Anime result = Items.FirstOrDefault((a) => a.IsSequal(prequelAid));
-            return (result);
-        }
+            if (animes == null)
+                throw new ArgumentNullException(nameof(animes));
 
-        public void RefreshGroups()
-        {
-            Groups.Clear();
-            foreach (Anime anime in Items)
+            _items = animes.ToImmutableArray();
+
+            List<AnimeGroup> groups = new List<AnimeGroup>();
+            foreach (Anime anime in _items)
             {
                 int sequelCount = anime.Relations.Count(c => c.Type == RelationType.Sequel);
                 if (sequelCount > 0)
@@ -53,9 +56,16 @@ namespace Finalspace.Onigiri.Models
                     {
                         group.Items.Add(new AnimeGroupItem(sequel));
                     }
-                    Groups.Add(group);
+                    groups.Add(group);
                 }
             }
+            _groups = groups.ToImmutableArray();
+        }
+
+        private Anime FindSequel(ulong prequelAid)
+        {
+            Anime result = Items.FirstOrDefault((a) => a.IsSequal(prequelAid));
+            return (result);
         }
     }
 }

@@ -97,7 +97,8 @@ namespace Finalspace.Onigiri
             if (updateArgIndex > -1)
             {
                 system.ClearIssues();
-                system.UpdateSources(UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture, storage);
+
+                system.UpdateSources(UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture);
             }
 
             // Show
