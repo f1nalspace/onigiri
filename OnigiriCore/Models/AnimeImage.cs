@@ -17,5 +17,15 @@ namespace Finalspace.Onigiri.Models
             FileName = fileName;
             Data = data;
         }
+
+        public AnimeImage(string fileName, byte[] data)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentNullException(nameof(fileName));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            FileName = fileName;
+            Data = data.ToImmutableArray();
+        }
     }
 }

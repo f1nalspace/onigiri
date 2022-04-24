@@ -81,10 +81,10 @@ namespace Finalspace.Onigiri.ViewModels
             RaisePropertyChanged(() => IsLoadingMarque);
         }
 
-        private void StartedLoading()
+        private void StartedLoading(string header = "Loading")
         {
             IsNotLoading = false;
-            LoadingHeader = "Loading";
+            LoadingHeader = header;
             LoadingSubject = string.Empty;
             LoadingPercentage = -1;
             RaisePropertyChanged(() => LoadingWindowVisibility);
@@ -118,14 +118,15 @@ namespace Finalspace.Onigiri.ViewModels
             AnimesView.Refresh();
             RaisePropertyChanged(() => VisibleAnimeCount);
             RaisePropertyChanged(() => TotalAnimeCount);
+
             CmdRefresh.RaiseCanExecuteChanged();
+
             FinishedLoading();
         }
         private void RefreshWorkerProc()
         {
-            StartedLoading();
+            StartedLoading("Refreshing");
 
-            LoadingHeader = "Refreshing...";
             CoreService.Startup(new StatusChangedEventHandler(ChangedStatus));
 
             CoreService.ClearIssues();
@@ -207,7 +208,9 @@ namespace Finalspace.Onigiri.ViewModels
             AnimesView.Refresh();
             RaisePropertyChanged(() => VisibleAnimeCount);
             RaisePropertyChanged(() => TotalAnimeCount);
+
             CmdRefresh.RaiseCanExecuteChanged();
+
             FinishedLoading();
 
             if (CoreService.Issues.Count > 0)
@@ -219,7 +222,7 @@ namespace Finalspace.Onigiri.ViewModels
         {
             string updateType = (string)value;
 
-            StartedLoading();
+            StartedLoading("Updating");
 
             bool writeStorage = false;
             UpdateFlags updateFlags = UpdateFlags.None;
@@ -250,6 +253,65 @@ namespace Finalspace.Onigiri.ViewModels
             Anime[] items = CoreService.Animes.Items.ToArray();
             _animes.Clear();
             _animes.AddRange(items);
+        }
+        #endregion
+
+        #region Export worker
+        private BackgroundWorker ExportWorker { get; set; }
+        private void ExportWorkerComplete(RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+                log.Error("Export failed!", e.Error);
+
+            CmdExport.RaiseCanExecuteChanged();
+
+            FinishedLoading();
+        }
+
+        private void ExportWorkerProc(object value)
+        {
+            string path = value as string;
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(value));
+
+            StartedLoading("Exporting");
+
+            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(path);
+
+            CoreService.Save(databaseStorage, new StatusChangedEventHandler(ChangedStatus));
+        }
+        #endregion
+
+        #region Import worker
+        private BackgroundWorker ImportWorker { get; set; }
+        private void ImportWorkerComplete(RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+                log.Error("Import failed!", e.Error);
+
+            AnimesView.Refresh();
+            RaisePropertyChanged(() => VisibleAnimeCount);
+            RaisePropertyChanged(() => TotalAnimeCount);
+
+            CmdImport.RaiseCanExecuteChanged();
+
+            FinishedLoading();
+        }
+
+        private void ImportWorkerProc(object value)
+        {
+            string path = value as string;
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(value));
+
+            StartedLoading("Importing");
+
+            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(path);
+
+            CoreService.Load(databaseStorage, new StatusChangedEventHandler(ChangedStatus));
+
+            _animes.Clear();
+            _animes.AddRange(CoreService.Animes.Items);
         }
         #endregion
 
@@ -474,16 +536,22 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<Anime> CmdToggleWatchedAnni { get; }
         public DelegateCommand<Anime> CmdToggleDeleteitFinal { get; }
         public DelegateCommand<Anime> CmdToggleDeleteitAnni { get; }
+
         public DelegateCommand CmdChangedSort { get; }
         public DelegateCommand CmdChangedFilter { get; }
+        public DelegateCommand<MainTheme> CmdChangeTheme { get; }
+
         public DelegateCommand CmdRefresh { get; }
         public DelegateCommand<string> CmdUpdate { get; }
+        public DelegateCommand CmdExport { get; }
+        public DelegateCommand CmdImport { get; }
         public DelegateCommand CmdExit { get; }
+
         public DelegateCommand CmdTitles { get; }
         public DelegateCommand CmdIssues { get; }
+
         public DelegateCommand<Anime> CmdOpenPage { get; }
         public DelegateCommand<Anime> CmdOpenRelations { get; }
-        public DelegateCommand<MainTheme> CmdChangeTheme { get; }
         #endregion
 
         public bool IsDarkMode { get => GetValue<bool>(); private set => SetValue(value); }
@@ -518,6 +586,46 @@ namespace Finalspace.Onigiri.ViewModels
             };
             timer.Start();
 #endif
+        }
+
+        private bool CanExport() => !ExportWorker.IsBusy;
+        private void Export()
+        {
+            ISaveFileDialogService dlg = GetService<ISaveFileDialogService>();
+            dlg.Title = "Save to Onigiri Database";
+            dlg.Filter = "Onigiri database file|*.onigiridb";
+            dlg.AddExtension = true;
+            dlg.DefaultExt = ".onigiridb";
+            if (dlg.ShowDialog())
+            {
+                string filePath = dlg.File.GetFullName();
+                ExportWorker.RunWorkerAsync(filePath);
+            }
+        }
+
+        private bool CanImport() => !ImportWorker.IsBusy;
+        private void Import()
+        {
+            IOpenFileDialogService dlg = GetService<IOpenFileDialogService>();
+            dlg.Title = "Save to Onigiri Database";
+            dlg.Filter = "Onigiri database file|*.onigiridb";
+            if (dlg.ShowDialog())
+            {
+                string filePath = dlg.File.GetFullName();
+                ImportWorker.RunWorkerAsync(filePath);
+            }
+        }
+
+        private bool CanRefresh() => !RefreshWorker.IsBusy;
+        private void Refresh()
+        {
+            RefreshWorker.RunWorkerAsync(false);
+        }
+
+        private bool CanUpdate(string s) => !UpdateWorker.IsBusy;
+        private void Update(string s)
+        {
+            UpdateWorker.RunWorkerAsync(s);
         }
 
         private void ShowTitlesDialog()
@@ -588,6 +696,12 @@ namespace Finalspace.Onigiri.ViewModels
             UpdateWorker = new BackgroundWorker();
             UpdateWorker.RunWorkerCompleted += (s, e) => UpdateWorkerComplete(e);
             UpdateWorker.DoWork += (s, e) => UpdateWorkerProc(e.Argument);
+            ExportWorker = new BackgroundWorker();
+            ExportWorker.RunWorkerCompleted += (s, e) => ExportWorkerComplete(e);
+            ExportWorker.DoWork += (s, e) => ExportWorkerProc(e.Argument);
+            ImportWorker = new BackgroundWorker();
+            ImportWorker.RunWorkerCompleted += (s, e) => ImportWorkerComplete(e);
+            ImportWorker.DoWork += (s, e) => ImportWorkerProc(e.Argument);
 
             // Default values
             LoadingHeader = "Ready";
@@ -601,20 +715,27 @@ namespace Finalspace.Onigiri.ViewModels
 
             // Commands
             CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanAddonDataByChanged);
+
             CmdToggleWatchedFinal = new DelegateCommand<Anime>((a) => ToggleWatched(a, "final"), (a) => CanAddonDataByChanged(a));
             CmdToggleWatchedAnni = new DelegateCommand<Anime>((a) => ToggleWatched(a, "anni"), (a) => CanAddonDataByChanged(a));
             CmdToggleDeleteitFinal = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "final"), (a) => CanAddonDataByChanged(a));
             CmdToggleDeleteitAnni = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "anni"), (a) => CanAddonDataByChanged(a));
+
             CmdChangedSort = new DelegateCommand(() => UpdateSort(true));
             CmdChangedFilter = new DelegateCommand(UpdateFilter);
+            CmdChangeTheme = new DelegateCommand<MainTheme>(ChangeTheme);
+
             CmdExit = new DelegateCommand(() => CloseRequested?.Invoke());
-            CmdRefresh = new DelegateCommand(() => RefreshWorker.RunWorkerAsync(false), () => !RefreshWorker.IsBusy);
-            CmdUpdate = new DelegateCommand<string>((s) => UpdateWorker.RunWorkerAsync(s));
+            CmdRefresh = new DelegateCommand(Refresh, CanRefresh);
+            CmdUpdate = new DelegateCommand<string>(Update, CanUpdate);
+            CmdExport = new DelegateCommand(Export, CanExport);
+            CmdImport = new DelegateCommand(Import, CanImport);
+
             CmdOpenPage = new DelegateCommand<Anime>(OpenPage);
             CmdOpenRelations = new DelegateCommand<Anime>(OpenRelations);
+
             CmdTitles = new DelegateCommand(ShowTitlesDialog);
             CmdIssues = new DelegateCommand(ShowIssuesDialog);
-            CmdChangeTheme = new DelegateCommand<MainTheme>(ChangeTheme);
 
             // Refresh directly at startup
             RefreshWorker.RunWorkerAsync();

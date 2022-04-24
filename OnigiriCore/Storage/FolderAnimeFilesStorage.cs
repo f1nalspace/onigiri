@@ -1,4 +1,5 @@
 ﻿using Finalspace.Onigiri.Events;
+using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
@@ -9,6 +10,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -20,6 +22,156 @@ namespace Finalspace.Onigiri.Storage
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private readonly string _persistentPath;
         private readonly int _maxThreadCount;
+
+        [Serializable]
+        [StructLayout(LayoutKind.Sequential, Pack = 0)]
+        struct AnimeFileHeader
+        {
+            public static ulong MagicKey = 0x8c450d2b; // CRC32 hash from ONIGIRI_PERSISTENCE
+            public static ulong CurrentVersion = 1;
+
+            public ulong Magic;
+            public ulong Version;
+            public ulong Aid;
+            public ulong DetailsLength;
+            public ulong PictureLength;
+        }
+
+        class AnimeFile
+        {
+            private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+            public ulong Aid { get; }
+
+            public ImmutableArray<byte> Details { get; }
+
+            public ImmutableArray<byte> Picture { get; }
+
+            public AnimeFile(ulong aid, ImmutableArray<byte> details, ImmutableArray<byte> picture)
+            {
+                Aid = aid;
+                Details = details;
+                Picture = picture;
+            }
+
+            public ExecutionResult SaveToStream(Stream stream, string streamName)
+            {
+                if (stream == null)
+                    throw new ArgumentNullException(nameof(stream));
+                if (string.IsNullOrWhiteSpace(streamName))
+                    throw new ArgumentNullException(nameof(streamName));
+                try
+                {
+                    int sizeOfHeader = Marshal.SizeOf(typeof(AnimeFileHeader));
+                    AnimeFileHeader header = new AnimeFileHeader();
+                    header.Magic = AnimeFileHeader.MagicKey;
+                    header.Version = AnimeFileHeader.CurrentVersion;
+                    header.Aid = Aid;
+                    header.DetailsLength = (ulong)Details.Length;
+                    header.PictureLength = (ulong)Picture.Length;
+                    stream.WriteStruct(header);
+
+                    stream.Write(Details.AsSpan());
+
+                    if (Picture.Length > 0)
+                        stream.Write(Picture.AsSpan());
+
+                    stream.Flush();
+                }
+                catch (Exception e)
+                {
+                    Exception failed = new Exception($"Failed to save anime database '{Aid}' to stream '{streamName}'!", e);
+                    log.Error(failed.Message, failed);
+                    return new ExecutionResult(failed);
+                }
+                return new ExecutionResult();
+            }
+
+            public ExecutionResult SaveToFile(string filePath)
+            {
+                try
+                {
+                    using (Stream stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                    {
+                        ExecutionResult success = SaveToStream(stream, filePath);
+                        if (!success.Success)
+                            throw success.Error;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Exception failed = new Exception($"Failed to save anime database '{Aid}' to file '{filePath}'!", e);
+                    log.Error(failed.Message, failed);
+                    return new ExecutionResult(failed);
+                }
+                return new ExecutionResult();
+            }
+
+            public static ExecutionResult<AnimeFile> LoadFromStream(Stream stream, string streamName)
+            {
+                if (stream == null)
+                    throw new ArgumentNullException(nameof(stream));
+                if (string.IsNullOrWhiteSpace(streamName))
+                    throw new ArgumentNullException(nameof(streamName));
+                AnimeFile animeFile = null;
+                try
+                {
+                    AnimeFileHeader header = stream.ReadStruct<AnimeFileHeader>();
+                    if (header.Magic != AnimeFileHeader.MagicKey)
+                        throw new FormatException($"Wrong magic key");
+                    if (header.Aid == 0)
+                        throw new FormatException($"Wrong aid in anime file stream");
+                    if (header.DetailsLength == 0)
+                        throw new FormatException($"Missing details block");
+
+                    byte[] detailsData = new byte[header.DetailsLength];
+                    stream.Read(detailsData, 0, (int)header.DetailsLength);
+
+                    byte[] pictureData = null;
+                    if (header.PictureLength > 0)
+                    {
+                        pictureData = new byte[header.PictureLength];
+                        stream.Read(pictureData, 0, (int)header.PictureLength);
+                    }
+
+                    animeFile = new AnimeFile(header.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);
+                }
+                catch (Exception e)
+                {
+                    Exception failed = new Exception($"Failed to load anime database from stream '{stream}'!", e);
+                    log.Error(failed.Message, failed);
+                    return new ExecutionResult<AnimeFile>(failed);
+
+                }
+                return new ExecutionResult<AnimeFile>(animeFile);
+            }
+
+            public static ExecutionResult<AnimeFile> LoadFromFile(string filePath)
+            {
+                if (string.IsNullOrWhiteSpace(filePath))
+                    throw new ArgumentNullException(nameof(filePath));
+                AnimeFile animeFile = null;
+                try
+                {
+                    if (!File.Exists(filePath))
+                        throw new FileNotFoundException($"File '{filePath}' was not found", filePath);
+                    using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        ExecutionResult<AnimeFile> res = LoadFromStream(stream, filePath);
+                        if (!res.Success)
+                            throw res.Error;
+                        animeFile = res.Value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Exception failed = new Exception($"Failed to load anime database file '{filePath}'!", e);
+                    log.Error(failed.Message, e);
+                    return new ExecutionResult<AnimeFile>(failed);
+                }
+                return new ExecutionResult<AnimeFile>(animeFile);
+            }
+        }
 
         public FolderAnimeFilesStorage(string persistentPath, int? maxThreadCount = null)
         {
@@ -33,6 +185,7 @@ namespace Finalspace.Onigiri.Storage
         {
             if (animeFile == null)
                 throw new ArgumentNullException(nameof(animeFile));
+
             ImmutableArray<byte> animeData = animeFile.Details;
             if (animeData.Length == 0)
             {
@@ -42,20 +195,9 @@ namespace Finalspace.Onigiri.Storage
 
             ImmutableArray<byte> pictureData = animeFile.Picture;
 
-            Anime anime = null;
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(Anime));
-                using (MemoryStream stream = new MemoryStream(animeData.ToArray()))
-                {
-                    anime = (Anime)serializer.Deserialize(stream);
-                }
-            }
-            catch (Exception e)
-            {
-                log.Error($"Failed to deserialize anime data from anime '{animeFile.Aid}'!", e);
-                return new ExecutionResult<Anime>(e);
-            }
+            Anime anime = AnimeSerialization.DeserializeAnime(animeData.AsSpan(), animeFile.Aid);
+            if (anime == null)
+                return new ExecutionResult<Anime>(new FormatException("Anime serializer is broken!"));
 
             anime.Image = pictureData.Length > 0 ? new AnimeImage(anime.Picture, pictureData) : null;
 
@@ -64,25 +206,14 @@ namespace Finalspace.Onigiri.Storage
 
         private static ExecutionResult<AnimeFile> Serialize(Anime anime, string pictureFilePath)
         {
+            if (anime == null)
+                throw new ArgumentNullException(nameof(anime));
             if (anime.Aid == 0)
                 return new ExecutionResult<AnimeFile>(new FormatException($"Anime '{anime}' has in valid aid!"));
-            byte[] detailsData = null;
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(Anime));
-                using (MemoryStream detailsStream = new MemoryStream())
-                {
-                    serializer.Serialize(detailsStream, anime);
-                    detailsStream.Flush();
-                    detailsStream.Seek(0, SeekOrigin.Begin);
-                    detailsData = detailsStream.ToArray();
-                }
-            }
-            catch (Exception e)
-            {
-                log.Error($"Failed to serialize anime '{anime}' to xml!", e);
-                return new ExecutionResult<AnimeFile>(e);
-            }
+
+            byte[] detailsData;
+            using (MemoryStream stream = AnimeSerialization.SerializeAnime(anime))
+                detailsData = stream.ToArray();
 
             byte[] pictureData = null;
             if (!string.IsNullOrEmpty(pictureFilePath))

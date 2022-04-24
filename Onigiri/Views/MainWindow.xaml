@@ -6,9 +6,12 @@
               xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
               xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
               mc:Ignorable="d"
-        Title="Onigiri" Height="600" Width="800" Icon="../Resources/onigiri.ico" Loaded="RibbonWindow_Loaded">
+              Title="Onigiri" Height="600" Width="800" Icon="../Resources/onigiri.ico" Loaded="RibbonWindow_Loaded"
+              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
+        <dxmvvm:OpenFileDialogService />
+        <dxmvvm:SaveFileDialogService />
     </dxmvvm:Interaction.Behaviors>
     <Window.Resources>
         <ResourceDictionary>
@@ -31,12 +34,16 @@
                     </RibbonApplicationMenu.AuxiliaryPaneContent>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
-            
+
             <RibbonTab Header="Home" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
                 <RibbonGroup Header="Actions">
                     <RibbonButton ToolTip="Reload Database" Command="{Binding CmdRefresh}" Label="Refresh" LargeImageSource="/Resources/refresh_32x32.png" />
                     <RibbonButton ToolTip="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database" Label="Rebuild Database" LargeImageSource="/Resources/rebuild_database_32x32.png" />
                     <RibbonButton ToolTip="Update folders from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store" Label="Update Folders" LargeImageSource="/Resources/download_to_local_store_32x32.png" />
+                </RibbonGroup>
+                <RibbonGroup Header="Export/Import">
+                    <RibbonButton ToolTip="Export to a database file" Command="{Binding CmdExport}" Label="Export..." LargeImageSource="/Resources/download_to_local_store_32x32.png" />
+                    <RibbonButton ToolTip="Import from a database file" Command="{Binding CmdImport}" Label="Import..." LargeImageSource="/Resources/download_to_local_store_32x32.png" />
                 </RibbonGroup>
                 <RibbonGroup Header="Windows">
                     <RibbonButton ToolTip="Show titles" Command="{Binding CmdTitles}" Label="Titles" LargeImageSource="/Resources/titles_32x32.png" />
