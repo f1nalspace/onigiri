@@ -215,7 +215,7 @@ namespace Finalspace.Onigiri.Storage
             int animeIdCounter = 0;
             int imageIdCounter = 0;
 
-            // Write details & picture foreach
+            // Write details & picture
             int count = 0;
             int totalCount = data.Animes.Length;
             foreach (Anime anime in data.Animes)
@@ -227,16 +227,16 @@ namespace Finalspace.Onigiri.Storage
                 {
                     ulong uncompressedSize;
                     MemoryStream compressedStream;
+                    uint crc;
                     using (MemoryStream rawDetailsStream = AnimeSerialization.SerializeAnime(anime))
                     {
+                        crc = CompressionUtils.ComputeCRC(rawDetailsStream);
                         uncompressedSize = (ulong)rawDetailsStream.Length;
                         compressedStream = CompressionUtils.CompressGZip(rawDetailsStream);
                     }
 
                     ulong size = (ulong)compressedStream.Length;
 
-                    // TODO(final): Implement CRC for anime details!
-                    uint crc = 0;
                     // TODO(final): Read last update date from anime
                     DateTime date = DateTime.MinValue;
                     uint id = (uint)++animeIdCounter;
@@ -271,8 +271,8 @@ namespace Finalspace.Onigiri.Storage
                     AnimeImage image = anime.Image;
                     if (image != null)
                     {
-                        // TODO(final): Implement CRC for binary data (Picture)
-                        uint crc = 0;
+                        uint crc = CompressionUtils.ComputeCRC(image.Data.AsSpan());
+
                         // TODO(final): Read creation date from anime image
                         DateTime date = DateTime.MinValue;
 
@@ -377,6 +377,8 @@ namespace Finalspace.Onigiri.Storage
 
                     TestFileEntry(entry, entryIndex, dataHeader);
 
+                    uint crc = dataHeader.Hash;
+
                     // TODO(final): Read in blocks of int32?
                     byte[] rawData = new byte[entry.Size];
                     int read = fileStream.Read(rawData, 0, rawData.Length);
@@ -404,6 +406,13 @@ namespace Finalspace.Onigiri.Storage
                         ulong actualSize = (ulong)dataStream.Length;
                         if ((ulong)dataStream.Length != dataHeader.UmcompressedSize)
                             throw new NotSupportedException($"Wrong '{dataHeader.Compression}' decompressed size, expect '{dataHeader.UmcompressedSize}' but got '{actualSize}' for entry {entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'");
+                    }
+
+                    if (crc > 0)
+                    {
+                        uint uncompressedCRC = CompressionUtils.ComputeCRC(dataStream);
+                        if (uncompressedCRC != crc)
+                            throw new FormatException($"CRC-Mismatch, expect '{crc:X2}' but got '{uncompressedCRC:X2}' for entry '{entry.Size}' for entry {entryIndex}' with aid '{entry.Aid}' as type '{entry.Type}'");
                     }
 
                     Anime anime = null;
