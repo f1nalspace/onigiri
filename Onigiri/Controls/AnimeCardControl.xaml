@@ -8,7 +8,7 @@
              d:DesignHeight="280"
              d:DesignWidth="640"
              d:DataContext="{d:DesignInstance viewmodels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
-             d:Background="Blue">
+             d:Background="{StaticResource animeItemBackground_light}">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,14 +18,14 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="440" />
+            <ColumnDefinition Style="{StaticResource mainImageColumn}" />
+            <ColumnDefinition Style="{StaticResource mainBlockColumn}" />
         </Grid.ColumnDefinitions>
 
         <!-- Image block start -->
         <Grid Grid.Column="0">
             <!-- Picture start -->
-            <Image Stretch="UniformToFill">
+            <Image Style="{StaticResource pictureImage}">
                 <Image.Source>
                     <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
                         <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
@@ -36,11 +36,8 @@
             <!-- Picture end -->
 
             <!-- Anime title start -->
-            <Grid VerticalAlignment="Bottom">
-                <Grid.Background>
-                    <SolidColorBrush Color="Black" Opacity="0.75" />
-                </Grid.Background>
-                <TextBlock Padding="10" Foreground="White" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" TextWrapping="Wrap" FontSize="18" />
+            <Grid VerticalAlignment="Bottom" Background="{StaticResource animeTitleBackground}">
+                <TextBlock Style="{StaticResource animeTitleText}" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" />
             </Grid>
             <!-- Anime title end -->
         </Grid>
@@ -49,14 +46,14 @@
         <!-- Content start -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="56" />
+                <RowDefinition Style="{StaticResource contentTitleRow}" />
+                <RowDefinition Style="{StaticResource contentDescriptionRow}" />
+                <RowDefinition Style="{StaticResource contentCategoriesRow}"/>
             </Grid.RowDefinitions>
 
             <!-- Header start -->
             <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
-                <StackPanel DockPanel.Dock="Right" Margin="0 0 8 0" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Orientation="Horizontal">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ratingPanel}">
                     <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                     <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
                     <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
@@ -65,14 +62,14 @@
                 </StackPanel>
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                        <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
-                        <TextBlock Text=" " FontSize="14" FontWeight="Bold" />
-                        <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" />
+                        <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeMainlineText}" />
+                        <TextBlock Text=" " Style="{StaticResource animeMainlineText}" />
+                        <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeMainlineText}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                        <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
-                        <TextBlock Text="/" Style="{StaticResource animeSublines}" FontSize="18" FontWeight="Bold"  />
-                        <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold"  />
+                        <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeSublineText}" />
+                        <TextBlock Text="/" Style="{StaticResource animeSublineText}" />
+                        <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeSublineText}" />
                     </StackPanel>
                 </StackPanel>
             </DockPanel>
@@ -80,8 +77,8 @@
 
             <!-- Description start -->
             <Grid Grid.Row="1">
-                <TextBlock Padding="8" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" FontSize="14" />
-                <WrapPanel Grid.Column="1" Margin="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
+                <WrapPanel Style="{StaticResource actionsPanel}">
                     <Button Style="{StaticResource actionButton}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
@@ -123,7 +120,7 @@
             <!-- Description end -->
 
             <!-- Tags start, ItemsControl needs a fixed width -->
-            <ItemsControl Grid.Row="2" Style="{StaticResource tagsItemsControl}" FontSize="12" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}">
+            <ItemsControl Grid.Row="2" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}" Style="{StaticResource tagsItemsControl}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" />
@@ -131,8 +128,8 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="4" Margin="2" Background="BlueViolet" CornerRadius="4">
-                            <TextBlock VerticalAlignment="Center" TextAlignment="Left" ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Foreground="White" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                        <Border Style="{StaticResource tagItem}">
+                            <TextBlock ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource tagItemText}" />
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
