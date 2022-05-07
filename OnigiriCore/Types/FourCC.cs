@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Types
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    public readonly struct FourCC : IEquatable<FourCC>
+    [XmlRoot()]
+    public struct FourCC : IEquatable<FourCC>
     {
-        public uint Value { get; }
+        [XmlAttribute()]
+        public uint Value { get; set; }
 
         private FourCC(uint value)
         {

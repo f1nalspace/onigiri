@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Finalspace.Onigiri.Types;
+using System;
 
-namespace Finalspace.Onigiri.Types
+namespace Finalspace.Onigiri.Media
 {
     public struct AudioInfo
     {

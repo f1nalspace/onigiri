@@ -18,6 +18,8 @@ using System.Collections.Immutable;
 using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Storage;
 using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
+using Finalspace.Onigiri.Media;
 
 namespace Finalspace.Onigiri
 {
@@ -281,7 +283,9 @@ namespace Finalspace.Onigiri
 
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
 
-                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = Config.MaxThreadCount };
+                int threadCount = Config.MaxThreadCount;
+                threadCount = 1;
+                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
                 Parallel.ForEach(animeDirs, poptions, (animeDir) =>
                 {
                     int c = Interlocked.Increment(ref count);
@@ -330,7 +334,7 @@ namespace Finalspace.Onigiri
             ".mp4"
         };
 
-        private static IEnumerable<string> FindMediaFileNames(DirectoryInfo dir)
+        private static IEnumerable<AnimeMediaFile> GetExtendedMediaFiles(DirectoryInfo dir)
         {
             FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
             foreach (FileInfo file in files)
@@ -338,7 +342,14 @@ namespace Finalspace.Onigiri
                 string ext = file.Extension.ToLower();
                 if (!mediaFileExtensions.Contains(ext))
                     continue;
-                yield return file.Name;
+                MediaInfo info = MediaInfoParser.Parse(file);
+                AnimeMediaFile animeMediaFile = new AnimeMediaFile()
+                {
+                    FileName = file.Name,
+                    FileSize = (ulong)file.Length,
+                    Info = info,
+                };
+                yield return animeMediaFile;
             }
         }
 
@@ -458,8 +469,9 @@ namespace Finalspace.Onigiri
 
             // Find media files
             log.Info($"Find media files from path '{sourceDir.FullName}'");
-            IEnumerable<string> mediaFiles = FindMediaFileNames(sourceDir);
-            result.MediaFiles = new List<string>(mediaFiles);
+            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir);
+            result.ExtendedMediaFiles = extendedMediaFiles.ToList();
+            result.MediaFiles = extendedMediaFiles.Select(m => m.FileName).ToList();
             log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}'");
 
             return result;

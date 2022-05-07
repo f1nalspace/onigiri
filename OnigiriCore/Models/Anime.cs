@@ -36,6 +36,14 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value, () => RaisePropertyChanged(nameof(MediaFileCount)));
         }
 
+        [XmlArray("ExtendedMediaFiles")]
+        [XmlArrayItem("ExtendedMediaFile")]
+        public List<AnimeMediaFile> ExtendedMediaFiles
+        {
+            get => GetValue<List<AnimeMediaFile>>();
+            set => SetValue(value, () => RaisePropertyChanged(nameof(MediaFileCount)));
+        }
+
         public int MediaFileCount => MediaFiles.Count;
 
         [XmlElement]
