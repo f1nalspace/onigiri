@@ -148,19 +148,73 @@
         <Setter Property="Margin" Value="0 0 8 0" />
     </Style>
 
-    <Style x:Key="actionsPanel" TargetType="WrapPanel">
+    <Style x:Key="actionsPanelBack" TargetType="Grid">
         <Setter Property="Margin" Value="2" />
-        <Setter Property="Orientation" Value="Horizontal" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
-    <!-- Action buttons &amp; icons -->
     <Style x:Key="actionButton" TargetType="Button">
         <Setter Property="Width" Value="32" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Margin" Value="2 1" />
     </Style>
+
+    <ControlTemplate x:Key="actionsPanelTemplate">
+        <Grid Style="{StaticResource actionsPanelBack}" x:Name="outerActionPanel">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel x:Name="innerActionPanel" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
+                <Button Style="{StaticResource actionButton}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Image Source="/Resources/anni_false.png" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Style="{StaticResource actionButton}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Image Source="/Resources/final_false.png" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Style="{StaticResource actionButton}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Image Source="/Resources/mark_false.png" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+            <Button Grid.Column="1" Style="{StaticResource actionButton}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Image Source="/Resources/add_32x32.png" />
+                        </Grid>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger SourceName="outerActionPanel" Property="IsMouseOver" Value="True">
+                <Setter TargetName="innerActionPanel" Property="Visibility" Value="Visible" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Action buttons &amp; icons -->
+
     <Style x:Key="actionIcon" TargetType="Image">
         <Setter Property="Width" Value="48" />
         <Setter Property="Height" Value="48" />
@@ -292,7 +346,7 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-    
+
     <Style x:Key="animeSublineText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Bold" />
@@ -357,7 +411,35 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListBox}">
-                            <TextBlock Text="No Animes found." Foreground="{StaticResource noAnimesForeground_light}" />
+                            <Grid>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Background" Value="{StaticResource animeListBackground_dark}" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <TextBlock Text="No Animes found." HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="24" />
+                                            <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                                    <DataTrigger.Setters>
+                                                        <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
+                                                    </DataTrigger.Setters>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -388,6 +470,18 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="bottomPanel" TargetType="Grid">
+        <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                <DataTrigger.Setters>
+                    <Setter Property="Background" Value="{StaticResource tagsBackground_dark}" />
+                </DataTrigger.Setters>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="tagsItemsControl" TargetType="ItemsControl">
         <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
 
@@ -404,9 +498,19 @@
 
     <Style x:Key="tagItem" TargetType="Border">
         <Setter Property="Background" Value="BlueViolet" />
-        <Setter Property="Padding" Value="4" />
+        <Setter Property="Padding" Value="3" />
         <Setter Property="Margin" Value="2" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                <DataTrigger.Setters>
+                    <Setter Property="BorderBrush" Value="White" />
+                </DataTrigger.Setters>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="pictureImage" TargetType="Image">

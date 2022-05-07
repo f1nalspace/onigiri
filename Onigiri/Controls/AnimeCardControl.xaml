@@ -78,44 +78,7 @@
             <!-- Description start -->
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
-                <WrapPanel Style="{StaticResource actionsPanel}">
-                    <Button Style="{StaticResource actionButton}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Grid>
-                                    <Image Source="/Resources/anni_false.png" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <Button Style="{StaticResource actionButton}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Grid>
-                                    <Image Source="/Resources/final_false.png" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <Button Style="{StaticResource actionButton}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Grid>
-                                    <Image Source="/Resources/mark_false.png" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <Button Style="{StaticResource actionButton}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Grid>
-                                    <Image Source="/Resources/add_32x32.png" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </WrapPanel>
+                <Button Template="{StaticResource actionsPanelTemplate}" />
             </Grid>
             <!-- Description end -->
 
@@ -135,7 +98,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <!-- Tags end -->
-
         </Grid>
         <!-- Content end -->
     </Grid>
