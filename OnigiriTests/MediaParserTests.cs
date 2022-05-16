@@ -1,5 +1,7 @@
 using Finalspace.Onigiri.Media;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using System.Linq;
 
 namespace OnigiriTests
 {
@@ -9,8 +11,23 @@ namespace OnigiriTests
         [TestMethod]
         public void TestAvi()
         {
-            MediaInfo ep1 = MediaInfoParser.Parse(@"X:\Argento Soma\[E-F] Argento Soma - ep01 [05429A44].avi");
-            Assert.IsNotNull(ep1);
+            string folderPath = @"E:\Gamevideos";
+
+            DirectoryInfo folder = new DirectoryInfo(folderPath);
+            if (!folder.Exists)
+                Assert.Fail($"Folder path '{folderPath}' does not exists");
+
+            FileInfo[] files = folder
+                .GetFiles("*.avi", SearchOption.TopDirectoryOnly)
+                .OrderBy(f => f.Name)
+                .ToArray();
+
+            foreach (var file in files)
+            {
+                MediaInfo info = MediaInfoParser.Parse(file);
+                Assert.IsNotNull(info);
+            }
+
         }
     }
 }
