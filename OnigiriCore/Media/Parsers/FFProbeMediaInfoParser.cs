@@ -81,23 +81,35 @@ namespace Finalspace.Onigiri.Media.Parsers
                                 switch (codecType)
                                 {
                                     case "video":
-                                        string avgFrameRate = streamNode.GetAttribute("avg_frame_rate", string.Empty);
+                                        string frameRateText = streamNode.GetAttribute("avg_frame_rate", string.Empty);
+                                        if (frameRateText.Length == 0 || frameRateText.EndsWith("/0"))
+                                            frameRateText = streamNode.GetAttribute("r_frame_rate", string.Empty);
 
                                         double frameRate = 0.0;
-                                        Match m = _rexBasePattern.Match(avgFrameRate);
+                                        Match m = _rexBasePattern.Match(frameRateText);
                                         if (m.Success)
                                         {
                                             int value = int.Parse(m.Groups[1].Value);
                                             int divider = int.Parse(m.Groups[2].Value);
-                                            frameRate = value / (double)divider;
+                                            if  (divider != 0)
+                                                frameRate = value / (double)divider;
                                         }
+
+                                        FourCC codecId = FourCC.FromString(codecTagString);
+                                        string codecDesc = codecLongName ?? codecName;
+                                        int width = streamNode.GetAttribute("width", 0);
+                                        int height = streamNode.GetAttribute("height", 0);
+                                        int frameCount = streamNode.GetAttribute("nb_frames", 0);
+
+                                        if (frameCount == 0 && frameRate > 0 && result.Duration.TotalSeconds > 0)
+                                            frameCount = (int)(result.Duration.TotalSeconds * frameRate);
 
                                         result.Video.Add(new VideoInfo()
                                         {
-                                            Codec = new CodecDescription(FourCC.FromString(codecTagString), codecLongName ?? codecName),
-                                            Width = streamNode.GetAttribute("width", 0),
-                                            Height = streamNode.GetAttribute("height", 0),
-                                            FrameCount = streamNode.GetAttribute("nb_frames", 0),
+                                            Codec = new CodecDescription(codecId, codecDesc),
+                                            Width = width,
+                                            Height = height,
+                                            FrameCount = frameCount,
                                             FrameRate = frameRate,
                                         });
                                         break;

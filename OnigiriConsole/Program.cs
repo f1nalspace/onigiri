@@ -154,7 +154,7 @@ namespace Finalspace.Onigiri
                 throw new DirectoryNotFoundException($"Folder path '{folderPath}' does not exists");
 
             FileInfo[] files = folder
-                .GetFiles("*.avi", SearchOption.TopDirectoryOnly)
+                .GetFiles("*.*", SearchOption.TopDirectoryOnly)
                 .OrderBy(f => f.Name)
                 .ToArray();
 
