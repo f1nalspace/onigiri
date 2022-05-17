@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Finalspace.Onigiri.Media.Parsers
@@ -24,9 +25,11 @@ namespace Finalspace.Onigiri.Media.Parsers
         public static readonly FourCC StreamType = FourCC.FromString("strl");
         public static readonly FourCC StreamHeaderType = FourCC.FromString("strh");
         public static readonly FourCC StreamFormatType = FourCC.FromString("strf");
+        public static readonly FourCC StreamNameType = FourCC.FromString("strn");
 
         public static readonly FourCC StreamVideoType = FourCC.FromString("vids");
         public static readonly FourCC StreamAudioType = FourCC.FromString("auds");
+        public static readonly FourCC StreamSubtitleType = FourCC.FromString("txts");
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         unsafe struct RiffChunk
@@ -168,9 +171,10 @@ namespace Finalspace.Onigiri.Media.Parsers
             double frameRate = 1000.0 / ((double)aviHeader.dwMicroSecPerFrame / 1000.0);
             CodecDescription videoCodec = CodecDescription.Empty;
 
-            VideoInfo videoInfo = new VideoInfo((int)aviHeader.dwWidth, (int)aviHeader.dwHeight, frameCount, frameRate, videoCodec);
+            VideoInfo videoInfo = new VideoInfo(String.Empty, (int)aviHeader.dwWidth, (int)aviHeader.dwHeight, frameCount, frameRate, videoCodec);
+            result.Video.Add(videoInfo);
 
-            result.Video = videoInfo;
+            result.Duration = TimeSpan.FromSeconds((double)frameCount / frameRate);
 
             return true;
         }
@@ -181,7 +185,9 @@ namespace Finalspace.Onigiri.Media.Parsers
 
             FourCC currentStreamType = FourCC.Empty;
 
+            VideoInfo currentVideoInfo = result.Video.FirstOrDefault();
             AudioInfo currentAudioInfo = null;
+            SubtitleInfo currentSubtitleInfo = null;
 
             while (!streamData.IsEOF && streamData.Position < endList)
             {
@@ -198,14 +204,14 @@ namespace Finalspace.Onigiri.Media.Parsers
 
                     if (StreamVideoType.Equals(streamHeader.fccType))
                     {
-                        if (result.Video != null)
+                        if (currentVideoInfo != null)
                         {
-                            if (CodecTables.IdToVideoCodecMap.TryGetValue(streamHeader.fccHandler, out CodecDescription codecDescription))
-                                result.Video.Codec = codecDescription;
-                            else
-                                result.Video.Codec = new CodecDescription(streamHeader.fccHandler);
-                            result.Video.FrameRate = streamHeader.dwRate / (double)streamHeader.dwScale;
-                            result.Video.FrameCount = (int)streamHeader.dwLength;
+                            CodecDescription videoCodec;
+                            if (!CodecTables.IdToVideoCodecMap.TryGetValue(streamHeader.fccHandler, out videoCodec))
+                                videoCodec = new CodecDescription(streamHeader.fccHandler);
+                            currentVideoInfo.Codec = videoCodec;
+                            currentVideoInfo.FrameRate = streamHeader.dwRate / (double)streamHeader.dwScale;
+                            currentVideoInfo.FrameCount = (int)streamHeader.dwLength;
                         }
                     }
                     else if (StreamAudioType.Equals(streamHeader.fccType))
@@ -218,6 +224,15 @@ namespace Finalspace.Onigiri.Media.Parsers
                             BytesPerSample = bytesPerSample,
                         };
                         result.Audio.Add(audioInfo);
+                    }
+                    else if (StreamSubtitleType.Equals(streamHeader.fccType))
+                    {
+                        SubtitleInfo subtitleInfo = currentSubtitleInfo = new SubtitleInfo()
+                        {
+                            Name = string.Empty,
+                            Lang = string.Empty,
+                        };
+                        result.Subtitles.Add(subtitleInfo);
                     }
                     else
                         throw new NotImplementedException($"FCC Type '{streamHeader.fccType}' not implemented yet");
@@ -253,6 +268,16 @@ namespace Finalspace.Onigiri.Media.Parsers
                             continue;
                         }
                     }
+                    else if (StreamSubtitleType.Equals(currentStreamType))
+                    {
+                        // @TODO(final): Get more subtitle infos from format stream (strf)
+                    }
+
+                    streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
+                }
+                else if (StreamNameType.Equals(chunk.chunkType))
+                {
+                    // @TODO(final): Get stream name (strn)!
 
                     streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
                 }

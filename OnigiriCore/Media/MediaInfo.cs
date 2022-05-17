@@ -14,18 +14,25 @@ namespace Finalspace.Onigiri.Media
         public FourCC Format { get => GetValue<FourCC>(); set => SetValue(value); }
 
         [XmlElement]
-        public VideoInfo Video { get => GetValue<VideoInfo>(); set => SetValue(value); }
+        public TimeSpan Duration { get => GetValue<TimeSpan>(); set => SetValue(value); }
 
-        [XmlArray("AudioInfos")]
-        [XmlArrayItem("AudioInfo")]
+        [XmlArray("VideoStreams")]
+        [XmlArrayItem("VideoStream")]
+        public List<VideoInfo> Video { get => GetValue<List<VideoInfo>>(); set => SetValue(value); }
+
+        [XmlArray("AudioStreams")]
+        [XmlArrayItem("AudioStream")]
         public List<AudioInfo> Audio { get => GetValue<List<AudioInfo>>(); set => SetValue(value); }
 
-        [XmlArray("SubtitleInfos")]
-        [XmlArrayItem("SubtitleInfo")]
+        [XmlArray("Subtitles")]
+        [XmlArrayItem("Subtitle")]
         public List<SubtitleInfo> Subtitles { get => GetValue<List<SubtitleInfo>>(); set => SetValue(value); }
 
         public MediaInfo()
         {
+            Format = FourCC.Empty;
+            Duration = TimeSpan.Zero;
+            Video = new List<VideoInfo>();
             Audio = new List<AudioInfo>();
             Subtitles = new List<SubtitleInfo>();
         }

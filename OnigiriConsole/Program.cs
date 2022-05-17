@@ -160,19 +160,20 @@ namespace Finalspace.Onigiri
 
             foreach (var file in files)
             {
+                Console.WriteLine($"Parse media file: {file.Name}");
                 MediaInfo info = MediaInfoParser.Parse(file);
                 if (info != null)
                 {
-                    Console.WriteLine($"{file.Name}: {info.Format}");
-                    Console.WriteLine($"\tVideo: {info.Video.Width}x{info.Video.Height}, Rate: {info.Video.FrameRate}, Codec: {info.Video.Codec}");
+                    Console.WriteLine(FormattableString.Invariant($"\tContainer: '{info.Format}', Duration: {info.Duration.TotalSeconds} secs"));
+
+                    foreach (VideoInfo video in info.Video)
+                        Console.WriteLine(FormattableString.Invariant($"\tVideo: {video.Width}x{video.Height}, {video.FrameCount} frames, {video.FrameRate} Fps [Codec:'{video.Codec}', Name: '{video.Name}']"));
 
                     foreach (AudioInfo audio in info.Audio)
-                    {
-                        Console.WriteLine($"\tAudio: {audio.SampleRate} Hz, {audio.Channels} Channels, {audio.BytesPerSample} Bytes per sample, Codec: {audio.Codec}");
-                    }
+                        Console.WriteLine(FormattableString.Invariant($"\tAudio: {audio.Channels} Channels, {audio.SampleRate} Hz, {audio.BytesPerSample} Bytes per sample [Codec: '{audio.Codec}', Name: '{audio.Name}']"));
                 }
                 else
-                    Console.Error.WriteLine($"Failed getting media infos for: {file.Name}");
+                    Console.Error.WriteLine($"\tFailed getting media infos");
             }
 
             Console.WriteLine("press any key to exit");

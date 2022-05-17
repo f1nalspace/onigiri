@@ -8,6 +8,9 @@ namespace Finalspace.Onigiri.Media
     public class VideoInfo
     {
         [XmlAttribute()]
+        public string Name { get; set; }
+
+        [XmlAttribute()]
         public int Width { get; set; }
 
         [XmlAttribute()]
@@ -24,6 +27,7 @@ namespace Finalspace.Onigiri.Media
 
         public VideoInfo()
         {
+            Name = null;
             Width = 0;
             Height = 0;
             FrameCount = 0;
@@ -31,8 +35,9 @@ namespace Finalspace.Onigiri.Media
             Codec = CodecDescription.Empty;
         }
 
-        public VideoInfo(int width, int height, int frameCount, double frameRate, CodecDescription codec)
+        public VideoInfo(string name, int width, int height, int frameCount, double frameRate, CodecDescription codec)
         {
+            Name = name;
             Width = width;
             Height = height;
             FrameCount = frameCount;
