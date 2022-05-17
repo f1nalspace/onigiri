@@ -21,11 +21,19 @@ namespace Finalspace.Onigiri.Types
 
         public static FourCC FromString(string str)
         {
-            if (str == null)
+            if (str == null || str.Length == 0)
                 return Empty;
-            char[] c = str?.ToCharArray();
-            if (c.Length != 4)
-                throw new FormatException($"The format of the FourCC string '{str}' is invalid!");
+            char[] c = new char[4];
+
+            int len = Math.Min(c.Length, str.Length);
+
+            int i;
+            for (i = 0; i < len; i++)
+                c[i] = str[i];
+
+            for (; i < c.Length; i++)
+                c[i] = ' ';
+
             uint value = (uint)(c[3] << 24 | c[2] << 16 | c[1] << 8 | c[0]);
             return new FourCC(value);
         }

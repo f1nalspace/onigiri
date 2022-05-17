@@ -1,5 +1,4 @@
 ﻿using Finalspace.Onigiri.Types;
-using System;
 using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Media
@@ -19,7 +18,13 @@ namespace Finalspace.Onigiri.Media
         public uint SampleRate { get; set; }
 
         [XmlAttribute()]
-        public uint BytesPerSample { get; set; }
+        public uint BitsPerSample { get; set; }
+
+        [XmlAttribute()]
+        public uint BitRate { get; set; }
+
+        [XmlAttribute()]
+        public uint FrameCount { get; set; }
 
         [XmlElement()]
         public CodecDescription Codec { get; set; }
@@ -30,18 +35,10 @@ namespace Finalspace.Onigiri.Media
             Lang = null;
             Channels = 0;
             SampleRate = 0;
-            BytesPerSample = 0;
+            BitsPerSample = 0;
+            BitRate = 0;
+            FrameCount = 0;
             Codec = CodecDescription.Empty;
-        }
-
-        public AudioInfo(string name, string language, uint channels, uint sampleRate, uint bytesPerSample, CodecDescription codec)
-        {
-            Name = name;
-            Lang = language;
-            Channels = channels;
-            SampleRate = sampleRate;
-            BytesPerSample = bytesPerSample;
-            Codec = codec;
         }
     }
 }

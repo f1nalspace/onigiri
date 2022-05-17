@@ -19,17 +19,24 @@ namespace Finalspace.Onigiri.Utils
                 }
                 else return def;
             }
+            else if (typeof(T) == typeof(double))
+            {
+                if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
+                    return (T)Convert.ChangeType(result, typeof(T));
+                else
+                    return def;
+            }
             return (T)Convert.ChangeType(value, typeof(T));
         }
 
-        public static T GetAttribute<T>(XmlNode node, string name, T def, string format = null)
+        public static T GetAttribute<T>(this XmlNode node, string name, T def, string format = null)
         {
             XmlNode attr = node.Attributes.GetNamedItem(name);
             if (attr != null)
                 return GetValue(attr.Value, def, format);
             return def;
         }
-        public static T GetAttribute<T>(XmlNode rootNode, string xpath, string name, T def, string format = null)
+        public static T GetAttribute<T>(this XmlNode rootNode, string xpath, string name, T def, string format = null)
         {
             XmlNode node = rootNode.SelectSingleNode(xpath);
             if (node != null)
@@ -37,7 +44,7 @@ namespace Finalspace.Onigiri.Utils
             return def;
         }
 
-        public static T GetValue<T>(XmlNode node, string xpath, T def, string format = null)
+        public static T GetValue<T>(this XmlNode node, string xpath, T def, string format = null)
         {
             XmlNode found = node.SelectSingleNode(xpath);
             if (found != null)

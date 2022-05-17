@@ -17,15 +17,21 @@ namespace Finalspace.Onigiri.Media
             {".avi",  new RiffMediaInfoParser() },
         };
 
+        private static readonly FFProbeMediaInfoParser _ffProbeParser = new FFProbeMediaInfoParser();
+
         public static MediaInfo Parse(FileInfo file)
         {
             if (file == null || !file.Exists)
                 return null;
             string ext = file.Extension;
             string lowerExt = ext.ToLower();
-            if (_extensionToParserMap.TryGetValue(lowerExt, out IMediaInfoParser mediaInfoParser))
-                return mediaInfoParser.Parse(file.FullName);
-            return null;
+            MediaInfo result = _ffProbeParser.Parse(file.FullName);
+            if (result == null)
+            {
+                if (_extensionToParserMap.TryGetValue(lowerExt, out IMediaInfoParser mediaInfoParser))
+                    result = mediaInfoParser.Parse(file.FullName);
+            }
+            return result;
         }
 
         public static MediaInfo Parse(string filePath)

@@ -167,10 +167,10 @@ namespace Finalspace.Onigiri
                     Console.WriteLine(FormattableString.Invariant($"\tContainer: '{info.Format}', Duration: {info.Duration.TotalSeconds} secs"));
 
                     foreach (VideoInfo video in info.Video)
-                        Console.WriteLine(FormattableString.Invariant($"\tVideo: {video.Width}x{video.Height}, {video.FrameCount} frames, {video.FrameRate} Fps [Codec:'{video.Codec}', Name: '{video.Name}']"));
+                        Console.WriteLine(FormattableString.Invariant($"\tVideo: {video.Width}x{video.Height}, {video.FrameCount} frames, {video.FrameRate} fps [Codec:'{video.Codec}', Name: '{video.Name}']"));
 
                     foreach (AudioInfo audio in info.Audio)
-                        Console.WriteLine(FormattableString.Invariant($"\tAudio: {audio.Channels} Channels, {audio.SampleRate} Hz, {audio.BytesPerSample} Bytes per sample [Codec: '{audio.Codec}', Name: '{audio.Name}']"));
+                        Console.WriteLine(FormattableString.Invariant($"\tAudio: {audio.Channels} channels, {audio.SampleRate} Hz, {audio.BitsPerSample} bits/sample, {audio.BitRate / 1000} kHz [Codec: '{audio.Codec}', Name: '{audio.Name}']"));
                 }
                 else
                     Console.Error.WriteLine($"\tFailed getting media infos");

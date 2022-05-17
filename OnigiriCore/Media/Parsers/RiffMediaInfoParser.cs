@@ -219,11 +219,11 @@ namespace Finalspace.Onigiri.Media.Parsers
                     else if (StreamAudioType.Equals(streamHeader.fccType))
                     {
                         uint sampleRate = streamHeader.dwScale > 0 ? (uint)(streamHeader.dwRate / (double)streamHeader.dwScale) : streamHeader.dwRate;
-                        uint bytesPerSample = streamHeader.dwSampleSize;
+                        uint bitsPerSample = streamHeader.dwSampleSize * 8;
                         AudioInfo audioInfo = currentAudioInfo = new AudioInfo()
                         {
                             SampleRate = sampleRate,
-                            BytesPerSample = bytesPerSample,
+                            BitsPerSample = bitsPerSample,
                         };
                         result.Audio.Add(audioInfo);
                     }
@@ -258,7 +258,7 @@ namespace Finalspace.Onigiri.Media.Parsers
                             WaveFormatEx waveFormatEx = streamData.ReadStruct<WaveFormatEx>();
                             currentAudioInfo.Channels = waveFormatEx.nChannels;
                             currentAudioInfo.SampleRate = waveFormatEx.nSamplesPerSec;
-                            currentAudioInfo.BytesPerSample = (uint)(waveFormatEx.wBitsPerSample / 8);
+                            currentAudioInfo.BitsPerSample = (uint)waveFormatEx.wBitsPerSample;
                             if (CodecTables.FormatTagToAudioCodecMap.TryGetValue(waveFormatEx.wFormatTag, out CodecDescription codecDesc))
                                 currentAudioInfo.Codec = codecDesc;
                             else
