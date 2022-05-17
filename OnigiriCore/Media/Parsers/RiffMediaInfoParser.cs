@@ -193,6 +193,8 @@ namespace Finalspace.Onigiri.Media.Parsers
             {
                 RiffChunk chunk = streamData.ReadStruct<RiffChunk>();
 
+                long dataPosition = streamData.Position;
+
                 if (StreamHeaderType.Equals(chunk.chunkType))
                 {
                     if (AviStreamHeader.Size != chunk.chunkSize)
@@ -261,28 +263,26 @@ namespace Finalspace.Onigiri.Media.Parsers
                                 currentAudioInfo.Codec = codecDesc;
                             else
                                 currentAudioInfo.Codec = CodecDescription.Empty;
-
-                            // Seek back to the start position before we read the WaveFormatEx structure
-                            uint remaining = chunk.chunkSize - (uint)WaveFormatEx.Size;
-                            streamData.Seek(remaining, SeekOrigin.Current);
-                            continue;
                         }
                     }
                     else if (StreamSubtitleType.Equals(currentStreamType))
                     {
                         // @TODO(final): Get more subtitle infos from format stream (strf)
                     }
-
-                    streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
                 }
                 else if (StreamNameType.Equals(chunk.chunkType))
                 {
                     // @TODO(final): Get stream name (strn)!
-
-                    streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
                 }
-                else
-                    streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
+
+                // Seek to the the end of the chunk
+                if (streamData.Position < dataPosition)
+                {
+                    long endOfChunk = streamData.Position - dataPosition;
+                    streamData.Seek(endOfChunk, SeekOrigin.Current);
+                }
+
+                Debug.Assert(streamData.Position <= dataPosition + chunk.chunkSize);
             }
 
             return true;
