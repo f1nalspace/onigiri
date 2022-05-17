@@ -10,8 +10,6 @@ namespace Finalspace.Onigiri.Media
     [XmlRoot()]
     public class MediaInfo : BindableBase
     {
-        
-
         [XmlElement]
         public FourCC Format { get => GetValue<FourCC>(); set => SetValue(value); }
 
@@ -25,5 +23,11 @@ namespace Finalspace.Onigiri.Media
         [XmlArray("SubtitleInfos")]
         [XmlArrayItem("SubtitleInfo")]
         public List<SubtitleInfo> Subtitles { get => GetValue<List<SubtitleInfo>>(); set => SetValue(value); }
+
+        public MediaInfo()
+        {
+            Audio = new List<AudioInfo>();
+            Subtitles = new List<SubtitleInfo>();
+        }
     }
 }

@@ -4,18 +4,25 @@ using System.Xml.Serialization;
 namespace Finalspace.Onigiri.Media
 {
     [Serializable]
-    public struct SubtitleInfo
+    public class SubtitleInfo
     {
+        [XmlAttribute()]
+        public string Name { get; set; }
+
         [XmlAttribute()]
         public string Lang { get; set; }
 
-        [XmlAttribute()]
-        public string DisplayName { get; set; }
 
-        public SubtitleInfo(string language, string displayName)
+        public SubtitleInfo()
         {
+            Name = null;
+            Lang = null;
+        }
+
+        public SubtitleInfo(string name, string language)
+        {
+            Name = name;
             Lang = language;
-            DisplayName = displayName;
         }
     }
 }

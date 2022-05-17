@@ -13,16 +13,16 @@ namespace Finalspace.Onigiri.Models
     {
         [XmlArray("watchstates")]
         [XmlArrayItem("watched")]
-        public ObservableCollection<NameState> Watchstates
+        public ObservableCollection<UserState> Watchstates
         {
-            get => GetValue<ObservableCollection<NameState>>();
+            get => GetValue<ObservableCollection<UserState>>();
             private set => SetValue(value, RaiseWatchStatesChanged);
         }
         [XmlArray("deleteits")]
         [XmlArrayItem("deleteit")]
-        public ObservableCollection<NameState> Deleteits
+        public ObservableCollection<UserState> Deleteits
         {
-            get => GetValue<ObservableCollection<NameState>>();
+            get => GetValue<ObservableCollection<UserState>>();
             private set => SetValue(value, RaiseDeleteitsChanged);
         }
 
@@ -30,7 +30,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                NameState first = Watchstates.Where((d) => "anni".Equals(d.Name)).FirstOrDefault();
+                UserState first = Watchstates.Where((d) => "anni".Equals(d.UserName)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return false;
@@ -40,7 +40,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                NameState first = Watchstates.Where((d) => "final".Equals(d.Name)).FirstOrDefault();
+                UserState first = Watchstates.Where((d) => "final".Equals(d.UserName)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return false;
@@ -53,7 +53,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                NameState first = Deleteits.Where((d) => "anni".Equals(d.Name)).FirstOrDefault();
+                UserState first = Deleteits.Where((d) => "anni".Equals(d.UserName)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return false;
@@ -63,7 +63,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                NameState first = Deleteits.Where((d) => "final".Equals(d.Name)).FirstOrDefault();
+                UserState first = Deleteits.Where((d) => "final".Equals(d.UserName)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return false;
@@ -90,18 +90,18 @@ namespace Finalspace.Onigiri.Models
 
         public AdditionalData()
         {
-            Watchstates = new ObservableCollection<NameState>();
+            Watchstates = new ObservableCollection<UserState>();
             Watchstates.CollectionChanged += (s, e) => RaisePropertyChanged(() => Watchstates);
-            Deleteits = new ObservableCollection<NameState>();
+            Deleteits = new ObservableCollection<UserState>();
             Deleteits.CollectionChanged += (s, e) => RaisePropertyChanged(() => Deleteits);
         }
 
         public void ToggleWatchState(string who)
         {
-            NameState first = Watchstates.FirstOrDefault((d) => who.Equals(d.Name));
+            UserState first = Watchstates.FirstOrDefault((d) => who.Equals(d.UserName));
             if (first == null)
             {
-                first = new NameState() { Name = who, Value = true };
+                first = new UserState() { UserName = who, Value = true };
                 Watchstates.Add(first);
             }
             else
@@ -111,10 +111,10 @@ namespace Finalspace.Onigiri.Models
 
         public void ToggleDeleteit(string who)
         {
-            NameState first = Deleteits.FirstOrDefault((d) => who.Equals(d.Name));
+            UserState first = Deleteits.FirstOrDefault((d) => who.Equals(d.UserName));
             if (first == null)
             {
-                first = new NameState() { Name = who, Value = true };
+                first = new UserState() { UserName = who, Value = true };
                 Deleteits.Add(first);
             }
             else
@@ -138,9 +138,9 @@ namespace Finalspace.Onigiri.Models
             {
                 AdditionalData loaded = (AdditionalData)serializer.Deserialize(stream);
                 Watchstates.Clear();
-                foreach (NameState itm in loaded.Watchstates)
+                foreach (UserState itm in loaded.Watchstates)
                     Watchstates.Add(itm);
-                foreach (NameState itm in loaded.Deleteits)
+                foreach (UserState itm in loaded.Deleteits)
                     Deleteits.Add(itm);
                 Marked = loaded.Marked;
             }

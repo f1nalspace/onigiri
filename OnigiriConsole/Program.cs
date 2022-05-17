@@ -1,11 +1,13 @@
 ﻿using Finalspace.Onigiri.Enums;
 using Finalspace.Onigiri.Events;
+using Finalspace.Onigiri.Media;
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Storage;
 using log4net.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -137,9 +139,49 @@ namespace Finalspace.Onigiri
 
         static void Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             Console.WriteLine(string.Join(" ", args));
 
-            Console.OutputEncoding = Encoding.UTF8;
+#if true
+
+            string usersPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            string folderPath = Path.Combine(usersPath, "OneDrive", "Q3");
+
+            DirectoryInfo folder = new DirectoryInfo(folderPath);
+            if (!folder.Exists)
+                throw new DirectoryNotFoundException($"Folder path '{folderPath}' does not exists");
+
+            FileInfo[] files = folder
+                .GetFiles("*.avi", SearchOption.TopDirectoryOnly)
+                .OrderBy(f => f.Name)
+                .ToArray();
+
+            foreach (var file in files)
+            {
+                MediaInfo info = MediaInfoParser.Parse(file);
+                if (info != null)
+                {
+                    Console.WriteLine($"{file.Name}: {info.Format}");
+                    Console.WriteLine($"\tVideo: {info.Video.Width}x{info.Video.Height}, Rate: {info.Video.FrameRate}, Codec: {info.Video.Codec}");
+
+                    foreach (AudioInfo audio in info.Audio)
+                    {
+                        Console.WriteLine($"\tAudio: {audio.SampleRate} Hz, {audio.Channels} Channels, {audio.BytesPerSample} Bytes per sample, Codec: {audio.Codec}");
+                    }
+                }
+                else
+                    Console.Error.WriteLine($"Failed getting media infos for: {file.Name}");
+            }
+
+            Console.WriteLine("press any key to exit");
+            Console.ReadKey();
+
+#endif
+
+#if false
+
 
             XmlConfigurator.Configure();
             if (args.Length == 0)
@@ -168,7 +210,9 @@ namespace Finalspace.Onigiri
 
             ProcessArguments(args, system, persistenceStorage);
 
-            Console.ReadKey();
+            Console.ReadKey();           
+#endif
+
         }
     }
 }

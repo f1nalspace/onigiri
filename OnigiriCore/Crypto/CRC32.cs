@@ -52,7 +52,6 @@ namespace Finalspace.Onigiri.Crypto
                     item = ((item & 1) != 0) ? (Polynomial ^ (item >> 1)) : (item >> 1);
                 ChecksumTable[index] = item;
             }
-            Debug.WriteLine("hallo");
         }
 #endif
 

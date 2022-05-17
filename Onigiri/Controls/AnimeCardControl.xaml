@@ -82,7 +82,7 @@
             </Grid>
             <!-- Description end -->
 
-            <!-- Tags start, ItemsControl needs a fixed width -->
+            <!-- Tags start -->
             <ItemsControl Grid.Row="2" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}" Style="{StaticResource tagsItemsControl}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

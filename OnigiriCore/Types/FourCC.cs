@@ -51,9 +51,9 @@ namespace Finalspace.Onigiri.Types
 
         public bool Equals(FourCC other) => Value == other.Value;
 
-        public static readonly FourCC Empty = new FourCC(0);
-
         public static bool operator ==(FourCC left, FourCC right) => left.Equals(right);
         public static bool operator !=(FourCC left, FourCC right) => !left.Equals(right);
+
+        public static readonly FourCC Empty = new FourCC(0);
     }
 }

@@ -6,6 +6,7 @@
     <converters:IsGreaterThanConverter x:Key="isGreaterThanConverter"/>
     <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
     <converters:ThemeToBoolConverter x:Key="themeBoolConv" />
+    <converters:UserImageResourceConverter x:Key="userImgConv" />
 
     <BitmapImage x:Key="noPictureImage" UriSource="/Resources/nopicture.png" />
 
@@ -168,25 +169,71 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel x:Name="innerActionPanel" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
-                <Button Style="{StaticResource actionButton}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Image Source="/Resources/anni_false.png" />
-                            </Grid>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-                <Button Style="{StaticResource actionButton}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Grid>
-                                <Image Source="/Resources/final_false.png" />
-                            </Grid>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-                <Button Style="{StaticResource actionButton}">
+                <ItemsControl ItemsSource="{Binding DataContext.CoreService.Config.Users, RelativeSource={RelativeSource AncestorType=Page, Mode=FindAncestor}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button VerticalAlignment="Bottom">
+                                <Button.Template>
+                                    
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid x:Name="usersActionsPanelGrid" Background="Transparent">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Grid.Row="0" Orientation="Vertical" Visibility="Collapsed" x:Name="userActionsPanel">
+                                                <Button Style="{StaticResource actionButton}">
+                                                    <Button.Template>
+                                                        <ControlTemplate>
+                                                            <Image Source="/Resources/delete.png" />
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                                <Button Style="{StaticResource actionButton}">
+                                                    <Button.Template>
+                                                        <ControlTemplate>
+                                                            <Image Source="/Resources/mark.png" />
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </StackPanel>
+                                            <Button Grid.Row="1" Style="{StaticResource actionButton}">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid>
+                                                            <Image>
+                                                                <Image.Source>
+                                                                    <MultiBinding Converter="{StaticResource userImgConv}">
+                                                                        <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                                                        <Binding Path="DisabledImage" UpdateSourceTrigger="PropertyChanged" />
+                                                                    </MultiBinding>
+                                                                </Image.Source>
+                                                            </Image>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger SourceName="usersActionsPanelGrid" Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="userActionsPanel" Property="Visibility" Value="Visible" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                    
+                                </Button.Template>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+                <!--
+                <Button Style="{StaticResource actionButton}" VerticalAlignment="Bottom">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Grid>
@@ -195,8 +242,9 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
+                -->
             </StackPanel>
-            <Button Grid.Column="1" Style="{StaticResource actionButton}">
+            <Button Grid.Column="1" Style="{StaticResource actionButton}" VerticalAlignment="Bottom">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Grid>

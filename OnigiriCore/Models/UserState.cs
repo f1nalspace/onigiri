@@ -5,10 +5,10 @@ using System.Xml.Serialization;
 namespace Finalspace.Onigiri.Models
 {
     [Serializable]
-    public class NameState: BindableBase
+    public class UserState: BindableBase
     {
         [XmlAttribute("name")]
-        public string Name
+        public string UserName
         {
             get => GetValue<string>();
             set => SetValue(value);

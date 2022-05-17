@@ -1,5 +1,6 @@
 using Finalspace.Onigiri.Media;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -11,7 +12,9 @@ namespace OnigiriTests
         [TestMethod]
         public void TestAvi()
         {
-            string folderPath = @"E:\Gamevideos";
+            string usersPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            string folderPath = Path.Combine(usersPath, "OneDrive", "Q3");
 
             DirectoryInfo folder = new DirectoryInfo(folderPath);
             if (!folder.Exists)
