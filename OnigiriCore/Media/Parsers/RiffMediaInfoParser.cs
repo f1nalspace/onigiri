@@ -112,7 +112,7 @@ namespace Finalspace.Onigiri.Media.Parsers
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct WaveFormatExtensible
         {
-            [StructLayout(LayoutKind.Explicit, Pack = 1)]
+            [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 2)]
             public struct SamplesUnion
             {
                 [FieldOffset(0)]
@@ -127,8 +127,8 @@ namespace Finalspace.Onigiri.Media.Parsers
 
             public WaveFormatEx Format;
             public SamplesUnion Samples;
-            //public uint dwChannelMask;
-            //public Guid SubFormat;
+            public uint dwChannelMask;
+            public Guid SubFormat;
         }
 
         class StreamData : Stream
@@ -177,25 +177,18 @@ namespace Finalspace.Onigiri.Media.Parsers
 
         private static bool ParseStream(StreamData streamData, long dataSize, ref MediaInfo result)
         {
-            Debug.WriteLine($"Stream:");
-
             long endList = streamData.Position + dataSize;
 
             FourCC currentStreamType = FourCC.Empty;
 
             AudioInfo currentAudioInfo = null;
 
-            Debug.Indent();
             while (!streamData.IsEOF && streamData.Position < endList)
             {
                 RiffChunk chunk = streamData.ReadStruct<RiffChunk>();
-                Debug.WriteLine($"{chunk.chunkType} {chunk.chunkSize}");
-                Debug.Indent();
 
                 if (StreamHeaderType.Equals(chunk.chunkType))
                 {
-                    Debug.WriteLine($"Stream Header:");
-
                     if (AviStreamHeader.Size != chunk.chunkSize)
                         throw new FormatException($"Wrong AVI header size, expect '{AviStreamHeader.Size}' but got '{chunk.chunkSize}'!");
 
@@ -231,8 +224,6 @@ namespace Finalspace.Onigiri.Media.Parsers
                 }
                 else if (StreamFormatType.Equals(chunk.chunkType))
                 {
-                    Debug.WriteLine($"Stream Format:");
-
                     if (StreamVideoType.Equals(currentStreamType))
                     {
                         // BITMAPINFOHEADER
@@ -256,46 +247,35 @@ namespace Finalspace.Onigiri.Media.Parsers
                             else
                                 currentAudioInfo.Codec = CodecDescription.Empty;
 
-                            streamData.Seek(position, SeekOrigin.Begin);
+                            // Seek back to the start position before we read the WaveFormatEx structure
+                            uint remaining = chunk.chunkSize - (uint)WaveFormatEx.Size;
+                            streamData.Seek(remaining, SeekOrigin.Current);
+                            continue;
                         }
-                        currentAudioInfo = null;
                     }
 
                     streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
                 }
                 else
                     streamData.Seek(chunk.chunkSize, SeekOrigin.Current);
-
-                Debug.Unindent();
             }
-            Debug.Unindent();
 
             return true;
         }
 
         private static bool ParseHeaderList(StreamData streamData, long dataSize, ref MediaInfo result)
         {
-            Debug.WriteLine($"AVI Header-List:");
-
             long endList = streamData.Position + dataSize;
-
-            Debug.Indent();
             while (!streamData.IsEOF && streamData.Position < endList)
             {
                 RiffChunk chunk = streamData.ReadStruct<RiffChunk>();
 
                 long seekSize = chunk.chunkSize;
-                FourCC chunkListType;
+                FourCC chunkListType = FourCC.Empty;
                 if (ListType.Equals(chunk.chunkType))
                 {
                     chunkListType = streamData.ReadStruct<FourCC>();
                     seekSize -= 4;
-                    Debug.WriteLine($"{chunk.chunkType} {chunk.chunkSize} {chunkListType}");
-                }
-                else
-                {
-                    chunkListType = FourCC.Empty;
-                    Debug.WriteLine($"{chunk.chunkType} {chunk.chunkSize}");
                 }
 
                 if (AviHeaderType.Equals(chunk.chunkType))
@@ -312,24 +292,16 @@ namespace Finalspace.Onigiri.Media.Parsers
                 else
                     streamData.Seek(seekSize, SeekOrigin.Current);
             }
-            Debug.Unindent();
 
             return true;
         }
 
         private static bool ParseAviList(StreamData streamData, long dataSize, ref MediaInfo result)
         {
-            Debug.WriteLine($"AVI-List:");
-
             long endList = streamData.Position + dataSize;
-
             while (!streamData.IsEOF && streamData.Position < endList)
             {
-                Debug.Indent();
-
                 RiffList listHeader = streamData.ReadStruct<RiffList>();
-                Debug.WriteLine($"{listHeader.listType} {listHeader.listSize} {listHeader.chunkType}");
-
                 if (HeaderChunkType.Equals(listHeader.chunkType))
                 {
                     if (!ParseHeaderList(streamData, listHeader.listSize - 4, ref result))
@@ -337,10 +309,7 @@ namespace Finalspace.Onigiri.Media.Parsers
                 }
                 else
                     streamData.Seek(listHeader.listSize - 4, SeekOrigin.Current);
-
-                Debug.Unindent();
             }
-
             return true;
         }
 
@@ -350,9 +319,6 @@ namespace Finalspace.Onigiri.Media.Parsers
                 throw new ArgumentNullException(nameof(filePath));
             if (!File.Exists(filePath))
                 return null;
-
-            Debug.WriteLine($"Media Info for file: {filePath}");
-            Debug.WriteLine("");
 
             MediaInfo result = new MediaInfo();
 
@@ -375,12 +341,8 @@ namespace Finalspace.Onigiri.Media.Parsers
 
                 result.Format = AviFormat;
 
-                Debug.Indent();
                 ParseAviList(streamData, mainHeader.listSize - 4, ref result);
-                Debug.Unindent();
             }
-
-            Debug.WriteLine("");
 
             return result;
         }
