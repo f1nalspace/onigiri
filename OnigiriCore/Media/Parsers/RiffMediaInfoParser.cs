@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri.Media.Parsers
 {
@@ -338,7 +339,7 @@ namespace Finalspace.Onigiri.Media.Parsers
             return true;
         }
 
-        public MediaInfo Parse(string filePath)
+        public async Task<MediaInfo> Parse(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentNullException(nameof(filePath));
@@ -347,7 +348,7 @@ namespace Finalspace.Onigiri.Media.Parsers
 
             MediaInfo result = new MediaInfo();
 
-            byte[] data = File.ReadAllBytes(filePath);
+            byte[] data = await File.ReadAllBytesAsync(filePath);
 
             // https://cdn.hackaday.io/files/274271173436768/avi.pdf
             // https://www.codeproject.com/Articles/10613/C-RIFF-Parser

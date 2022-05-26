@@ -24,7 +24,17 @@ namespace Finalspace.Onigiri.Types
             Name = id.ToString();
         }
 
-        public override string ToString() => $"{Name} [{Id}]";
+        public override string ToString()
+        {
+            if (!string.IsNullOrWhiteSpace(Name) && !Id.IsEmpty)
+                return $"{Name} [{Id}]";
+            else if (!string.IsNullOrWhiteSpace(Name) && Id.IsEmpty)
+                return $"{Name}";
+            else if (string.IsNullOrWhiteSpace(Name) && !Id.IsEmpty)
+                return $"{Id}";
+            else
+                return null;
+        }
 
         public static readonly CodecDescription Empty = new CodecDescription(FourCC.Empty, null);
     }

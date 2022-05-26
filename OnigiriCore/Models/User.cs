@@ -36,6 +36,14 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value);
         }
 
+        public User()
+        {
+            UserName = null;
+            DisplayName = null;
+            ActiveImage = null;
+            DisabledImage = null;
+        }
+
         public User(string name, string activeImage, string disabledImage)
         {
             if (string.IsNullOrWhiteSpace(name))

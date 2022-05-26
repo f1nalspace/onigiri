@@ -1,7 +1,9 @@
-﻿namespace Finalspace.Onigiri.Media
+﻿using System.Threading.Tasks;
+
+namespace Finalspace.Onigiri.Media
 {
     public interface IMediaInfoParser
     {
-        MediaInfo Parse(string filePath);
+        Task<MediaInfo> Parse(string filePath);
     }
 }

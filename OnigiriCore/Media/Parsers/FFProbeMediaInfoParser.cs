@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
+using Finalspace.Onigiri.Helper;
 using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
 
@@ -13,15 +15,19 @@ namespace Finalspace.Onigiri.Media.Parsers
     {
         private static readonly Regex _rexBasePattern = new Regex("(\\d+)/(\\d+)", RegexOptions.Compiled);
 
-        public MediaInfo Parse(string filePath)
+        public async Task<MediaInfo> Parse(string filePath)
         {
             // ffprobe - v quiet - print_format json - show_format - show_streams - print_format json [FILENAME]
 
+            string executable = "ffprobe.exe";
+            string arguments = $"-v quiet -show_format -show_streams -print_format xml \"{filePath}\"";
+
             try
             {
+#if false
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "ffprobe.exe";
-                startInfo.Arguments = $"-v quiet -show_format -show_streams -print_format xml \"{filePath}\"";
+                startInfo.FileName = executable;
+                startInfo.Arguments = arguments;
                 startInfo.CreateNoWindow = true;
                 startInfo.UseShellExecute = false;
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filePath);
@@ -42,15 +48,25 @@ namespace Finalspace.Onigiri.Media.Parsers
                     process.WaitForExit();
                     exitCode = process.ExitCode;
                 }
+#endif
 
-                if (exitCode == 0 && output.Length > 0)
+                ProcessAsyncHelper.ProcessResult res = await ProcessAsyncHelper.ExecuteShellCommand(executable, arguments, 0);
+
+                if (res.Completed && res.ExitCode == 0 && res.Output.Length > 0)
                 {
                     MediaInfo result = new MediaInfo();
 
-                    string xml = output.ToString().Trim();
-
                     XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(xml);
+
+                    try
+                    {
+                        string xml = res.Output.ToString().Trim();
+                        doc.LoadXml(xml);
+                    }
+                    catch (Exception e)
+                    {
+                        return null;
+                    }
 
                     XmlNode rootNode = doc.SelectSingleNode("ffprobe");
                     if (rootNode != null)
@@ -91,7 +107,7 @@ namespace Finalspace.Onigiri.Media.Parsers
                                         {
                                             int value = int.Parse(m.Groups[1].Value);
                                             int divider = int.Parse(m.Groups[2].Value);
-                                            if  (divider != 0)
+                                            if (divider != 0)
                                                 frameRate = value / (double)divider;
                                         }
 

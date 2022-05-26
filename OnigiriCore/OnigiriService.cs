@@ -284,7 +284,7 @@ namespace Finalspace.Onigiri
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
 
                 int threadCount = Config.MaxThreadCount;
-                threadCount = 1;
+                //threadCount = 1;
                 ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
                 Parallel.ForEach(animeDirs, poptions, (animeDir) =>
                 {
@@ -323,7 +323,7 @@ namespace Finalspace.Onigiri
             return null;
         }
 
-        readonly static HashSet<string> mediaFileExtensions = new HashSet<string>
+        public static readonly HashSet<string> MediaFileExtensions = new HashSet<string>
         {
             ".avi",
             ".mkv",
@@ -334,23 +334,33 @@ namespace Finalspace.Onigiri
             ".mp4"
         };
 
-        private static IEnumerable<AnimeMediaFile> GetExtendedMediaFiles(DirectoryInfo dir)
+        private AnimeMediaFile[] GetExtendedMediaFiles(DirectoryInfo dir)
         {
-            FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
-            foreach (FileInfo file in files)
+            ConcurrentBag<AnimeMediaFile> list = new ConcurrentBag<AnimeMediaFile>();
+
+            FileInfo[] files = dir
+                .GetFiles("*", SearchOption.TopDirectoryOnly)
+                .Where(f => !f.Attributes.HasFlag(FileAttributes.System))
+                .Where(f => MediaFileExtensions.Contains(f.Extension.ToLower()))
+                .ToArray();
+
+            int threadCount = Math.Min(4, Config.MaxThreadCount);
+            ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
+            Parallel.ForEach(files, poptions, async (file) =>
             {
-                string ext = file.Extension.ToLower();
-                if (!mediaFileExtensions.Contains(ext))
-                    continue;
-                MediaInfo info = MediaInfoParser.Parse(file);
+                MediaInfo info = await MediaInfoParser.Parse(file);
                 AnimeMediaFile animeMediaFile = new AnimeMediaFile()
                 {
                     FileName = file.Name,
                     FileSize = (ulong)file.Length,
                     Info = info,
                 };
-                yield return animeMediaFile;
-            }
+                list.Add(animeMediaFile);
+            });
+
+            AnimeMediaFile[] result = list.OrderBy(f => f.FileName).ToArray();
+
+            return result;
         }
 
         private static Title CreateFallbackTitle(ulong aid, string folderName)
@@ -468,11 +478,14 @@ namespace Finalspace.Onigiri
             }
 
             // Find media files
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find media files in: {sourceDir.Name}" });
             log.Info($"Find media files from path '{sourceDir.FullName}'");
+            watch.Restart();
             IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir);
             result.ExtendedMediaFiles = extendedMediaFiles.ToList();
             result.MediaFiles = extendedMediaFiles.Select(m => m.FileName).ToList();
-            log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}'");
+            watch.Stop();
+            log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}', took {watch.Elapsed.TotalSeconds} secs");
 
             return result;
         }

@@ -10,7 +10,7 @@ namespace OnigiriTests
     public class MediaParserTests
     {
         [TestMethod]
-        public void TestAvi()
+        public async void TestAvi()
         {
             string usersPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
@@ -27,7 +27,7 @@ namespace OnigiriTests
 
             foreach (var file in files)
             {
-                MediaInfo info = MediaInfoParser.Parse(file);
+                MediaInfo info = await MediaInfoParser.Parse(file);
                 Assert.IsNotNull(info);
             }
 

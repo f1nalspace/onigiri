@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri
 {
@@ -148,20 +149,51 @@ namespace Finalspace.Onigiri
             string usersPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
             string folderPath = Path.Combine(usersPath, "OneDrive", "Q3");
+            //string folderPath = @"X:\";
+            //string folderPath = @"E:\_Anime";
 
+            Console.WriteLine($"Get media files from: {folderPath}");
             DirectoryInfo folder = new DirectoryInfo(folderPath);
             if (!folder.Exists)
                 throw new DirectoryNotFoundException($"Folder path '{folderPath}' does not exists");
 
-            FileInfo[] files = folder
-                .GetFiles("*.*", SearchOption.TopDirectoryOnly)
-                .OrderBy(f => f.Name)
-                .ToArray();
+            List<FileInfo> files = new List<FileInfo>(100000);
 
-            foreach (var file in files)
+            void AddFilesFromFolder(DirectoryInfo rootDir)
             {
-                Console.WriteLine($"Parse media file: {file.Name}");
-                MediaInfo info = MediaInfoParser.Parse(file);
+                if (rootDir.Attributes.HasFlag(FileAttributes.System))
+                    return;
+
+                FileInfo[] skipFiles = rootDir.GetFiles("skip.txt");
+                if (skipFiles.Length > 0)
+                    return;
+
+                FileInfo[] subFiles = rootDir.GetFiles();
+                foreach (FileInfo subFile in subFiles)
+                {
+                    if (subFile.Attributes.HasFlag(FileAttributes.System))
+                        continue;
+                    string ext = subFile.Extension.ToLower();
+                    if (OnigiriService.MediaFileExtensions.Contains(ext))
+                        files.Add(subFile);
+                }
+
+                DirectoryInfo[] subdirs = rootDir.GetDirectories();
+                foreach (DirectoryInfo subdir in subdirs)
+                    AddFilesFromFolder(subdir);
+            }
+
+            AddFilesFromFolder(folder);
+
+            FileInfo[] mediaFiles = files.OrderBy(f => f.Name).ToArray();
+
+            Console.WriteLine($"Parse {mediaFiles.Length} media files");
+            foreach (FileInfo mediaFile in mediaFiles)
+            {
+                Console.WriteLine($"Parse media file: {mediaFile.Name}");
+                Task<MediaInfo> task = MediaInfoParser.Parse(mediaFile);
+                task.Wait();
+                MediaInfo info = task.Result;
                 if (info != null)
                 {
                     Console.WriteLine(FormattableString.Invariant($"\tContainer: '{info.Format}', Duration: {info.Duration.TotalSeconds} secs"));
