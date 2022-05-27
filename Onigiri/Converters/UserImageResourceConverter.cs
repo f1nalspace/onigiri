@@ -34,16 +34,28 @@ namespace Finalspace.Onigiri.Converters
             // create WPF control
             Size size = new Size(width, heigth);
 
-            Grid grid = new Grid();
+            Grid grid = new Grid() { Background = Brushes.LightGray };
 
-            TextBlock content = new TextBlock();
-            content.VerticalAlignment = VerticalAlignment.Center;
-            content.HorizontalAlignment = HorizontalAlignment.Center;
-            content.TextWrapping = TextWrapping.NoWrap;
-            content.Text = text;
-            content.FontSize = width * 0.5f;
+            TextBlock text0 = new TextBlock();
+            text0.VerticalAlignment = VerticalAlignment.Center;
+            text0.HorizontalAlignment = HorizontalAlignment.Center;
+            text0.TextWrapping = TextWrapping.NoWrap;
+            text0.Text = text;
+            text0.FontSize = width * 0.5f;
+            text0.FontWeight = FontWeights.Bold;
+            text0.Foreground = Brushes.Green;
 
-            grid.Children.Add(content);
+            TextBlock text1 = new TextBlock();
+            text1.VerticalAlignment = VerticalAlignment.Center;
+            text1.HorizontalAlignment = HorizontalAlignment.Center;
+            text1.TextWrapping = TextWrapping.NoWrap;
+            text1.Text = text;
+            text1.FontSize = width * 0.5f;
+            text1.Padding = new Thickness(1, 2, 1, 2);
+            text1.Foreground = Brushes.Black;
+
+            grid.Children.Add(text0);
+            grid.Children.Add(text1);
 
             // process layouting
             grid.Measure(size);
@@ -84,21 +96,25 @@ namespace Finalspace.Onigiri.Converters
                         string defaultImageFilePath = Path.Combine(OnigiriPaths.UserImagesPath, userName + ".png");
                         if (!File.Exists(defaultImageFilePath))
                         {
-                            BitmapSource bitmap = CreateImage("TS", 64, 64);
+                            string text = userName.Substring(0, Math.Min(userName.Length, 5));
+                            BitmapSource bitmap = CreateImage(text, 64, 64);
                             BitmapEncoder encoder = new PngBitmapEncoder();
                             encoder.Frames.Add(BitmapFrame.Create(bitmap));
                             using (FileStream stream = File.Create(defaultImageFilePath))
                                 encoder.Save(stream);
+                            result = bitmap;
                         }
-
-                        if (File.Exists(defaultImageFilePath))
+                        else
                         {
-                            using var fileStream = File.OpenRead(defaultImageFilePath);
                             BitmapImage bitmap = new BitmapImage();
-                            bitmap.BeginInit();
-                            bitmap.StreamSource = fileStream;
-                            bitmap.EndInit();
-                            bitmap.Freeze();
+                            using (FileStream fileStream = File.OpenRead(defaultImageFilePath))
+                            {
+                                bitmap.BeginInit();
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.StreamSource = fileStream;
+                                bitmap.EndInit();
+                                bitmap.Freeze();
+                            }
                             result = bitmap;
                             _imageSourcesMap.AddOrUpdate(imageKey, result, (key, old) => result);
                         }
