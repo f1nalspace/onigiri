@@ -12,7 +12,7 @@ namespace Finalspace.Onigiri.Media.Parsers
 {
     public sealed class RiffMediaInfoParser : IMediaInfoParser
     {
-        public static readonly FourCC AviFormat = FourCC.FromString("AVI ");
+        public static readonly CodecDescription AviFormat = new CodecDescription(FourCC.FromString("RIFF"), "AVI Riff");
 
         public static readonly FourCC RiffType = FourCC.FromString("RIFF");
         public static readonly FourCC ListType = FourCC.FromString("LIST");
@@ -219,8 +219,8 @@ namespace Finalspace.Onigiri.Media.Parsers
                     }
                     else if (StreamAudioType.Equals(streamHeader.fccType))
                     {
-                        uint sampleRate = streamHeader.dwScale > 0 ? (uint)(streamHeader.dwRate / (double)streamHeader.dwScale) : streamHeader.dwRate;
-                        uint bitsPerSample = streamHeader.dwSampleSize * 8;
+                        int sampleRate = streamHeader.dwScale > 0 ? (int)(streamHeader.dwRate / (double)streamHeader.dwScale) : (int)streamHeader.dwRate;
+                        int bitsPerSample = (int)streamHeader.dwSampleSize * 8;
                         AudioInfo audioInfo = currentAudioInfo = new AudioInfo()
                         {
                             SampleRate = sampleRate,
@@ -258,8 +258,8 @@ namespace Finalspace.Onigiri.Media.Parsers
 
                             WaveFormatEx waveFormatEx = streamData.ReadStruct<WaveFormatEx>();
                             currentAudioInfo.Channels = waveFormatEx.nChannels;
-                            currentAudioInfo.SampleRate = waveFormatEx.nSamplesPerSec;
-                            currentAudioInfo.BitsPerSample = (uint)waveFormatEx.wBitsPerSample;
+                            currentAudioInfo.SampleRate = (int)waveFormatEx.nSamplesPerSec;
+                            currentAudioInfo.BitsPerSample = waveFormatEx.wBitsPerSample;
                             if (CodecTables.FormatTagToAudioCodecMap.TryGetValue(waveFormatEx.wFormatTag, out CodecDescription codecDesc))
                                 currentAudioInfo.Codec = codecDesc;
                             else

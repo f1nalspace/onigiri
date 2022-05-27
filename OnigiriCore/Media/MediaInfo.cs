@@ -11,7 +11,7 @@ namespace Finalspace.Onigiri.Media
     public class MediaInfo : BindableBase
     {
         [XmlElement]
-        public FourCC Format { get => GetValue<FourCC>(); set => SetValue(value); }
+        public CodecDescription Format { get => GetValue<CodecDescription>(); set => SetValue(value); }
 
         [XmlElement]
         public TimeSpan Duration { get => GetValue<TimeSpan>(); set => SetValue(value); }
@@ -30,7 +30,7 @@ namespace Finalspace.Onigiri.Media
 
         public MediaInfo()
         {
-            Format = FourCC.Empty;
+            Format = CodecDescription.Empty;
             Duration = TimeSpan.Zero;
             Video = new List<VideoInfo>();
             Audio = new List<AudioInfo>();

@@ -17,7 +17,7 @@ namespace Finalspace.Onigiri.Media
         public int Height { get; set; }
 
         [XmlAttribute()]
-        public int FrameCount { get; set; }
+        public long FrameCount { get; set; }
 
         [XmlAttribute()]
         public double FrameRate { get; set; }

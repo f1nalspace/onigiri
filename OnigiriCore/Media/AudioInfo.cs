@@ -12,19 +12,19 @@ namespace Finalspace.Onigiri.Media
         public string Lang { get; set; }
 
         [XmlAttribute()]
-        public uint Channels { get; set; }
+        public int Channels { get; set; }
 
         [XmlAttribute()]
-        public uint SampleRate { get; set; }
+        public int SampleRate { get; set; }
 
         [XmlAttribute()]
-        public uint BitsPerSample { get; set; }
+        public int BitsPerSample { get; set; }
 
         [XmlAttribute()]
-        public uint BitRate { get; set; }
+        public long BitRate { get; set; }
 
         [XmlAttribute()]
-        public uint FrameCount { get; set; }
+        public long FrameCount { get; set; }
 
         [XmlElement()]
         public CodecDescription Codec { get; set; }

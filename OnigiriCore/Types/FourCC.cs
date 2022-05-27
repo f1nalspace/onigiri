@@ -63,5 +63,11 @@ namespace Finalspace.Onigiri.Types
         public static bool operator !=(FourCC left, FourCC right) => !left.Equals(right);
 
         public static readonly FourCC Empty = new FourCC(0);
+
+        public static FourCC FromUInt(uint value)
+        {
+            FourCC result = new FourCC(value);
+            return result;
+        }
     }
 }

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriCore", "OnigiriCore\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriConsole", "OnigiriConsole\OnigiriConsole.csproj", "{429344A0-192C-4E32-A44E-4F98D4156296}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnigiriTests", "OnigiriTests\OnigiriTests.csproj", "{B2FB629E-1FBA-4200-BAF1-C72916165827}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriTests", "OnigiriTests\OnigiriTests.csproj", "{B2FB629E-1FBA-4200-BAF1-C72916165827}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
