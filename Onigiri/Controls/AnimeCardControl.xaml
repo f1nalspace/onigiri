@@ -53,6 +53,9 @@
 
             <!-- Header start -->
             <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Style="{StaticResource infoButton}" Command="{Binding DataContext.ShowDetailsCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}}" CommandParameter="{Binding}" />
+                </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ratingPanel}">
                     <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                     <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
@@ -79,6 +82,7 @@
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
                 <Button Template="{StaticResource actionsPanelTemplate}" />
+                <Button Template="{StaticResource videoQualityPanelTemplate}" />
             </Grid>
             <!-- Description end -->
 

@@ -27,6 +27,12 @@
     <BitmapImage x:Key="finalDeleteTrueImage" UriSource="/Resources/final_delete.png" />
     <BitmapImage x:Key="finalDeleteFalseImage" UriSource="/Resources/final_delete_false.png" />
 
+    <BitmapImage x:Key="videoQuality576pImage" UriSource="/Resources/v_576p.png" />
+    <BitmapImage x:Key="videoQuality720pImage" UriSource="/Resources/v_720p.png" />
+    <BitmapImage x:Key="videoQuality1080pImage" UriSource="/Resources/v_1080p.png" />
+    <BitmapImage x:Key="videoQuality1440pImage" UriSource="/Resources/v_1440p.png" />
+    <BitmapImage x:Key="videoQuality2160pImage" UriSource="/Resources/v_2160p.png" />
+
     <SolidColorBrush x:Key="animeListBackground_light">
         <SolidColorBrush.Color>
             <Color R="214" G="224" B="239" A="255" />
@@ -179,7 +185,7 @@
                         <DataTemplate>
                             <Button VerticalAlignment="Bottom">
                                 <Button.Template>
-                                    
+
                                     <ControlTemplate TargetType="Button">
                                         <Grid x:Name="usersActionsPanelGrid" Background="Transparent">
                                             <Grid.RowDefinitions>
@@ -225,13 +231,13 @@
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
-                                    
+
                                 </Button.Template>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                
+
                 <!--
                 <Button Style="{StaticResource actionButton}" VerticalAlignment="Bottom">
                     <Button.Template>
@@ -367,6 +373,33 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <Style x:Key="infoButton" TargetType="Button" BasedOn="{StaticResource actionButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid>
+                        <Image Source="/Resources/show_32x32.png" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="video_quality_icon" TargetType="Image">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Width" Value="96" />
+        <Setter Property="Height" Value="76" />
+        <Setter Property="Stretch" Value="UniformToFill" />
+        <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
+    </Style>
+
+    <ControlTemplate x:Key="videoQualityPanelTemplate">
+        <Grid>
+            <Image Style="{StaticResource video_quality_icon}" />
+        </Grid>
+    </ControlTemplate>
 
     <!-- Text labels -->
     <Style x:Key="animeLabel" TargetType="TextBlock">
