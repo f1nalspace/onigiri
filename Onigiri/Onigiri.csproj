@@ -41,6 +41,7 @@
     <None Remove="Resources\prev_32x32.png" />
     <None Remove="Resources\prev_tag_32x32.png" />
     <None Remove="Resources\rebuild_database_32x32.png" />
+    <None Remove="Resources\show_32x32.png" />
     <None Remove="Resources\suggestion_32x32.png" />
     <None Remove="Resources\sun_32x32.png" />
     <None Remove="Resources\titles_32x32.png" />
@@ -113,6 +114,7 @@
     <Resource Include="Resources\prev_tag_32x32.png" />
     <Resource Include="Resources\prev_32x32.png" />
     <Resource Include="Resources\rebuild_database_32x32.png" />
+    <Resource Include="Resources\show_32x32.png" />
     <Resource Include="Resources\star0.png" />
     <Resource Include="Resources\star1.png" />
     <Resource Include="Resources\star2.png" />
