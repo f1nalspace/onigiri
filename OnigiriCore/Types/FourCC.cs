@@ -6,12 +6,12 @@ namespace Finalspace.Onigiri.Types
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    [XmlRoot()]
     public struct FourCC : IEquatable<FourCC>
     {
         [XmlAttribute()]
         public uint Value { get; set; }
 
+        [XmlIgnore]
         public bool IsEmpty => Value == 0;
 
         private FourCC(uint value)

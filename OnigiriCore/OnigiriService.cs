@@ -311,7 +311,9 @@ namespace Finalspace.Onigiri
 #endif
             }
 
-            Animes.Set(list.ToArray());
+            Anime[] sortedAnimes = list.OrderBy(a => a.FoundPath).ToArray();
+
+            Animes.Set(sortedAnimes);
         }
 
         private static string FindImage(DirectoryInfo dir)

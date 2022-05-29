@@ -4,13 +4,14 @@ using System.Xml.Serialization;
 namespace Finalspace.Onigiri.Types
 {
     [Serializable]
-    public readonly struct CodecDescription
+    [XmlRoot]
+    public struct CodecDescription
     {
-        [XmlAttribute]
-        public FourCC Id { get; }
+        [XmlElement]
+        public FourCC Id { get; set; }
 
         [XmlAttribute]
-        public string Name { get; }
+        public string Name { get; set; }
 
         public CodecDescription(FourCC id, string name)
         {
