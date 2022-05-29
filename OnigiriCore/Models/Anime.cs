@@ -41,7 +41,22 @@ namespace Finalspace.Onigiri.Models
         public List<AnimeMediaFile> ExtendedMediaFiles
         {
             get => GetValue<List<AnimeMediaFile>>();
-            set => SetValue(value, () => RaisePropertyChanged(nameof(MediaFileCount)));
+            set => SetValue(value, () => ExtendedMediaFilesChanged(value));
+        }
+
+        private void ExtendedMediaFilesChanged(List<AnimeMediaFile> files)
+        {
+            var allVideoStreams = files
+                .Where(f => f.Info != null && f.Info.Video.Any())
+                .SelectMany(f => f.Info.Video)
+                .Distinct()
+                .OrderByDescending(v => v.Width);
+
+            VideoWidths = allVideoStreams
+                .Select(v => v.Width)
+                .ToArray();
+
+            RaisePropertyChanged(nameof(MediaFileCount));
         }
 
         public int MediaFileCount => MediaFiles.Count;
@@ -202,6 +217,13 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value);
         }
 
+        [XmlIgnore]
+        public int[] VideoWidths
+        {
+            get => GetValue<int[]>();
+            set => SetValue(value);
+        }
+
         public Anime()
         {
             Titles = new Titles();
@@ -228,6 +250,7 @@ namespace Finalspace.Onigiri.Models
             AddonData.PropertyChanged += (s, e) => RaisePropertyChanged(() => AddonData);
 
             Image = null;
+            VideoWidths = Array.Empty<int>();
         }
 
         public void LoadFromAnimeXML(string filePath, bool skipDetails = false)

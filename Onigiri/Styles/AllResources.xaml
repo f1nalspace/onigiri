@@ -388,10 +388,11 @@
 
     <Style x:Key="video_quality_icon" TargetType="Image">
         <Setter Property="HorizontalAlignment" Value="Left" />
-        <Setter Property="VerticalAlignment" Value="Bottom" />
-        <Setter Property="Width" Value="96" />
-        <Setter Property="Height" Value="76" />
-        <Setter Property="Stretch" Value="UniformToFill" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Width" Value="64" />
+        <Setter Property="Height" Value="50" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="Opacity" Value="0.65" />
         <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
     </Style>
 

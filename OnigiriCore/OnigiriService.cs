@@ -207,13 +207,13 @@ namespace Finalspace.Onigiri
                         {
                             log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
                             Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", sourceDir.FullName);
-                        }                       
+                        }
                     }
                 }
             }
 
-            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) && 
-                !string.IsNullOrWhiteSpace(imageFilePath) && 
+            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
+                !string.IsNullOrWhiteSpace(imageFilePath) &&
                 File.Exists(imageFilePath))
             {
                 // TODO(tspaete): More robust image file read
@@ -249,7 +249,7 @@ namespace Finalspace.Onigiri
             if (flags.HasFlag(UpdateFlags.DownloadTitles))
                 ReadTitles(statusChanged, true);
 
-            ConcurrentBag<Anime> list = new ConcurrentBag<Anime>();
+            List<Anime> list = new List<Anime>();
 
             using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
             {
@@ -283,10 +283,23 @@ namespace Finalspace.Onigiri
 
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
 
+                var sortedAnimeDirs = animeDirs.OrderBy(d => d.FullName).ToArray();
+
+#if !SINGLE_THREAD_PROCESSING
                 int threadCount = Config.MaxThreadCount;
-                //threadCount = 1;
                 ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
-                Parallel.ForEach(animeDirs, poptions, (animeDir) =>
+                Anime[] animes = new Anime[sortedAnimeDirs.Length];
+                Parallel.ForEach(sortedAnimeDirs, poptions, (animeDir, state, index) =>
+                {
+                    int c = Interlocked.Increment(ref count);
+                    int percentage = (int)((c / (double)totalDirCount) * 100.0);
+                    statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
+                    Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
+                    animes[index] = anime;
+                });
+                list.AddRange(animes.Where(a => a != null));
+#else
+                foreach (var animeDir in sortedAnimeDirs)
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
@@ -294,12 +307,11 @@ namespace Finalspace.Onigiri
                     Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
                     if (anime != null)
                         list.Add(anime);
-                });
+                }
+#endif
             }
 
-            Anime[] sorted = list.OrderBy(a => a.FoundPath).ToArray();
-
-            Animes.Set(sorted);
+            Animes.Set(list.ToArray());
         }
 
         private static string FindImage(DirectoryInfo dir)
@@ -334,31 +346,67 @@ namespace Finalspace.Onigiri
             ".mp4"
         };
 
-        private AnimeMediaFile[] GetExtendedMediaFiles(DirectoryInfo dir)
+        private static AnimeMediaFile[] GetExtendedMediaFiles(DirectoryInfo dir, int maxThreadCount)
         {
-            ConcurrentBag<AnimeMediaFile> list = new ConcurrentBag<AnimeMediaFile>();
-
             FileInfo[] files = dir
                 .GetFiles("*", SearchOption.TopDirectoryOnly)
                 .Where(f => !f.Attributes.HasFlag(FileAttributes.System))
                 .Where(f => MediaFileExtensions.Contains(f.Extension.ToLower()))
+                .OrderBy(f => f.Name)
                 .ToArray();
 
-            int threadCount = Math.Min(4, Config.MaxThreadCount);
+            AnimeMediaFile[] result = new AnimeMediaFile[files.Length];
+
+#if !SINGLE_THREAD_PROCESSING
+            int threadCount = Math.Min(4, maxThreadCount);
             ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
-            Parallel.ForEach(files, poptions, async (file) =>
+            Parallel.ForEach(files, poptions, (file, state, index) =>
             {
-                MediaInfo info = await MediaInfoParser.Parse(file);
+                MediaInfo info = null;
+                try
+                {
+                    using Task<MediaInfo> task = MediaInfoParser.Parse(file);
+                    task.Wait();
+                    info = task.Result;
+                }
+                catch (Exception e)
+                {
+                    // @TODO(final): Log error!
+                }
+
                 AnimeMediaFile animeMediaFile = new AnimeMediaFile()
                 {
                     FileName = file.Name,
                     FileSize = (ulong)file.Length,
                     Info = info,
                 };
-                list.Add(animeMediaFile);
+                result[index] = animeMediaFile;
             });
+#else
+            long index = 0;
+            foreach (FileInfo file in files)
+            {
+                MediaInfo info = null;
+                try
+                {
+                    using Task<MediaInfo> task = MediaInfoParser.Parse(file);
+                    task.Wait();
+                    info = task.Result;
+                }
+                catch (Exception e)
+                {
+                    // @TODO(final): Log error!
+                }
 
-            AnimeMediaFile[] result = list.OrderBy(f => f.FileName).ToArray();
+                AnimeMediaFile animeMediaFile = new AnimeMediaFile()
+                {
+                    FileName = file.Name,
+                    FileSize = (ulong)file.Length,
+                    Info = info,
+                };
+                result[index++] = animeMediaFile;
+            }
+#endif
 
             return result;
         }
@@ -481,7 +529,7 @@ namespace Finalspace.Onigiri
             statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find media files in: {sourceDir.Name}" });
             log.Info($"Find media files from path '{sourceDir.FullName}'");
             watch.Restart();
-            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir);
+            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir, Config.MaxThreadCount);
             result.ExtendedMediaFiles = extendedMediaFiles.ToList();
             result.MediaFiles = extendedMediaFiles.Select(m => m.FileName).ToList();
             watch.Stop();

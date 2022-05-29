@@ -45,6 +45,11 @@
     <None Remove="Resources\suggestion_32x32.png" />
     <None Remove="Resources\sun_32x32.png" />
     <None Remove="Resources\titles_32x32.png" />
+    <None Remove="Resources\v_1080p.png" />
+    <None Remove="Resources\v_1440p.png" />
+    <None Remove="Resources\v_2160p.png" />
+    <None Remove="Resources\v_576p.png" />
+    <None Remove="Resources\v_720p.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -146,6 +151,11 @@
     <Resource Include="Resources\close_16x16.png" />
     <Resource Include="Resources\close_32x32.png" />
     <Resource Include="Resources\titles_32x32.png" />
+    <Resource Include="Resources\v_1080p.png" />
+    <Resource Include="Resources\v_1440p.png" />
+    <Resource Include="Resources\v_2160p.png" />
+    <Resource Include="Resources\v_576p.png" />
+    <Resource Include="Resources\v_720p.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

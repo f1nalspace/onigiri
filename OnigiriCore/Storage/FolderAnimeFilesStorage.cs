@@ -231,9 +231,40 @@ namespace Finalspace.Onigiri.Storage
             {
                 int count = 0;
                 FileInfo[] persistentFiles = rootDir.GetFiles("p*.onigiri");
+
                 int totalFileCount = persistentFiles.Length;
+
+#if !SINGLE_THREAD_PROCESSING
                 ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
-                Parallel.ForEach(persistentFiles, poptions, (persistentFile) =>
+                Parallel.ForEach<FileInfo, ExecutionResult<Anime>>(persistentFiles, poptions, 
+                    () => new ExecutionResult<Anime>(),
+                    (persistentFile, state, local) =>
+                    {
+                        int c = Interlocked.Increment(ref count);
+                        int percentage = (int)(c / (double)totalFileCount * 100.0);
+                        statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = persistentFile.Name, Percentage = percentage });
+
+                        ExecutionResult<AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
+                        if (!res.Success)
+                            return new ExecutionResult<Anime>(res.Error);
+                        AnimeFile animeFile = res.Value;
+                        ExecutionResult<Anime> t = Deserialize(animeFile);
+                        return t;
+                    },
+                    (res) =>
+                    {
+                        if (res.Success)
+                        {
+                            Anime anime = res.Value;
+                            list.Add(anime);
+                        }
+                        else
+                        {
+                            // TODO(tspaete): Log issue!
+                        }
+                    });
+#else
+                foreach (FileInfo persistentFile in persistentFiles)
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)(c / (double)totalFileCount * 100.0);
@@ -254,7 +285,8 @@ namespace Finalspace.Onigiri.Storage
                     {
                         // TODO(tspaete): Log issue!
                     }
-                });
+                }
+#endif
             }
 
             AnimeStorageData result = new AnimeStorageData(list.ToImmutableArray(), ImmutableArray<Title>.Empty);
@@ -273,6 +305,8 @@ namespace Finalspace.Onigiri.Storage
 
             int totalCount = data.Animes.Length;
             int count = 0;
+
+#if !SINGLE_THREAD_PROCESSING
             ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
             Parallel.ForEach(data.Animes, poptions, (anime) =>
             {
@@ -292,6 +326,26 @@ namespace Finalspace.Onigiri.Storage
                     // TODO(tspaete): Log issue!
                 }
             });
+#else
+            foreach (Anime anime in data.Animes)
+            {
+                int c = Interlocked.Increment(ref count);
+                int percentage = (int)(c / (double)totalCount * 100.0);
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = anime.MainTitle, Percentage = percentage });
+
+                ExecutionResult<AnimeFile> res = Serialize(anime);
+                if (res.Success)
+                {
+                    AnimeFile animeFile = res.Value;
+                    string persistentAnimeFilePath = Path.Combine(rootDir.FullName, $"p{anime.Aid}.onigiri");
+                    animeFile.SaveToFile(persistentAnimeFilePath);
+                }
+                else
+                {
+                    // TODO(tspaete): Log issue!
+                }
+            }
+#endif
             return true;
         }
 
@@ -319,6 +373,6 @@ namespace Finalspace.Onigiri.Storage
             }
         }
 
-       public override string ToString() => "Persistent-Cache";
+        public override string ToString() => "Persistent-Cache";
     }
 }

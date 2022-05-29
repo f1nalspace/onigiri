@@ -40,6 +40,9 @@
                 <TextBlock Style="{StaticResource animeTitleText}" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" />
             </Grid>
             <!-- Anime title end -->
+
+            <!-- Quality icon -->
+            <Button Template="{StaticResource videoQualityPanelTemplate}" />
         </Grid>
         <!-- Image block end -->
 
@@ -82,7 +85,6 @@
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
                 <Button Template="{StaticResource actionsPanelTemplate}" />
-                <Button Template="{StaticResource videoQualityPanelTemplate}" />
             </Grid>
             <!-- Description end -->
 
