@@ -146,43 +146,8 @@ namespace OnigiriTests
             for (int i = 0; i < source.ExtendedMediaFiles.Count; i++)
             {
                 AnimeMediaFile sourceMediaFile = source.ExtendedMediaFiles[i];
-
                 AnimeMediaFile targetExtendedMediaFile = target.ExtendedMediaFiles[i];
-                Assert.IsNotNull(targetExtendedMediaFile);
-
-                Assert.AreEqual(sourceMediaFile.FileName, targetExtendedMediaFile.FileName);
-                Assert.AreEqual(sourceMediaFile.FileSize, targetExtendedMediaFile.FileSize);
-
-                MediaInfo sourceInfo = sourceMediaFile.Info;
-                MediaInfo targetInfo = targetExtendedMediaFile.Info;
-                Assert.IsNotNull(targetInfo);
-
-                Assert.AreEqual(sourceInfo.Duration, targetInfo.Duration);
-                Assert.AreEqual(sourceInfo.Format, targetInfo.Format);
-
-                Assert.AreEqual(sourceInfo.Video.Count, targetInfo.Video.Count);
-                for (int videoIndex = 0; videoIndex < sourceInfo.Video.Count; videoIndex++)
-                {
-                    VideoInfo sourceVideo = sourceInfo.Video[videoIndex];
-                    VideoInfo targetVideo = targetInfo.Video[videoIndex];
-                    Assert.AreEqual(sourceVideo, targetVideo);
-                }
-
-                Assert.AreEqual(sourceInfo.Audio.Count, targetInfo.Audio.Count);
-                for (int audioIndex = 0; audioIndex < sourceInfo.Audio.Count; audioIndex++)
-                {
-                    AudioInfo sourceAudio = sourceInfo.Audio[audioIndex];
-                    AudioInfo targetAudio = targetInfo.Audio[audioIndex];
-                    Assert.AreEqual(sourceAudio, targetAudio);
-                }
-
-                Assert.AreEqual(sourceInfo.Subtitles.Count, targetInfo.Subtitles.Count);
-                for (int subtitleIndex = 0; subtitleIndex < sourceInfo.Subtitles.Count; subtitleIndex++)
-                {
-                    SubtitleInfo sourceSubtitle = sourceInfo.Subtitles[subtitleIndex];
-                    SubtitleInfo targetSubtitle = targetInfo.Subtitles[subtitleIndex];
-                    Assert.AreEqual(sourceSubtitle, targetSubtitle);
-                }
+                Assert.AreEqual(sourceMediaFile, targetExtendedMediaFile);
             }
         }
     }

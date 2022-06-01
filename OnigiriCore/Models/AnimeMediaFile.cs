@@ -8,7 +8,7 @@ namespace Finalspace.Onigiri.Models
 {
     [Serializable]
     [XmlRoot()]
-    public class AnimeMediaFile : BindableBase
+    public class AnimeMediaFile : BindableBase, IEquatable<AnimeMediaFile>
     {
         [XmlAttribute]
         public string FileName
@@ -30,5 +30,23 @@ namespace Finalspace.Onigiri.Models
             get => GetValue<MediaInfo>();
             set => SetValue(value);
         }
+
+        public override int GetHashCode()
+            => HashCode.Combine(FileName, FileSize, Info);
+
+        public bool Equals(AnimeMediaFile other)
+        {
+            if (other == null)
+                return false;
+            if (!string.Equals(FileName, other.FileName))
+                return false;
+            if (FileSize != other.FileSize)
+                return false;
+            if (!Info.Equals(other.Info))
+                return false;
+            return true;
+        }
+
+        public override bool Equals(object obj) => Equals(obj as AnimeMediaFile);
     }
 }
