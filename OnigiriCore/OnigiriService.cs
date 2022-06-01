@@ -420,8 +420,8 @@ namespace Finalspace.Onigiri
             Title result = new Title()
             {
                 Aid = aid,
-                Lang = "en",
-                Type = "main",
+                Lang = LanguageNames.EnglishShort,
+                Type = TitleTypes.Main,
                 Name = cleanTitleName
             };
             return result;

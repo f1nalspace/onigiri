@@ -5,7 +5,7 @@ namespace Finalspace.Onigiri.Types
 {
     [Serializable]
     [XmlRoot]
-    public struct CodecDescription
+    public struct CodecDescription : IEquatable<CodecDescription>
     {
         [XmlElement]
         public FourCC Id { get; set; }
@@ -36,6 +36,13 @@ namespace Finalspace.Onigiri.Types
             else
                 return null;
         }
+
+        public override int GetHashCode() => HashCode.Combine(Id, Name);
+
+        public bool Equals(CodecDescription other)
+            => string.Equals(Name, other.Name) && Id.Equals(other.Id);
+
+        public override bool Equals(object obj) => obj is CodecDescription codecDesc && Equals(codecDesc);
 
         public static readonly CodecDescription Empty = new CodecDescription(FourCC.Empty, null);
     }

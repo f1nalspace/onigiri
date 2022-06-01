@@ -10,6 +10,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using DevExpress.Mvvm;
+using Finalspace.Onigiri.Types;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -193,7 +194,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                Rating first = Ratings.Where((d) => "permanent".Equals(d.Name, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+                Rating first = Ratings.Where((d) => RatingTypes.Pernament.Equals(d.Name, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return 0.0;
@@ -203,7 +204,7 @@ namespace Finalspace.Onigiri.Models
         {
             get
             {
-                Rating first = Ratings.Where((d) => "temporary".Equals(d.Name, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+                Rating first = Ratings.Where((d) => RatingTypes.Temporary.Equals(d.Name, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
                 if (first != null)
                     return first.Value;
                 return 0.0;
@@ -248,6 +249,9 @@ namespace Finalspace.Onigiri.Models
             Relations.CollectionChanged += (s, e) => RaisePropertyChanged(() => Relations);
             AddonData = new AdditionalData();
             AddonData.PropertyChanged += (s, e) => RaisePropertyChanged(() => AddonData);
+
+            MediaFiles = new List<string>();
+            ExtendedMediaFiles = new List<AnimeMediaFile>();
 
             Image = null;
             VideoWidths = Array.Empty<int>();

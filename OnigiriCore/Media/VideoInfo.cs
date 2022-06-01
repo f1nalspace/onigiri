@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Finalspace.Onigiri.Media
 {
     [Serializable]
-    public class VideoInfo
+    public class VideoInfo : IEquatable<VideoInfo>
     {
         [XmlAttribute()]
         public string Name { get; set; }
@@ -44,5 +44,29 @@ namespace Finalspace.Onigiri.Media
             FrameRate = frameRate;
             Codec = codec;
         }
+
+        public override int GetHashCode()
+            => HashCode.Combine(Name, Width, Height, FrameCount, FrameRate, Codec);
+
+        public bool Equals(VideoInfo other)
+        {
+            if (other == null)
+                return false;
+            if (!string.Equals(Name, other.Name))
+                return false;
+            if (Width != other.Width)
+                return false;
+            if (Height != other.Height)
+                return false;
+            if (FrameCount != other.FrameCount)
+                return false;
+            if (FrameRate != other.FrameRate)
+                return false;
+            if (!Codec.Equals(other.Codec))
+                return false;
+            return true;
+        }
+
+        public override bool Equals(object obj) => Equals(obj as VideoInfo);
     }
 }

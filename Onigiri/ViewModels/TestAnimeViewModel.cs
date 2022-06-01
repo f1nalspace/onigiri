@@ -1,4 +1,5 @@
 ﻿using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Types;
 using System;
 
 namespace Finalspace.Onigiri.ViewModels
@@ -9,7 +10,7 @@ namespace Finalspace.Onigiri.ViewModels
         {
             Titles.Add(new Title() { Name = "Lorem ipsum dolor sit amet", Type = "main" });
             
-            Ratings.Add(new Rating() { Count = 1000, Value = 7.3, Name = "permanent" });
+            Ratings.Add(new Rating() { Count = 1000, Value = 7.3, Name = RatingTypes.Pernament });
 
             TopCategories.Add(new Category() { Name = "Blubb", Weight = 9 });
             TopCategories.Add(new Category() { Name = "Mystery", Weight = 8 });

@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Storage
 {
-    static class AnimeSerialization
+    public static class AnimeSerialization
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
