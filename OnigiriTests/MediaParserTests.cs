@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OnigiriTests
 {
@@ -25,12 +26,20 @@ namespace OnigiriTests
                 .OrderBy(f => f.Name)
                 .ToArray();
 
-            foreach (var file in files)
+            foreach (FileInfo file in files)
             {
-                var task = MediaInfoParser.Parse(file);
+                Task<MediaInfo> task = MediaInfoParser.Parse(file);
                 task.Wait();
                 MediaInfo info = task.Result;
                 Assert.IsNotNull(info);
+
+                VideoInfo video = info.Video.FirstOrDefault();
+                Assert.IsNotNull(video);
+                Assert.IsTrue(video.Width > 0 && video.Height > 0 && !video.Codec.Id.IsEmpty);
+
+                AudioInfo audio = info.Audio.FirstOrDefault();
+                Assert.IsNotNull(audio);
+                Assert.IsTrue(audio.Channels > 0 && audio.SampleRate > 0 && !audio.Codec.Id.IsEmpty);
             }
 
         }
