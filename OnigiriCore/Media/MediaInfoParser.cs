@@ -8,14 +8,8 @@ namespace Finalspace.Onigiri.Media
 {
     public static class MediaInfoParser
     {
-        //public static readonly FourCC MatroskaFormat = FourCC.FromString("MKV_");
-        //public static readonly FourCC OggFormat = FourCC.FromString("OGM_");
-        //public static readonly FourCC MP4Format = FourCC.FromString("MP4_");
-        //public static readonly FourCC MpegFormat = FourCC.FromString("MPEG");
-
         private static readonly Dictionary<string, IMediaInfoParser> _extensionToParserMap = new Dictionary<string, IMediaInfoParser>()
         {
-            {".avi",  new RiffMediaInfoParser() },
         };
 
         private static readonly FFMpegMediaInfoParser _defaultParser = new FFMpegMediaInfoParser();
