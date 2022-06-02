@@ -57,58 +57,62 @@
                     <RibbonRadioButton GroupName="theme" ToolTip="Light" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Light}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Light}}" Label="Light" LargeImageSource="/Resources/sun_32x32.png" />
                     <RibbonRadioButton GroupName="theme" ToolTip="Dark" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Dark}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Dark}}" Label="Dark" LargeImageSource="/Resources/moon_32x32.png" />
                 </RibbonGroup>
-                <RibbonGroup Header="Sorting">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
-                                <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FirstSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                    <RibbonGalleryCategory Header="First field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
-                                </RibbonGallery>
-                            </RibbonComboBox>
-                            <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
-                        </Grid>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
-                                <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SecondSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                    <RibbonGalleryCategory Header="Second field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
-                                </RibbonGallery>
-                            </RibbonComboBox>
-                            <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
-                        </Grid>
+            </RibbonTab>
+
+            <RibbonTab Header="Sorting" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
+                <RibbonGroup Header="Primary">
+                    <StackPanel Orientation="Vertical">
+                        <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
+                            <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FirstSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <RibbonGalleryCategory Header="First field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
+                            </RibbonGallery>
+                        </RibbonComboBox>
+                        <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
                     </StackPanel>
                 </RibbonGroup>
-                <RibbonGroup Header="Filter">
-                    <RibbonComboBox Label="By Type" IsEditable="True" IsReadOnly="True">
+                <RibbonGroup Header="Secondary">
+                    <StackPanel Orientation="Vertical">
+                        <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
+                            <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SecondSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <RibbonGalleryCategory Header="Second field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
+                            </RibbonGallery>
+                        </RibbonComboBox>
+                        <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
+                    </StackPanel>
+                </RibbonGroup>
+            </RibbonTab>
+
+            <RibbonTab Header="Filtering" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
+                <RibbonGroup Header="By Type">
+                    <RibbonComboBox IsEditable="True" IsReadOnly="True">
                         <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <RibbonGalleryCategory ItemsSource="{Binding AnimeTypes}" DisplayMemberPath="Name" />
                         </RibbonGallery>
                     </RibbonComboBox>
-                    <RibbonTextBox Command="{Binding CmdChangedFilter}" Label="By Title" Text="{Binding FilterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <RibbonComboBox Label="By Watch state" IsEditable="True" IsReadOnly="True">
+                </RibbonGroup>
+                <RibbonGroup Header="By Title">
+                    <RibbonTextBox Command="{Binding CmdChangedFilter}" Text="{Binding FilterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </RibbonGroup>
+                <RibbonGroup Header="By States">
+                    <RibbonComboBox Label="Watched" IsEditable="True" IsReadOnly="True">
                         <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterWatchState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <RibbonGalleryCategory ItemsSource="{Binding WatchStates}" DisplayMemberPath="Name" />
                         </RibbonGallery>
                     </RibbonComboBox>
-                    <RibbonComboBox Label="By Category" IsEditable="False" IsReadOnly="False">
+                    <RibbonCheckBox Label="Marked" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterMarked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <RibbonCheckBox Label="To remove" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterRemove, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </RibbonGroup>
+                <RibbonGroup Header="By Category">
+                    <RibbonComboBox Label="Type" IsEditable="False" IsReadOnly="False">
                         <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <RibbonGalleryCategory ItemsSource="{Binding FilterCategories, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
                         </RibbonGallery>
                     </RibbonComboBox>
-                    <RibbonComboBox Label="Min Category Weight" IsEditable="False" IsReadOnly="False">
+                    <RibbonComboBox Label="Weight" IsEditable="False" IsReadOnly="False">
                         <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategoryMinWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <RibbonGalleryCategory ItemsSource="{Binding FilterCategoryWeights, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
                         </RibbonGallery>
                     </RibbonComboBox>
-                    <RibbonCheckBox Label="Marked" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterMarked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <RibbonCheckBox Label="To remove" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterRemove, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </RibbonGroup>
             </RibbonTab>
 
