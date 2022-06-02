@@ -128,7 +128,8 @@ namespace OnigiriTests
             };
 
             source.ExtendedMediaFiles.Add(mediaFile);
-            source.MediaFiles = source.ExtendedMediaFiles.Select(s => s.FileName).ToList();
+
+            source.MediaFiles = new ObservableCollection<string>(source.ExtendedMediaFiles.Select(s => s.FileName));
 
             Anime target;
             using (MemoryStream stream = AnimeSerialization.SerializeAnime(source))

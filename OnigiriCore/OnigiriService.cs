@@ -532,8 +532,8 @@ namespace Finalspace.Onigiri
             log.Info($"Find media files from path '{sourceDir.FullName}'");
             watch.Restart();
             IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir, Config.MaxThreadCount);
-            result.ExtendedMediaFiles = extendedMediaFiles.ToList();
-            result.MediaFiles = extendedMediaFiles.Select(m => m.FileName).ToList();
+            result.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
+            result.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
             watch.Stop();
             log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}', took {watch.Elapsed.TotalSeconds} secs");
 

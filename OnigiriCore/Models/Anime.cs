@@ -31,30 +31,30 @@ namespace Finalspace.Onigiri.Models
 
         [XmlArray("MediaFiles")]
         [XmlArrayItem("MediaFile")]
-        public List<string> MediaFiles
+        public ObservableCollection<string> MediaFiles
         {
-            get => GetValue<List<string>>();
+            get => GetValue<ObservableCollection<string>>();
             set => SetValue(value, () => RaisePropertyChanged(nameof(MediaFileCount)));
         }
 
         [XmlArray("ExtendedMediaFiles")]
         [XmlArrayItem("ExtendedMediaFile")]
-        public List<AnimeMediaFile> ExtendedMediaFiles
+        public ObservableCollection<AnimeMediaFile> ExtendedMediaFiles
         {
-            get => GetValue<List<AnimeMediaFile>>();
+            get => GetValue<ObservableCollection<AnimeMediaFile>>();
             set => SetValue(value, () => ExtendedMediaFilesChanged(value));
         }
 
-        private void ExtendedMediaFilesChanged(List<AnimeMediaFile> files)
+        private void ExtendedMediaFilesChanged(ObservableCollection<AnimeMediaFile> files)
         {
             var allVideoStreams = files
                 .Where(f => f.Info != null && f.Info.Video.Any())
                 .SelectMany(f => f.Info.Video)
                 .Distinct()
-                .OrderByDescending(v => v.Width);
+                .OrderByDescending(v => v.Height);
 
-            VideoWidths = allVideoStreams
-                .Select(v => v.Width)
+            VideoHeights = allVideoStreams
+                .Select(v => v.Height)
                 .ToArray();
 
             RaisePropertyChanged(nameof(MediaFileCount));
@@ -219,7 +219,7 @@ namespace Finalspace.Onigiri.Models
         }
 
         [XmlIgnore]
-        public int[] VideoWidths
+        public int[] VideoHeights
         {
             get => GetValue<int[]>();
             set => SetValue(value);
@@ -250,11 +250,13 @@ namespace Finalspace.Onigiri.Models
             AddonData = new AdditionalData();
             AddonData.PropertyChanged += (s, e) => RaisePropertyChanged(() => AddonData);
 
-            MediaFiles = new List<string>();
-            ExtendedMediaFiles = new List<AnimeMediaFile>();
+            MediaFiles = new ObservableCollection<string>();
+
+            ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>();
+            ExtendedMediaFiles.CollectionChanged += (s, e) => ExtendedMediaFilesChanged(ExtendedMediaFiles);
 
             Image = null;
-            VideoWidths = Array.Empty<int>();
+            VideoHeights = Array.Empty<int>();
         }
 
         public void LoadFromAnimeXML(string filePath, bool skipDetails = false)

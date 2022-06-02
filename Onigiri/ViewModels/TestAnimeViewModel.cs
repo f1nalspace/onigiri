@@ -1,4 +1,5 @@
-﻿using Finalspace.Onigiri.Models;
+﻿using Finalspace.Onigiri.Media;
+using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Types;
 using System;
 
@@ -33,6 +34,57 @@ namespace Finalspace.Onigiri.ViewModels
             EndDate = DateTime.Now.AddMonths(6);
 
             Description = loremIpson.Replace("\n", Environment.NewLine + Environment.NewLine);
+
+            var mediaInfo = new MediaInfo()
+            {
+                Format = new CodecDescription(FourCC.FromString("avi"), "AVI-Container"),
+                Duration = TimeSpan.FromSeconds(1337.0),
+            };
+
+            mediaInfo.Video.Add(new VideoInfo()
+            {
+                Codec = new CodecDescription(FourCC.FromString("h274"), "H.264"),
+                FrameCount = 1337,
+                FrameRate = 25.0,
+                Width = 1280,
+                Height = 720,
+                Name = "Video0",
+            });
+
+            mediaInfo.Video.Add(new VideoInfo()
+            {
+                Codec = new CodecDescription(FourCC.FromString("h274"), "H.264"),
+                FrameCount = 1337,
+                FrameRate = 25.0,
+                Width = 1920,
+                Height = 1080,
+                Name = "Video1",
+            });
+
+            mediaInfo.Audio.Add(new AudioInfo()
+            {
+                Codec = new CodecDescription(FourCC.FromString("h274"), "H.264"),
+                FrameCount = 1337,
+                BitRate = 138000,
+                BitsPerSample = 16,
+                Channels = 2,
+                SampleRate = 44110,
+                Lang = LanguageNames.JapaneseShort,
+                Name = "Audio",
+            });
+
+            mediaInfo.Subtitles.Add(new SubtitleInfo()
+            {
+                Lang = LanguageNames.EnglishShort,
+                Name = "Subtitle",
+            });
+
+            ExtendedMediaFiles.Add(new AnimeMediaFile()
+            {
+                FileName = "anime.avi",
+                FileSize = 1337128,
+                Info = mediaInfo,
+            });
         }
     }
 }

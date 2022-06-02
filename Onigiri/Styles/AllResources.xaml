@@ -7,6 +7,12 @@
     <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
     <converters:ThemeToBoolConverter x:Key="themeBoolConv" />
     <converters:UserImageResourceConverter x:Key="userImgConv" />
+    
+    <converters:IntGreaterThanConverter x:Key="int576pGTConv" Cutoff="576" />
+    <converters:IntGreaterThanConverter x:Key="int720pGTConv" Cutoff="720" />
+    <converters:IntGreaterThanConverter x:Key="int1080pGTConv" Cutoff="1080" />
+    <converters:IntGreaterThanConverter x:Key="int1440pGTConv" Cutoff="1440" />
+    <converters:IntGreaterThanConverter x:Key="int2160pGTConv" Cutoff="2160" />
 
     <BitmapImage x:Key="noPictureImage" UriSource="/Resources/nopicture.png" />
 
@@ -393,12 +399,45 @@
         <Setter Property="Height" Value="50" />
         <Setter Property="Stretch" Value="Fill" />
         <Setter Property="Opacity" Value="0.65" />
-        <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
     </Style>
 
     <ControlTemplate x:Key="videoQualityPanelTemplate">
         <Grid>
-            <Image Style="{StaticResource video_quality_icon}" />
+            <ItemsControl ItemsSource="{Binding VideoHeights, UpdateSourceTrigger=PropertyChanged}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image>
+                            <Image.Style>
+                                <Style TargetType="Image" BasedOn="{StaticResource video_quality_icon}">
+                                    <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int576pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int720pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality720pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int1080pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality1080pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int1440pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality1440pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int2160pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality2160pImage}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </ControlTemplate>
 
