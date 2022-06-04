@@ -13,14 +13,6 @@
         <dxmvvm:OpenFileDialogService />
         <dxmvvm:SaveFileDialogService />
     </dxmvvm:Interaction.Behaviors>
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/Styles/Controls.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
     <DockPanel LastChildFill="True">
         <Ribbon DockPanel.Dock="Top">
             <Ribbon.ApplicationMenu>

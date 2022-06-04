@@ -236,31 +236,31 @@ namespace Finalspace.Onigiri.Storage
 
 #if !SINGLE_THREAD_PROCESSING
                 ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = _maxThreadCount };
-                Parallel.ForEach<FileInfo, ExecutionResult<Anime>>(persistentFiles, poptions, 
-                    () => new ExecutionResult<Anime>(),
-                    (persistentFile, state, local) =>
+                Parallel.ForEach(persistentFiles, poptions,
+                    (persistentFile) =>
                     {
                         int c = Interlocked.Increment(ref count);
                         int percentage = (int)(c / (double)totalFileCount * 100.0);
                         statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = persistentFile.Name, Percentage = percentage });
 
                         ExecutionResult<AnimeFile> res = AnimeFile.LoadFromFile(persistentFile.FullName);
-                        if (!res.Success)
-                            return new ExecutionResult<Anime>(res.Error);
-                        AnimeFile animeFile = res.Value;
-                        ExecutionResult<Anime> t = Deserialize(animeFile);
-                        return t;
-                    },
-                    (res) =>
-                    {
                         if (res.Success)
                         {
-                            Anime anime = res.Value;
-                            list.Add(anime);
+                            AnimeFile animeFile = res.Value;
+                            ExecutionResult<Anime> t = Deserialize(animeFile);
+                            if (t.Success)
+                            {
+                                Anime anime = t.Value;
+                                list.Add(anime);
+                            }
+                            else
+                            {
+                                // @TODO(final): Handle error!
+                            }
                         }
                         else
                         {
-                            // TODO(tspaete): Log issue!
+                            // @TODO(final): Handle error!
                         }
                     });
 #else

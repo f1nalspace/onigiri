@@ -85,6 +85,10 @@ namespace Finalspace.Onigiri.ViewModels
                 FileSize = 1337128,
                 Info = mediaInfo,
             });
+
+            var x = Finalspace.Onigiri.App.GetResourceStream(new Uri("resources/p221098.jpg"));
+
+            //Image = new AnimeImage()
         }
     }
 }

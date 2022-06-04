@@ -1,0 +1,60 @@
+﻿<Window x:Class="Finalspace.Onigiri.Views.DetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Finalspace.Onigiri.ViewModels"
+        xmlns:coreModels="clr-namespace:Finalspace.Onigiri.Models;assembly=OnigiriCore"
+        mc:Ignorable="d"
+        Title="DetailsWindow" 
+        Height="450" 
+        Width="800" 
+        FontFamily="Arial"
+        d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
+        d:Background="White">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Styles/Controls.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource detailsTitleText}" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" />
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <!-- Picture start -->
+                <Image Style="{StaticResource pictureImage}">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
+                            <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
+                <!-- Picture end -->
+            </Grid>
+            <TabControl Grid.Column="1" SelectedIndex="0">
+                <TabItem Header="Basic">
+                    <StackPanel Orientation="Vertical">
+
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Description">
+
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>

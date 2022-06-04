@@ -8,14 +8,7 @@
              d:DesignHeight="280"
              d:DesignWidth="640"
              d:DataContext="{d:DesignInstance viewmodels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
-             d:Background="{StaticResource animeItemBackground_light}">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
+             d:Background="Black">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Style="{StaticResource mainImageColumn}" />
