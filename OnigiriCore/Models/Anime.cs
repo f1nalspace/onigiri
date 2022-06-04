@@ -50,11 +50,11 @@ namespace Finalspace.Onigiri.Models
             var allVideoStreams = files
                 .Where(f => f.Info != null && f.Info.Video.Any())
                 .SelectMany(f => f.Info.Video)
-                .Distinct()
                 .OrderByDescending(v => v.Height);
 
             VideoHeights = allVideoStreams
-                .Select(v => v.Height)
+                .Select(v => QualityLevel.HeightToQualityLevel(v.Height))
+                .Distinct()
                 .ToArray();
 
             RaisePropertyChanged(nameof(MediaFileCount));
