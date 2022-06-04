@@ -631,7 +631,7 @@
         <Setter Property="Margin" Value="2" />
         <Setter Property="CornerRadius" Value="2" />
         <Setter Property="BorderBrush" Value="Black" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderThickness" Value="0.25" />
 
         <Style.Triggers>
             <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
