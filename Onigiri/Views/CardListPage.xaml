@@ -34,14 +34,7 @@
                     <!-- Image block start -->
                     <Grid Grid.Column="0">
                         <!-- Picture start -->
-                        <Image Style="{StaticResource pictureImage}">
-                            <Image.Source>
-                                <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
-                                    <Binding Path="Image" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
-                                    <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
-                                </MultiBinding>
-                            </Image.Source>
-                        </Image>
+                        <Image Style="{StaticResource pictureImage}" Source="{Binding Image, UpdateSourceTrigger=PropertyChanged, IsAsync=True, Converter={StaticResource animeImageConverter}, FallbackValue={StaticResource noPictureImage}}" />
                         <!-- Picture end -->
 
                         <!-- Anime title start -->

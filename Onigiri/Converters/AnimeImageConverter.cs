@@ -1,17 +1,14 @@
 ﻿using Finalspace.Onigiri.Models;
-using Finalspace.Onigiri.ViewModels;
 using System;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
 namespace Finalspace.Onigiri.Converters
 {
-    public class AnimeImageConverter : IMultiValueConverter
+    public class AnimeImageConverter : IValueConverter
     {
         private static BitmapImage LoadImage(ReadOnlySpan<byte> imageData)
         {
@@ -32,28 +29,17 @@ namespace Finalspace.Onigiri.Converters
             return image;
         }
 
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length < 2)
+            if (value is AnimeImage animeImage)
+                return LoadImage(animeImage.Data.AsSpan());
+            else if (value is string pictureFile && File.Exists(pictureFile))
+                return new BitmapImage(new Uri(pictureFile));
+            else 
                 return DependencyProperty.UnsetValue;
-
-            if (!(values[1] is MainViewModel mainViewModel))
-                return DependencyProperty.UnsetValue;
-
-            if (values[0] is string)
-            {
-                string pictureFile = (string)values[0];
-                if (!string.IsNullOrEmpty(pictureFile))
-                    return new BitmapImage(new Uri(pictureFile));
-            }
-            else if (values[0] is AnimeImage animeIage)
-                return LoadImage(animeIage.Data.AsSpan());
-            return DependencyProperty.UnsetValue;
         }
 
-        public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotSupportedException();
     }
 }
