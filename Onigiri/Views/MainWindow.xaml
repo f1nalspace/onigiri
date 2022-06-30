@@ -17,13 +17,13 @@
         <Ribbon DockPanel.Dock="Top">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu>
+                    <RibbonApplicationMenuItem Command="{Binding CmdCreate}" Header="New" ImageSource="/Resources/new_32x32.png"/>
+                    <RibbonApplicationMenuItem Command="{Binding CmdImport}" Header="Import..." ImageSource="/Resources/open2_32x32.png"/>
+                    <RibbonApplicationMenuItem Command="{Binding CmdExport}" Header="Export..." ImageSource="/Resources/open2_32x32.png"/>
                     <RibbonApplicationMenuItem Command="{Binding CmdExit}" Header="Exit" ImageSource="/Resources/close_32x32.png"/>
-                    <RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <RibbonGallery CanUserFilter="False" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <RibbonGalleryCategory Background="Transparent"  MaxColumnCount="1">
-                            </RibbonGalleryCategory>
-                        </RibbonGallery>
-                    </RibbonApplicationMenu.AuxiliaryPaneContent>
+                    <RibbonSeparator />
+                    <RibbonApplicationMenuItem Command="{Binding CmdSettings}" Header="Settings" ImageSource="/Resources/customization_32x32.png"/>
+                    <RibbonApplicationMenuItem Command="{Binding CmdAbout}" Header="About" ImageSource="/Resources/info_32x32.png"/>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
 

@@ -27,7 +27,11 @@
     <None Remove="Resources\add_32x32.png" />
     <None Remove="Resources\darkmode_trigger_32x32.png" />
     <None Remove="Resources\download_to_local_store_32x32.png" />
+    <None Remove="Resources\info_16x16.png" />
+    <None Remove="Resources\info_32x32.png" />
     <None Remove="Resources\moon_32x32.png" />
+    <None Remove="Resources\new_16x16.png" />
+    <None Remove="Resources\new_32x32.png" />
     <None Remove="Resources\next_32x32.png" />
     <None Remove="Resources\next_tag_32x32.png" />
     <None Remove="Resources\p221098.jpg" />
@@ -43,6 +47,8 @@
     <None Remove="Resources\v_2160p.png" />
     <None Remove="Resources\v_576p.png" />
     <None Remove="Resources\v_720p.png" />
+	<None Remove="Resources\open2_16x16.png" />
+	<None Remove="Resources\open2_32x32.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -60,7 +66,11 @@
     <Resource Include="Resources\add_32x32.png" />
     <Resource Include="Resources\darkmode_trigger_32x32.png" />
     <Resource Include="Resources\download_to_local_store_32x32.png" />
+    <Resource Include="Resources\info_16x16.png" />
+    <Resource Include="Resources\info_32x32.png" />
     <Resource Include="Resources\moon_32x32.png" />
+    <Resource Include="Resources\new_16x16.png" />
+    <Resource Include="Resources\new_32x32.png" />
     <Resource Include="Resources\next_tag_32x32.png" />
     <Resource Include="Resources\next_32x32.png" />
     <Resource Include="Resources\onigiri.ico" />
@@ -84,6 +94,8 @@
     <Resource Include="Resources\final_false.png" />
     <Resource Include="Resources\mark.png" />
     <Resource Include="Resources\mark_false.png" />
+    <Resource Include="Resources\open2_16x16.png" />
+    <Resource Include="Resources\open2_32x32.png" />
     <Resource Include="Resources\prev_tag_32x32.png" />
     <Resource Include="Resources\prev_32x32.png" />
     <Resource Include="Resources\rebuild_database_32x32.png" />
