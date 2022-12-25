@@ -471,7 +471,16 @@ namespace Finalspace.Onigiri.ViewModels
             Anime anime = item as Anime;
             if (result && (!string.IsNullOrEmpty(FilterTitle) && !string.IsNullOrEmpty(anime.MainTitle)))
             {
-                if (!anime.MainTitle.ToLower().Contains(FilterTitle.ToLower()))
+                bool found = false;
+                foreach (Title title in anime.Titles.Items)
+                {
+                    if (anime.MainTitle.ToLower().Contains(FilterTitle.ToLower()))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
                     result = false;
             }
             if (result && (FilterType != null && (!"All".Equals(FilterType.Name, StringComparison.InvariantCultureIgnoreCase))))
