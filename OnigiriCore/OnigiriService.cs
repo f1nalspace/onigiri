@@ -372,7 +372,7 @@ namespace Finalspace.Onigiri
                     task.Wait();
                     info = task.Result;
                 }
-                catch (Exception e)
+                catch
                 {
                     // @TODO(final): Log error!
                 }
@@ -682,8 +682,7 @@ namespace Finalspace.Onigiri
 
             string configFilePath = OnigiriPaths.ConfigFilePath;
 
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            log.Info($"Use identity: {identity.Name}");
+            log.Info($"Use identity: {_currentUser.UserName}");
 
             // Read config
             if (File.Exists(configFilePath))
