@@ -39,7 +39,7 @@ namespace Finalspace.Onigiri
         {
             _userService = new Win32UserService();
 
-            _currentUser = userService.GetCurrentUser();
+            _currentUser = _userService.GetCurrentUser();
 
             if (!Directory.Exists(OnigiriPaths.AppSettingsPath))
                 Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
