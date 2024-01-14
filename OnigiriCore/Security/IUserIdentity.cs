@@ -1,6 +1,8 @@
-﻿namespace Finalspace.Onigiri
+﻿using System;
+
+namespace Finalspace.Onigiri
 {
-    interface IUserIdentity
+    public interface IUserIdentity : IDisposable
     {
         string UserName { get; }
     }

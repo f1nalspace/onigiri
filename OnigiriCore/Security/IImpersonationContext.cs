@@ -2,7 +2,7 @@
 
 namespace Finalspace.Onigiri.Security
 {
-    interface IImpersonationContext : IDisposable
+    public interface IImpersonationContext : IDisposable
     {
     }
 }

@@ -1,25 +1,24 @@
 ﻿using Finalspace.Onigiri.AniDB;
-using System;
-using System.IO;
-using log4net;
-using System.Reflection;
-using Finalspace.Onigiri.Utils;
-using Finalspace.Onigiri.Models;
-using System.Security.Principal;
 using Finalspace.Onigiri.Enums;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Diagnostics;
 using Finalspace.Onigiri.Events;
-using System.Linq;
-using Finalspace.Onigiri.Security;
-using System.Collections.Immutable;
-using Finalspace.Onigiri.Types;
-using Finalspace.Onigiri.Storage;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 using Finalspace.Onigiri.Media;
+using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Security;
+using Finalspace.Onigiri.Storage;
+using Finalspace.Onigiri.Types;
+using Finalspace.Onigiri.Utils;
+using log4net;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Principal;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri
 {
@@ -27,8 +26,9 @@ namespace Finalspace.Onigiri
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly IUserIdentity _userIdentity;
-        private readonly IIdentityImpersonator _identityImpersonator;
+        private readonly IUserService _userService;
+
+        private readonly IUserIdentity _currentUser;
 
         public Config Config { get; }
         public Titles Titles { get; }
@@ -37,8 +37,9 @@ namespace Finalspace.Onigiri
 
         public OnigiriService()
         {
-            _userIdentity = new Win32UserIdentity();
-            _identityImpersonator = new Win32IdentityImpersonator();
+            _userService = new Win32UserService();
+
+            _currentUser = userService.GetCurrentUser();
 
             if (!Directory.Exists(OnigiriPaths.AppSettingsPath))
                 Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
@@ -251,7 +252,7 @@ namespace Finalspace.Onigiri
 
             List<Anime> list = new List<Anime>();
 
-            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
                 List<DirectoryInfo> animeDirs = new List<DirectoryInfo>();
                 foreach (SearchPath searchPath in Config.SearchPaths)
@@ -551,7 +552,7 @@ namespace Finalspace.Onigiri
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
 
-            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load from '{storage}'", Subject = "", Percentage = -1 });
 
@@ -586,7 +587,7 @@ namespace Finalspace.Onigiri
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
 
-            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
 
@@ -618,7 +619,7 @@ namespace Finalspace.Onigiri
             if (storage == null)
                 throw new ArgumentNullException(nameof(storage));
 
-            using (IImpersonationContext imp = _identityImpersonator.Impersonate(_userIdentity))
+            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Principal;
 
 namespace Finalspace.Onigiri.Security
 {
