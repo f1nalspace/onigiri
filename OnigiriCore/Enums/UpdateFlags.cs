@@ -11,28 +11,33 @@ namespace Finalspace.Onigiri.Enums
         None = 0,
 
         /// <summary>
+        /// Do not save anything, just load from all sources.
+        /// </summary>
+        ReadOnly = 1 << 0,
+
+        /// <summary>
         /// Overwrite the details XML in the local store.
         /// </summary>
-        ForceDetails = 1 << 0,
+        ForceDetails = 1 << 1,
 
         /// <summary>
         /// Overwrite the images in the local store.
         /// </summary>
-        ForcePicture = 1 << 1,
+        ForcePicture = 1 << 2,
 
         /// <summary>
         /// Download the details XML to the local store.
         /// </summary>
-        DownloadDetails = 1 << 2,
+        DownloadDetails = 1 << 3,
 
         /// <summary>
         /// Download the images to the local store.
         /// </summary>
-        DownloadPicture = 1 << 3,
+        DownloadPicture = 1 << 4,
 
         /// <summary>
         /// Download the titles XML, without touching the persistent cache or the local store.
         /// </summary>
-        DownloadTitles = 1 << 4,
+        DownloadTitles = 1 << 5,
     }
 }

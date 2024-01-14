@@ -168,7 +168,7 @@ namespace Finalspace.Onigiri
             }
 
             // Download anime details xml
-            if (flags.HasFlag(UpdateFlags.DownloadDetails) || flags.HasFlag(UpdateFlags.ForceDetails))
+            if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadDetails) || flags.HasFlag(UpdateFlags.ForceDetails)))
             {
                 bool updateDetails = flags.HasFlag(UpdateFlags.ForceDetails) || !File.Exists(animeXmlFilePath);
                 if (updateDetails)
@@ -190,7 +190,9 @@ namespace Finalspace.Onigiri
 
             // Download picture
             string imageFilePath = FindImage(sourceDir);
-            if (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture))
+
+
+            if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture)))
             {
                 bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
                 if (updatePicture)
@@ -213,7 +215,7 @@ namespace Finalspace.Onigiri
                 }
             }
 
-            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
+            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ReadOnly) || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
                 !string.IsNullOrWhiteSpace(imageFilePath) &&
                 File.Exists(imageFilePath))
             {
