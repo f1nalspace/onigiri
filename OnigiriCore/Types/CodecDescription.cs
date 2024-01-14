@@ -43,6 +43,8 @@ namespace Finalspace.Onigiri.Types
             => string.Equals(Name, other.Name) && Id.Equals(other.Id);
 
         public override bool Equals(object obj) => obj is CodecDescription codecDesc && Equals(codecDesc);
+        public static bool operator ==(CodecDescription left, CodecDescription right) => left.Equals(right);
+        public static bool operator !=(CodecDescription left, CodecDescription right) => !(left == right);
 
         public static readonly CodecDescription Empty = new CodecDescription(FourCC.Empty, null);
     }
