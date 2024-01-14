@@ -15,6 +15,7 @@ using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
 using DevExpress.Mvvm;
 using Finalspace.Onigiri.Storage;
+using System.ComponentModel.Design;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -563,16 +564,20 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<Anime> CmdOpenRelations { get; }
         #endregion
 
-        public bool IsDarkMode { get => GetValue<bool>(); private set => SetValue(value); }
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>();
+            private set => SetValue(value);
+        }
 
         public MainTheme Theme { get => GetValue<MainTheme>(); private set => SetValue(value, () => ChangedTheme(value)); }
 
         private void ChangedTheme(MainTheme theme)
         {
             IDarkModeDetectionService service = GetService<IDarkModeDetectionService>();
-            service.DarkModeChanged -= OnDarkModeChanged;
-
-            if (theme == MainTheme.Automatic)
+            if (service != null)
+                service.DarkModeChanged -= OnDarkModeChanged;
+            if (service != null && theme == MainTheme.Automatic)
             {
                 IsDarkMode = service.IsDarkMode;
                 service.DarkModeChanged += OnDarkModeChanged;
@@ -597,7 +602,7 @@ namespace Finalspace.Onigiri.ViewModels
 #endif
         }
 
-        private bool CanExport() => !ExportWorker.IsBusy;
+        private bool CanExport() => ExportWorker != null && !ExportWorker.IsBusy;
         private void Export()
         {
             ISaveFileDialogService dlg = GetService<ISaveFileDialogService>();
@@ -612,7 +617,7 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
-        private bool CanImport() => !ImportWorker.IsBusy;
+        private bool CanImport() => ImportWorker != null && !ImportWorker.IsBusy;
         private void Import()
         {
             IOpenFileDialogService dlg = GetService<IOpenFileDialogService>();
@@ -625,13 +630,13 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
-        private bool CanRefresh() => !RefreshWorker.IsBusy;
+        private bool CanRefresh() => RefreshWorker != null && !RefreshWorker.IsBusy;
         private void Refresh()
         {
             RefreshWorker.RunWorkerAsync(false);
         }
 
-        private bool CanUpdate(string s) => !UpdateWorker.IsBusy;
+        private bool CanUpdate(string s) => UpdateWorker != null && !UpdateWorker.IsBusy;
         private void Update(string s)
         {
             UpdateWorker.RunWorkerAsync(s);
@@ -678,12 +683,16 @@ namespace Finalspace.Onigiri.ViewModels
         #region Constructor
         public MainViewModel()
         {
-            IDarkModeDetectionService darkModeService = GetService<IDarkModeDetectionService>();
-
             // Dark mode
-            darkModeService.DarkModeChanged += OnDarkModeChanged;
-            Theme = MainTheme.Automatic;
-            ChangedTheme(Theme);
+            IDarkModeDetectionService darkModeService = GetService<IDarkModeDetectionService>();
+            if (darkModeService != null)
+            {
+                darkModeService.DarkModeChanged += OnDarkModeChanged;
+                Theme = MainTheme.Automatic;
+                ChangedTheme(Theme);
+            }
+            else
+                Theme = MainTheme.Light;
 
             // Services
             CoreService = new OnigiriService();

@@ -7,7 +7,7 @@
     <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
     <converters:ThemeToBoolConverter x:Key="themeBoolConv" />
     <converters:UserImageResourceConverter x:Key="userImgConv" />
-    
+
     <converters:IntGreaterThanConverter x:Key="int576pGTConv" Cutoff="576" />
     <converters:IntGreaterThanConverter x:Key="int720pGTConv" Cutoff="720" />
     <converters:IntGreaterThanConverter x:Key="int1080pGTConv" Cutoff="1080" />
@@ -127,7 +127,7 @@
         </SolidColorBrush.Color>
     </SolidColorBrush>
 
-    <!-- Layout -->
+    <!-- Cards-Layout (660 x 280 + 20 x 20 margin) -->
     <Style x:Key="mainImageColumn" TargetType="ColumnDefinition">
         <Setter Property="Width" Value="200" />
     </Style>
@@ -149,7 +149,7 @@
         <Setter Property="Background" Value="{StaticResource headerBackground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Background" Value="{StaticResource headerBackground_dark}" />
                 </DataTrigger.Setters>
@@ -468,7 +468,7 @@
         <Setter Property="Foreground" Value="{StaticResource mainlineForeground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Foreground" Value="{StaticResource mainlineForeground_dark}" />
                 </DataTrigger.Setters>
@@ -482,7 +482,7 @@
         <Setter Property="Foreground" Value="{StaticResource sublineForeground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Foreground" Value="{StaticResource sublineForeground_dark}" />
                 </DataTrigger.Setters>
@@ -500,7 +500,7 @@
         <Setter Property="TextWrapping" Value="Wrap" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Foreground" Value="{StaticResource descriptionForeground_dark}" />
                 </DataTrigger.Setters>
@@ -512,7 +512,7 @@
         <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
                 </DataTrigger.Setters>
@@ -545,7 +545,7 @@
                                     <Style TargetType="Grid">
                                         <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                                                 <DataTrigger.Setters>
                                                     <Setter Property="Background" Value="{StaticResource animeListBackground_dark}" />
                                                 </DataTrigger.Setters>
@@ -559,7 +559,7 @@
                                             <Setter Property="FontSize" Value="24" />
                                             <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                                <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                                                     <DataTrigger.Setters>
                                                         <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
                                                     </DataTrigger.Setters>
@@ -573,7 +573,7 @@
                     </Setter.Value>
                 </Setter>
             </Trigger>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Background" Value="{StaticResource animeListBackground_dark}" />
                 </DataTrigger.Setters>
@@ -591,7 +591,7 @@
         <Setter Property="Background" Value="{StaticResource animeItemBackground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Background" Value="{StaticResource animeItemBackground_dark}" />
                 </DataTrigger.Setters>
@@ -603,7 +603,7 @@
         <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Background" Value="{StaticResource tagsBackground_dark}" />
                 </DataTrigger.Setters>
@@ -617,7 +617,7 @@
         <Setter Property="FontSize" Value="12" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="Background" Value="{StaticResource tagsBackground_dark}" />
                 </DataTrigger.Setters>
@@ -634,7 +634,7 @@
         <Setter Property="BorderThickness" Value="0.25" />
 
         <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}" Value="True">
+            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
                 <DataTrigger.Setters>
                     <Setter Property="BorderBrush" Value="White" />
                 </DataTrigger.Setters>
