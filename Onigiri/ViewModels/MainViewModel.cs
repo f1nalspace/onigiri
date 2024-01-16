@@ -233,7 +233,10 @@ namespace Finalspace.Onigiri.ViewModels
                 writeStorage = true;
             }
             else if ("Database".Equals(updateType))
+            {
+                updateFlags = UpdateFlags.ReadOnly;
                 writeStorage = true;
+            }
             else
                 throw new NotSupportedException($"The update type '{updateType}' is not supported");
 
