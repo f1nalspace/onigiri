@@ -42,8 +42,6 @@ namespace Finalspace.Onigiri.Models
 
             // TODO(final): Do not add final/anni to the users by default
             Users = new ObservableCollection<User>();
-            Users.Add(new User("final", "final.png", "final_false.png"));
-            Users.Add(new User("anni", "anni.png", "anni_false.png"));
 
             MaxThreadCount = Math.Max(Environment.ProcessorCount - 1, 1);
         }

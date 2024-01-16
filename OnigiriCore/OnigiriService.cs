@@ -692,6 +692,13 @@ namespace Finalspace.Onigiri
             else
                 log.Warn($"Not found config file '{configFilePath}'!");
 
+            // Add default users
+            if (Config.Users.Count == 0)
+            {
+                Config.Users.Add(new User("final", "final.png", "final_false.png"));
+                Config.Users.Add(new User("anni", "anni.png", "anni_false.png"));
+            }
+            
             // Download anime titles dump raw file from anidb if needed
             ReadTitles(statusChanged, false);
         }
