@@ -10,7 +10,6 @@
     d:DesignHeight="450"
     d:DesignWidth="1300"
     d:DataContext="{d:DesignInstance viewmodels:MainViewModel, IsDesignTimeCreatable=True}"
-    FontFamily="Arial"
     Title="ListViewPage">
     <ListBox ItemContainerStyle="{StaticResource animeItem}" Style="{StaticResource animeList}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
         <ListBox.ItemsPanel>
