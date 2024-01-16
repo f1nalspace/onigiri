@@ -48,6 +48,23 @@ namespace Finalspace.Onigiri.Models
             MaxThreadCount = Math.Max(Environment.ProcessorCount - 1, 1);
         }
 
+        public void Assign(Config config)
+        {
+            SearchTypeLanguages.Clear();
+            foreach (SearchTypeLanguage language in config.SearchTypeLanguages)
+                SearchTypeLanguages.Add(new SearchTypeLanguage() { Lang = language.Lang, Type = language.Type });
+
+            SearchPaths.Clear();
+            foreach (SearchPath searchPath in config.SearchPaths)
+                SearchPaths.Add(new SearchPath() { DriveName = searchPath.DriveName, Path = searchPath.Path });
+
+            Users.Clear();
+            foreach (var user in config.Users)
+                Users.Add(new User() { UserName = user.UserName, DisplayName = user.DisplayName, ActiveImage = user.ActiveImage, DisabledImage = user.DisabledImage });
+
+            MaxThreadCount = config.MaxThreadCount;
+        }
+
         public void SaveToFile(string filePath)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Config));
