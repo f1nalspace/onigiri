@@ -187,10 +187,12 @@ namespace Finalspace.Onigiri
             Anime anime = LoadAnimeFromSourceDir(sourceDir, statusChanged);
             Debug.Assert(anime is not null);
 
-            // Download picture
+            // Find picture
             string imageFilePath = FindImage(sourceDir);
+            if (!string.IsNullOrWhiteSpace(imageFilePath) && string.IsNullOrWhiteSpace(anime.Picture))
+                anime.Picture = Path.GetFileName(imageFilePath);
 
-
+            // Download picture
             if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture)))
             {
                 bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
