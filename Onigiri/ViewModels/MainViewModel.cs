@@ -35,7 +35,7 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Storage
-        private IAnimeStorage _currentStorage = null;
+        private readonly IAnimeStorage _currentStorage;
         #endregion
 
         #region Anime list & properties
@@ -158,7 +158,7 @@ namespace Finalspace.Onigiri.ViewModels
             _animes.Clear();
             _animes.AddRange(CoreService.Animes.Items);
 
-            if (!_animes.Any())
+            if (_animes.Count == 0)
             {
                 _animes.Add(new TestAnimeViewModel());
                 _animes.Add(new TestAnimeViewModel());
@@ -475,7 +475,7 @@ namespace Finalspace.Onigiri.ViewModels
                 bool found = false;
                 foreach (Title title in anime.Titles.Items)
                 {
-                    if (anime.MainTitle.ToLower().Contains(FilterTitle.ToLower()))
+                    if (anime.MainTitle.Contains(FilterTitle, StringComparison.InvariantCultureIgnoreCase))
                     {
                         found = true;
                         break;
