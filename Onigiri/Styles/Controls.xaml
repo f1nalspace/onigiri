@@ -1,47 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                    xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters">
-    <sys:Boolean x:Key="trueBool">true</sys:Boolean>
-    <sys:Boolean x:Key="falseBool">false</sys:Boolean>
-
-    <converters:BooleanLogicalOrMultiConverter x:Key="booleanLogicalOrConv" />
-
-    <MultiBinding x:Key="darkModeBinding" Converter="{StaticResource booleanLogicalOrConv}">
-        <Binding Path="DataContext.IsDarkMode" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}" UpdateSourceTrigger="PropertyChanged" />
-        <Binding Path="DataContext.IsDarkMode" RelativeSource="{RelativeSource AncestorType=Page, Mode=FindAncestor}" UpdateSourceTrigger="PropertyChanged" />
-    </MultiBinding>
-
-    <SolidColorBrush x:Key="lightBackgrund">
-        <SolidColorBrush.Color>
-            <Color R="214" G="224" B="239" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="darkBackgrund">
-        <SolidColorBrush.Color>
-            <Color R="19" G="23" B="29" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="lightForegrund">
-        <SolidColorBrush.Color>
-            <Color R="92" G="114" B="138" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="darkForegrund">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="lightGroupboxHeaderBackground">#25A0DA</SolidColorBrush>
-    <SolidColorBrush x:Key="darkGroupboxHeaderBackground">#25A0DA</SolidColorBrush>
-    <SolidColorBrush x:Key="lightGroupboxHeaderBorder">#25A0DA</SolidColorBrush>
-    <SolidColorBrush x:Key="darkGroupboxHeaderBorder">#25A0DA</SolidColorBrush>
-    <SolidColorBrush x:Key="lightGroupboxHeaderForeground">white</SolidColorBrush>
-    <SolidColorBrush x:Key="darkGroupboxHeaderForeground">white</SolidColorBrush>
-
-    <ControlTemplate x:Key="niceGroupBox" TargetType="GroupBox">
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <ControlTemplate x:Key="groupBox" TargetType="GroupBox">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -52,15 +12,15 @@
                 <Label>
                     <Label.Style>
                         <Style TargetType="Label">
-                            <Setter Property="Foreground" Value="{StaticResource lightGroupboxHeaderForeground}" />
+                            <Setter Property="Foreground" Value="{StaticResource groupboxHeaderForeground}" />
                         </Style>
                     </Label.Style>
                     <ContentPresenter Margin="2" ContentSource="Header" RecognizesAccessKey="True" />
                 </Label>
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="{StaticResource lightGroupboxHeaderBackground}" />
-                        <Setter Property="BorderBrush" Value="{StaticResource lightGroupboxHeaderBorder}" />
+                        <Setter Property="Background" Value="{StaticResource groupboxHeaderBackground}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource groupboxHeaderBorder}" />
                     </Style>
                 </Border.Style>
             </Border>
@@ -69,7 +29,7 @@
                 BorderBrush="#25A0DA">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="BorderBrush" Value="{StaticResource lightGroupboxHeaderBorder}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource groupboxHeaderBorder}" />
                     </Style>
                 </Border.Style>
                 <ContentPresenter Margin="2" />
@@ -83,83 +43,48 @@
 
     <Style TargetType="UserControl">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
     </Style>
 
     <Style TargetType="Window">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Setter Property="Foreground" Value="{StaticResource lightForegrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                    <Setter Property="Foreground" Value="{StaticResource darkForegrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 
     <Style TargetType="Page">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Setter Property="Foreground" Value="{StaticResource lightForegrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                    <Setter Property="Foreground" Value="{StaticResource darkForegrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
+    </Style>
+
+    <Style TargetType="Frame">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 
     <Style TargetType="Ribbon" xmlns:mwt="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" xmlns:swcrp="clr-namespace:System.Windows.Controls.Ribbon.Primitives;assembly=System.Windows.Controls.Ribbon">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Setter Property="Foreground" Value="{StaticResource lightForegrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                    <Setter Property="Foreground" Value="{StaticResource darkForegrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 
     <Style TargetType="TabControl">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Setter Property="Foreground" Value="{StaticResource lightForegrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                    <Setter Property="Foreground" Value="{StaticResource darkForegrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 
     <Style TargetType="TabItem">
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource lightBackgrund}" />
-        <Setter Property="Foreground" Value="{StaticResource lightForegrund}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource darkBackgrund}" />
-                    <Setter Property="Foreground" Value="{StaticResource darkForegrund}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
+    </Style>
+
+    <Style TargetType="StatusBar">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{StaticResource controlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 </ResourceDictionary>

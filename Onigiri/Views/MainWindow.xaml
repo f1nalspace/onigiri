@@ -171,7 +171,7 @@
                         <ProgressBar Width="300" Height="20" Value="{Binding LoadingPercentage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsIndeterminate="{Binding IsLoadingMarque, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
                     </StackPanel>
                 </DockPanel>
-                <Frame Name="mainFrame" DataContext="{Binding}" LoadCompleted="mainFrame_LoadCompleted" DataContextChanged="mainFrame_DataContextChanged" Source="CardListPage.xaml" />
+                <Frame Name="mainFrame" DataContext="{Binding}" LoadCompleted="mainFrame_LoadCompleted" DataContextChanged="mainFrame_DataContextChanged" ContentRendered="mainFrame_ContentRendered" Source="CardListPage.xaml" Background="{StaticResource transparentBrush}" NavigationUIVisibility="Hidden" />
             </Grid>
         </DockPanel>
     </DockPanel>

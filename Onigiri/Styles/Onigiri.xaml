@@ -39,94 +39,6 @@
     <BitmapImage x:Key="videoQuality1440pImage" UriSource="/Resources/v_1440p.png" />
     <BitmapImage x:Key="videoQuality2160pImage" UriSource="/Resources/v_2160p.png" />
 
-    <SolidColorBrush x:Key="animeListBackground_light">
-        <SolidColorBrush.Color>
-            <Color R="214" G="224" B="239" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="animeListBackground_dark">
-        <SolidColorBrush.Color>
-            <Color R="19" G="23" B="29" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="animeItemBackground_light" >
-        <SolidColorBrush.Color>
-            <Color R="250" G="252" B="252" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="animeItemBackground_dark" >
-        <SolidColorBrush.Color>
-            <Color R="31" G="35" B="45" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="headerBackground_light">
-        <SolidColorBrush.Color>
-            <Color R="250" G="252" B="252" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="headerBackground_dark">
-        <SolidColorBrush.Color>
-            <Color R="31" G="35" B="45" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="tagsBackground_light">
-        <SolidColorBrush.Color>
-            <Color R="229" G="233" B="245" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="tagsBackground_dark">
-        <SolidColorBrush.Color>
-            <Color R="25" G="29" B="38" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="descriptionForeground_light">
-        <SolidColorBrush.Color>
-            <Color R="92" G="114" B="138" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="descriptionForeground_dark">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="mainlineForeground_light">
-        <SolidColorBrush.Color>
-            <Color R="92" G="114" B="138" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="mainlineForeground_dark">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="sublineForeground_light">
-        <SolidColorBrush.Color>
-            <Color R="92" G="114" B="138" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="sublineForeground_dark">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
-    <SolidColorBrush x:Key="noAnimesForeground_light">
-        <SolidColorBrush.Color>
-            <Color R="92" G="114" B="138" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    <SolidColorBrush x:Key="noAnimesForeground_dark">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
     <!-- Cards-Layout (660 x 280 + 20 x 20 margin) -->
     <Style x:Key="mainImageColumn" TargetType="ColumnDefinition">
         <Setter Property="Width" Value="200" />
@@ -146,15 +58,7 @@
     </Style>
 
     <Style x:Key="headerPanel" TargetType="DockPanel">
-        <Setter Property="Background" Value="{StaticResource headerBackground_light}" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource headerBackground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource headerBackground}" />
     </Style>
 
     <Style x:Key="ratingPanel" TargetType="StackPanel">
@@ -465,59 +369,27 @@
     <Style x:Key="animeMainlineText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{StaticResource mainlineForeground_light}" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Foreground" Value="{StaticResource mainlineForeground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Foreground" Value="{StaticResource mainlineForeground}" />
     </Style>
 
     <Style x:Key="animeSublineText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{StaticResource sublineForeground_light}" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Foreground" Value="{StaticResource sublineForeground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Foreground" Value="{StaticResource sublineForeground}" />
     </Style>
 
     <Style x:Key="descriptionText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="Foreground" Value="{StaticResource descriptionForeground_light}" />
+        <Setter Property="Foreground" Value="{StaticResource descriptionForeground}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="8" />
 
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="TextWrapping" Value="Wrap" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Foreground" Value="{StaticResource descriptionForeground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="noAnimesText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Foreground" Value="{StaticResource noAnimesForeground}" />
     </Style>
 
     <Style x:Key="tagItemText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
@@ -533,7 +405,7 @@
     <Style x:Key="animeList" TargetType="ListBox">
         <Setter Property="FontSize" Value="16" />
 
-        <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
+        <Setter Property="Background" Value="{StaticResource animeListBackground}" />
 
         <Style.Triggers>
             <Trigger Property="HasItems" Value="False">
@@ -543,28 +415,14 @@
                             <Grid>
                                 <Grid.Style>
                                     <Style TargetType="Grid">
-                                        <Setter Property="Background" Value="{StaticResource animeListBackground_light}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                                                <DataTrigger.Setters>
-                                                    <Setter Property="Background" Value="{StaticResource animeListBackground_dark}" />
-                                                </DataTrigger.Setters>
-                                            </DataTrigger>
-                                        </Style.Triggers>
+                                        <Setter Property="Background" Value="{StaticResource animeListBackground}" />
                                     </Style>
                                 </Grid.Style>
                                 <TextBlock Text="No Animes found." HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="FontSize" Value="24" />
-                                            <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_light}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                                                    <DataTrigger.Setters>
-                                                        <Setter Property="Foreground" Value="{StaticResource noAnimesForeground_dark}" />
-                                                    </DataTrigger.Setters>
-                                                </DataTrigger>
-                                            </Style.Triggers>
+                                            <Setter Property="Foreground" Value="{StaticResource noAnimesForeground}" />
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
@@ -573,11 +431,6 @@
                     </Setter.Value>
                 </Setter>
             </Trigger>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource animeListBackground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
         </Style.Triggers>
     </Style>
 
@@ -588,41 +441,18 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="10" />
 
-        <Setter Property="Background" Value="{StaticResource animeItemBackground_light}" />
+        <Setter Property="IsHitTestVisible" Value="False" />
 
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource animeItemBackground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource animeItemBackground}" />
     </Style>
 
     <Style x:Key="bottomPanel" TargetType="Grid">
-        <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource tagsBackground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{StaticResource tagsBackground}" />
     </Style>
 
     <Style x:Key="tagsItemsControl" TargetType="ItemsControl">
-        <Setter Property="Background" Value="{StaticResource tagsBackground_light}" />
-
+        <Setter Property="Background" Value="{StaticResource tagsBackground}" />
         <Setter Property="FontSize" Value="12" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="Background" Value="{StaticResource tagsBackground_dark}" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="tagItem" TargetType="Border">
@@ -630,16 +460,8 @@
         <Setter Property="Padding" Value="3" />
         <Setter Property="Margin" Value="2" />
         <Setter Property="CornerRadius" Value="2" />
-        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderBrush" Value="{StaticResource tagItemBorderBrush}" />
         <Setter Property="BorderThickness" Value="0.25" />
-
-        <Style.Triggers>
-            <DataTrigger Binding="{StaticResource darkModeBinding}" Value="{StaticResource trueBool}">
-                <DataTrigger.Setters>
-                    <Setter Property="BorderBrush" Value="White" />
-                </DataTrigger.Setters>
-            </DataTrigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="pictureImage" TargetType="Image">
@@ -650,4 +472,5 @@
 
     <SolidColorBrush x:Key="animeTitleBackground" Color="Black" Opacity="0.75" />
 
+    <SolidColorBrush x:Key="transparentBrush" Color="Black" Opacity="0" />
 </ResourceDictionary>

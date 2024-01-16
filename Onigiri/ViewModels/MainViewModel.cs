@@ -16,6 +16,7 @@ using Finalspace.Onigiri.Enums;
 using DevExpress.Mvvm;
 using Finalspace.Onigiri.Storage;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -28,6 +29,7 @@ namespace Finalspace.Onigiri.ViewModels
         public IOnigiriDialogService DlgService => GetService<IOnigiriDialogService>();
         public IProcessStarterService ProcessStarterService => GetService<IProcessStarterService>();
         public IDispatcherService DispatcherService => GetService<IDispatcherService>();
+        public IThemeManagerService ThemeMngService => GetService<IThemeManagerService>();
         #endregion
 
         #region Events
@@ -568,13 +570,13 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<Anime> CmdOpenRelations { get; }
         #endregion
 
-        public bool IsDarkMode
-        {
-            get => GetValue<bool>();
-            private set => SetValue(value);
-        }
-
         public MainTheme Theme { get => GetValue<MainTheme>(); private set => SetValue(value, () => ChangedTheme(value)); }
+
+        private void SetTheme(MainTheme theme)
+        {
+            Debug.Assert(theme != MainTheme.Automatic);
+            ThemeMngService?.ChangeTheme(theme);
+        }
 
         private void ChangedTheme(MainTheme theme)
         {
@@ -583,13 +585,16 @@ namespace Finalspace.Onigiri.ViewModels
                 service.DarkModeChanged -= OnDarkModeChanged;
             if (service != null && theme == MainTheme.Automatic)
             {
-                IsDarkMode = service.IsDarkMode;
+                if (service.IsDarkMode)
+                    SetTheme(MainTheme.Dark);
+                else
+                    SetTheme(MainTheme.Light);
                 service.DarkModeChanged += OnDarkModeChanged;
             }
             else if (theme == MainTheme.Dark)
-                IsDarkMode = true;
+                SetTheme(MainTheme.Dark);
             else
-                IsDarkMode = false;
+                SetTheme(MainTheme.Light);
         }
 
         public void WindowLoaded()
@@ -681,9 +686,12 @@ namespace Finalspace.Onigiri.ViewModels
             ProcessStarterService.Start(url);
         }
 
-        private void OnDarkModeChanged(object sender, bool e)
+        private void OnDarkModeChanged(object sender, bool args)
         {
-            IsDarkMode = e;
+            if (args)
+                SetTheme(MainTheme.Dark);
+            else
+                SetTheme(MainTheme.Light);
         }
 
         private void ChangeTheme(MainTheme newTheme)

@@ -2,7 +2,9 @@
 using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.ViewModels;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Ribbon;
 using System.Windows.Navigation;
 
@@ -42,6 +44,17 @@ namespace Finalspace.Onigiri.Views
         private void mainFrame_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
             UpdateFrameDataContext(sender);
+        }
+
+        private void mainFrame_ContentRendered(object sender, System.EventArgs e)
+        {
+            ResourceDictionary[] resourceDicts = Application.Current.Resources.MergedDictionaries.ToArray();
+            if (mainFrame.Content is Page page)
+            {
+                page.Resources.MergedDictionaries.Clear();
+                foreach (ResourceDictionary resource in resourceDicts)
+                    page.Resources.MergedDictionaries.Add(resource);
+            }
         }
     }
 }
