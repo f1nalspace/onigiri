@@ -1,0 +1,41 @@
+﻿<Window x:Class="Finalspace.Onigiri.Views.ConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+        xmlns:viewModels="clr-namespace:Finalspace.Onigiri.ViewModels"
+        xmlns:helpers="clr-namespace:Finalspace.Onigiri.Helpers"
+        Title="Configuration" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance viewModels:ConfigViewModel, IsDesignTimeCreatable=False}"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d">
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:DispatcherService />
+        <dxmvvm:FolderBrowserDialogService />
+    </dxmvvm:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="10">
+            <GroupBox Header="Search Paths">
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                        <Button Padding="5" Content="Add" Command="{Binding CmdAddSearchPath}" />
+                        <Button Padding="5" Content="Remove" Command="{Binding CmdRemoveSearchPath}" CommandParameter="{Binding SelectedValue, UpdateSourceTrigger=PropertyChanged, ElementName=searchPathsListbox}" />
+                    </StackPanel>
+                    <ListBox x:Name="searchPathsListbox" Height="150" ItemsSource="{Binding Config.SearchPaths}">
+                    
+                    </ListBox>
+                </DockPanel>
+            </GroupBox>
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="10">
+            <Button x:Name="cancelButton" Padding="5" Width="100" Content="Close" HorizontalAlignment="Left" Command="{Binding CmdClose}" helpers:ButtonHelper.DialogResult="False" />
+            <Button x:Name="applyButton" Padding="5" Width="100" Content="Apply" HorizontalAlignment="Right" Command="{Binding CmdApply}" helpers:ButtonHelper.DialogResult="True" />
+        </Grid>
+    </Grid>
+</Window>
