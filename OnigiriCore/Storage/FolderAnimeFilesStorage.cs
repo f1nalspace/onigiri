@@ -56,19 +56,20 @@ namespace Finalspace.Onigiri.Storage
 
             public ExecutionResult SaveToStream(Stream stream, string streamName)
             {
-                if (stream == null)
-                    throw new ArgumentNullException(nameof(stream));
+                ArgumentNullException.ThrowIfNull(stream);
                 if (string.IsNullOrWhiteSpace(streamName))
                     throw new ArgumentNullException(nameof(streamName));
                 try
                 {
                     int sizeOfHeader = Marshal.SizeOf(typeof(AnimeFileHeader));
-                    AnimeFileHeader header = new AnimeFileHeader();
-                    header.Magic = AnimeFileHeader.MagicKey;
-                    header.Version = AnimeFileHeader.CurrentVersion;
-                    header.Aid = Aid;
-                    header.DetailsLength = (ulong)Details.Length;
-                    header.PictureLength = (ulong)Picture.Length;
+                    AnimeFileHeader header = new AnimeFileHeader
+                    {
+                        Magic = AnimeFileHeader.MagicKey,
+                        Version = AnimeFileHeader.CurrentVersion,
+                        Aid = Aid,
+                        DetailsLength = (ulong)Details.Length,
+                        PictureLength = (ulong)Picture.Length
+                    };
                     stream.WriteStruct(header);
 
                     stream.Write(Details.AsSpan());
@@ -109,11 +110,10 @@ namespace Finalspace.Onigiri.Storage
 
             public static ExecutionResult<AnimeFile> LoadFromStream(Stream stream, string streamName)
             {
-                if (stream == null)
-                    throw new ArgumentNullException(nameof(stream));
+                ArgumentNullException.ThrowIfNull(stream);
                 if (string.IsNullOrWhiteSpace(streamName))
                     throw new ArgumentNullException(nameof(streamName));
-                AnimeFile animeFile = null;
+                AnimeFile animeFile;
                 try
                 {
                     AnimeFileHeader header = stream.ReadStruct<AnimeFileHeader>();
@@ -183,8 +183,7 @@ namespace Finalspace.Onigiri.Storage
 
         private static ExecutionResult<Anime> Deserialize(AnimeFile animeFile)
         {
-            if (animeFile == null)
-                throw new ArgumentNullException(nameof(animeFile));
+            ArgumentNullException.ThrowIfNull(animeFile);
 
             ImmutableArray<byte> animeData = animeFile.Details;
             if (animeData.Length == 0)
@@ -206,8 +205,7 @@ namespace Finalspace.Onigiri.Storage
 
         private static ExecutionResult<AnimeFile> Serialize(Anime anime)
         {
-            if (anime == null)
-                throw new ArgumentNullException(nameof(anime));
+            ArgumentNullException.ThrowIfNull(anime);
             if (anime.Aid == 0)
                 return new ExecutionResult<AnimeFile>(new FormatException($"Anime '{anime}' has in valid aid!"));
 
@@ -296,8 +294,7 @@ namespace Finalspace.Onigiri.Storage
 
         public bool Save(AnimeStorageData data, StatusChangedEventHandler statusChanged)
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+            ArgumentNullException.ThrowIfNull(data);
 
             DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
             if (!rootDir.Exists)
@@ -351,8 +348,7 @@ namespace Finalspace.Onigiri.Storage
 
         public bool Save(Anime anime, StatusChangedEventHandler statusChanged)
         {
-            if (anime == null)
-                throw new ArgumentNullException(nameof(anime));
+            ArgumentNullException.ThrowIfNull(anime);
 
             DirectoryInfo rootDir = new DirectoryInfo(_persistentPath);
             if (!rootDir.Exists)

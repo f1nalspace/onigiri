@@ -713,8 +713,11 @@ namespace Finalspace.Onigiri.ViewModels
 
             // Collections
             _animes = new List<Anime>(4096);
-            AnimesView = new ListCollectionView(_animes) { CustomSort = new AnimeSorter() };
-            AnimesView.Filter = AnimesViewFilter;
+            AnimesView = new ListCollectionView(_animes)
+            {
+                CustomSort = new AnimeSorter(),
+                Filter = AnimesViewFilter
+            };
             FilterCategories = new ExtendedObservableCollection<CategoryItemViewModel>();
             FilterCategoryWeights = new ExtendedObservableCollection<CategoryItemViewModel>();
 

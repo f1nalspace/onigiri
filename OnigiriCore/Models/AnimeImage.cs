@@ -22,8 +22,7 @@ namespace Finalspace.Onigiri.Models
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentNullException(nameof(fileName));
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+            ArgumentNullException.ThrowIfNull(data);
             FileName = fileName;
             Data = data.ToImmutableArray();
         }
