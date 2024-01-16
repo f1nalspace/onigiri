@@ -555,6 +555,7 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<string> CmdUpdate { get; }
         public DelegateCommand CmdExport { get; }
         public DelegateCommand CmdImport { get; }
+        public DelegateCommand CmdSettings { get; }
         public DelegateCommand CmdExit { get; }
 
         public DelegateCommand CmdTitles { get; }
@@ -640,6 +641,13 @@ namespace Finalspace.Onigiri.ViewModels
         private void Update(string s)
         {
             UpdateWorker.RunWorkerAsync(s);
+        }
+
+        private void ShowSettingsDialog()
+        {
+            ConfigViewModel config = new ConfigViewModel(CoreService.Config);
+            if (DlgService.ShowConfigurationDialog(config))
+                CoreService.SaveConfig();
         }
 
         private void ShowTitlesDialog()
@@ -744,6 +752,7 @@ namespace Finalspace.Onigiri.ViewModels
             CmdChangeTheme = new DelegateCommand<MainTheme>(ChangeTheme);
 
             CmdExit = new DelegateCommand(() => CloseRequested?.Invoke());
+            CmdSettings = new DelegateCommand(ShowSettingsDialog);
             CmdRefresh = new DelegateCommand(Refresh, CanRefresh);
             CmdUpdate = new DelegateCommand<string>(Update, CanUpdate);
             CmdExport = new DelegateCommand(Export, CanExport);
