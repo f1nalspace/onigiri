@@ -332,19 +332,32 @@ namespace Finalspace.Onigiri.ViewModels
             // TODO: This is very slow and called very often - on startup only?
             return Directory.Exists(anime.FoundPath);
         }
+
+        private bool CanToggleMarked(Anime anime) 
+            => anime is not null && CanAddonDataByChanged(anime);
         private void ToggleMarked(Anime anime)
         {
             anime.AddonData.Marked = !anime.AddonData.Marked;
             SaveAddonData(anime);
         }
-        private void ToggleWatched(Anime anime, string who)
+
+        private bool CanToggleWatched(Tuple<Anime, string> pair) 
+            => pair is not null && pair.Item1 is not null && !string.IsNullOrEmpty(pair.Item2) && CanAddonDataByChanged(pair.Item1);
+        private void ToggleWatched(Tuple<Anime, string> pair)
         {
-            anime.AddonData.ToggleWatchState(who);
+            Anime anime = pair.Item1;
+            string username = pair.Item2;
+            anime.AddonData.ToggleWatchState(username);
             SaveAddonData(anime);
         }
-        private void ToggleDeleteit(Anime anime, string who)
+
+        private bool CanToggleDeletion(Tuple<Anime, string> pair)
+            => pair is not null && pair.Item1 is not null && !string.IsNullOrEmpty(pair.Item2) && CanAddonDataByChanged(pair.Item1);
+        private void ToggleDeletion(Tuple<Anime, string> pair)
         {
-            anime.AddonData.ToggleDeleteit(who);
+            Anime anime = pair.Item1;
+            string username = pair.Item2;
+            anime.AddonData.ToggleDeleteit(username);
             SaveAddonData(anime);
         }
         #endregion
@@ -547,10 +560,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         #region Commands
         public DelegateCommand<Anime> CmdToggleMarked { get; }
-        public DelegateCommand<Anime> CmdToggleWatchedFinal { get; }
-        public DelegateCommand<Anime> CmdToggleWatchedAnni { get; }
-        public DelegateCommand<Anime> CmdToggleDeleteitFinal { get; }
-        public DelegateCommand<Anime> CmdToggleDeleteitAnni { get; }
+        public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleDelete { get; }
+        public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleWatched { get; }
 
         public DelegateCommand CmdChangedSort { get; }
         public DelegateCommand CmdChangedFilter { get; }
@@ -754,12 +765,9 @@ namespace Finalspace.Onigiri.ViewModels
             FilterType = AnimeTypes[0];
 
             // Commands
-            CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanAddonDataByChanged);
-
-            CmdToggleWatchedFinal = new DelegateCommand<Anime>((a) => ToggleWatched(a, "final"), (a) => CanAddonDataByChanged(a));
-            CmdToggleWatchedAnni = new DelegateCommand<Anime>((a) => ToggleWatched(a, "anni"), (a) => CanAddonDataByChanged(a));
-            CmdToggleDeleteitFinal = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "final"), (a) => CanAddonDataByChanged(a));
-            CmdToggleDeleteitAnni = new DelegateCommand<Anime>((a) => ToggleDeleteit(a, "anni"), (a) => CanAddonDataByChanged(a));
+            CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanToggleMarked);
+            CmdUserActionToggleWatched = new DelegateCommand<Tuple<Anime, string>>(ToggleWatched, CanToggleWatched);
+            CmdUserActionToggleDelete = new DelegateCommand<Tuple<Anime, string>>(ToggleDeletion, CanToggleDeletion);
 
             CmdChangedSort = new DelegateCommand(() => UpdateSort(true));
             CmdChangedFilter = new DelegateCommand(UpdateFilter);
