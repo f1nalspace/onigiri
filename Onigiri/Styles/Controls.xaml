@@ -64,10 +64,34 @@
         <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
     </Style>
 
-    <Style TargetType="Ribbon" xmlns:mwt="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic" xmlns:swcrp="clr-namespace:System.Windows.Controls.Ribbon.Primitives;assembly=System.Windows.Controls.Ribbon">
+    <Style TargetType="Ribbon">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="Background" Value="{StaticResource controlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource controlForeground}" />
+    </Style>
+
+    <Style TargetType="RibbonTab">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ribbonForeground}" />
+    </Style>
+
+    <Style TargetType="RibbonGroup">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ribbonForeground}" />
+    </Style>
+
+    <Style TargetType="RibbonButton">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ribbonForeground}" />
+    </Style>
+
+    <Style TargetType="RibbonSeparator">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ribbonForeground}" />
     </Style>
 
     <Style TargetType="TabControl">

@@ -14,6 +14,12 @@
         </SolidColorBrush.Color>
     </SolidColorBrush>
 
+    <SolidColorBrush x:Key="ribbonForeground">
+        <SolidColorBrush.Color>
+            <Color R="0" G="0" B="0" A="255" />
+        </SolidColorBrush.Color>
+    </SolidColorBrush>
+    
     <SolidColorBrush x:Key="groupboxHeaderBackground">#25A0DA</SolidColorBrush>
     <SolidColorBrush x:Key="groupboxHeaderBorder">#25A0DA</SolidColorBrush>
     <SolidColorBrush x:Key="groupboxHeaderForeground">white</SolidColorBrush>
