@@ -45,24 +45,13 @@ namespace Finalspace.Onigiri.Services
             ControlsDictionary = new ResourceDictionary() { Source = new Uri($"Styles/Controls.xaml", UriKind.Relative) };
             AppDictionary = new ResourceDictionary() { Source = new Uri($"Styles/Onigiri.xaml", UriKind.Relative) };
 
-            ResourceDictionary[] resourceDicts = Application.Current.Resources.MergedDictionaries.ToArray();
-
+            //
+            // Reload frame, otherwise the style changes won't be applied
+            //
             MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-
             if (mainWindow.mainFrame.CanGoBack)
                 mainWindow.mainFrame.GoBack();
-
             mainWindow.mainFrame.Navigate(new CardListPage());
-
-
-            //if (mainWindow.mainFrame.Content is Page page)
-            //{
-
-
-            //    page.Resources.MergedDictionaries.Clear();
-            //    foreach (ResourceDictionary resource in resourceDicts)
-            //        page.Resources.MergedDictionaries.Add(resource);
-            //}
         }
     }
 }
