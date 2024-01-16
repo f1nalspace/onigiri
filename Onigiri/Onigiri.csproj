@@ -26,6 +26,7 @@
   <ItemGroup>
     <None Remove="Resources\add_32x32.png" />
     <None Remove="Resources\darkmode_trigger_32x32.png" />
+    <None Remove="Resources\delete_false.png" />
     <None Remove="Resources\download_to_local_store_32x32.png" />
     <None Remove="Resources\info_16x16.png" />
     <None Remove="Resources\info_32x32.png" />
@@ -49,6 +50,8 @@
     <None Remove="Resources\v_720p.png" />
 	<None Remove="Resources\open2_16x16.png" />
 	<None Remove="Resources\open2_32x32.png" />
+	<None Remove="Resources\watch.png" />
+	<None Remove="Resources\watch_false.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -62,6 +65,7 @@
     <ProjectReference Include="..\OnigiriCore\OnigiriCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\delete_false.png" />
     <Resource Include="Resources\p221098.jpg" />
     <Resource Include="Resources\add_32x32.png" />
     <Resource Include="Resources\darkmode_trigger_32x32.png" />
@@ -136,6 +140,8 @@
     <Resource Include="Resources\v_2160p.png" />
     <Resource Include="Resources\v_576p.png" />
     <Resource Include="Resources\v_720p.png" />
+    <Resource Include="Resources\watch.png" />
+    <Resource Include="Resources\watch_false.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
