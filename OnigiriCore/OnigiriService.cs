@@ -16,7 +16,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -69,7 +68,7 @@ namespace Finalspace.Onigiri
                     !string.IsNullOrEmpty(stl.Lang))
                 {
                     Title found = Titles.FindTitle(name, stl.Type, stl.Lang);
-                    if (found != null)
+                    if (found is not null)
                     {
                         log.Debug($"Found title {name} for name '{name}', type='{stl.Type}', lang='{stl.Lang}'!");
                         result = found;
@@ -153,7 +152,7 @@ namespace Finalspace.Onigiri
                 // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
                 log.Debug($"Find title by name '{cleanTitleName}' in folder '{folderName}'");
                 Title title = FindTitle(cleanTitleName);
-                if (title != null)
+                if (title is not null)
                 {
                     log.Debug($"Found title by name '{cleanTitleName}' in folder '{folderName}', got result: {title}");
                     aid = title.Aid;
@@ -175,7 +174,7 @@ namespace Finalspace.Onigiri
                 {
                     log.Info($"Request details for aid {aid} as '{cleanTitleName}'");
                     TextContent content = HttpApi.RequestAnime(aid);
-                    if (content != null && !string.IsNullOrEmpty(content.Text))
+                    if (content is not null && !string.IsNullOrEmpty(content.Text))
                     {
                         log.Info($"Save details xml file a'{animeXmlFilePath}'");
                         content.SaveToFile(animeXmlFilePath);
@@ -186,7 +185,7 @@ namespace Finalspace.Onigiri
             }
 
             Anime anime = LoadAnimeFromSourceDir(sourceDir, statusChanged);
-            Debug.Assert(anime != null);
+            Debug.Assert(anime is not null);
 
             // Download picture
             string imageFilePath = FindImage(sourceDir);
@@ -215,13 +214,13 @@ namespace Finalspace.Onigiri
                 }
             }
 
-            if ((anime.Image == null || flags.HasFlag(UpdateFlags.ReadOnly) || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
+            if ((anime.Image is null || flags.HasFlag(UpdateFlags.ReadOnly) || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
                 !string.IsNullOrWhiteSpace(imageFilePath) &&
                 File.Exists(imageFilePath))
             {
                 // TODO(tspaete): More robust image file read
                 byte[] imageData = File.ReadAllBytes(imageFilePath);
-                if (imageData != null && imageData.Length > 0)
+                if (imageData is not null && imageData.Length > 0)
                 {
                     string filename = Path.GetFileName(imageFilePath);
                     anime.Image = new AnimeImage(filename, imageData.ToImmutableArray());
@@ -300,7 +299,7 @@ namespace Finalspace.Onigiri
                     Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
                     animes[index] = anime;
                 });
-                list.AddRange(animes.Where(a => a != null));
+                list.AddRange(animes.Where(a => a is not null));
 #else
                 foreach (var animeDir in sortedAnimeDirs)
                 {
@@ -308,7 +307,7 @@ namespace Finalspace.Onigiri
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
                     Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
-                    if (anime != null)
+                    if (anime is not null)
                         list.Add(anime);
                 }
 #endif
@@ -329,13 +328,13 @@ namespace Finalspace.Onigiri
                 if (!file.Extension.Equals(".jpg", StringComparison.InvariantCultureIgnoreCase) &&
                     !file.Extension.Equals(".png", StringComparison.InvariantCultureIgnoreCase))
                     continue;
-                if (bestDate == null || file.LastWriteTime > bestDate)
+                if (bestDate is null || file.LastWriteTime > bestDate)
                 {
                     bestDate = file.LastWriteTime;
                     bestImage = file;
                 }
             }
-            if (bestImage != null)
+            if (bestImage is not null)
                 return bestImage.FullName;
             return null;
         }
@@ -439,8 +438,7 @@ namespace Finalspace.Onigiri
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="sourceDir"/> is <c>null</c>.</exception>
         private Anime LoadAnimeFromSourceDir(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
         {
-            if (sourceDir == null)
-                throw new ArgumentNullException(nameof(sourceDir));
+            ArgumentNullException.ThrowIfNull(sourceDir);
 
             Stopwatch watch = new Stopwatch();
 
@@ -455,7 +453,7 @@ namespace Finalspace.Onigiri
             Title foundTitle = FindTitle(cleanTitleName);
             watch.Stop();
             log.Debug($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
-            if (foundTitle == null)
+            if (foundTitle is null)
                 log.Warn($"No title found for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'!");
             else
                 aid = foundTitle.Aid;
@@ -488,7 +486,7 @@ namespace Finalspace.Onigiri
             Title databaseTitle = Titles.GetTitle(aid);
             if (string.IsNullOrEmpty(result.MainTitle))
             {
-                if (databaseTitle != null)
+                if (databaseTitle is not null)
                     result.Titles.Add(databaseTitle);
                 else
                     result.Titles.Add(CreateFallbackTitle(aid, sourceDir.Name));
@@ -505,7 +503,7 @@ namespace Finalspace.Onigiri
             {
                 // TODO(tspaete): More robust image file read
                 byte[] imageData = File.ReadAllBytes(imageFilePath);
-                if (imageData != null && imageData.Length > 0)
+                if (imageData is not null && imageData.Length > 0)
                 {
                     string filename = Path.GetFileName(imageFilePath);
                     result.Image = new AnimeImage(filename, imageData.ToImmutableArray());
@@ -551,8 +549,7 @@ namespace Finalspace.Onigiri
         /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
         public void Load(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
-            if (storage == null)
-                throw new ArgumentNullException(nameof(storage));
+            ArgumentNullException.ThrowIfNull(storage);
 
             using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
@@ -586,8 +583,7 @@ namespace Finalspace.Onigiri
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
         public void Save(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
-            if (storage == null)
-                throw new ArgumentNullException(nameof(storage));
+            ArgumentNullException.ThrowIfNull(storage);
 
             using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
@@ -616,10 +612,8 @@ namespace Finalspace.Onigiri
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
         public void Save(Anime anime, IAnimeStorage storage, StatusChangedEventHandler statusChanged)
         {
-            if (anime == null)
-                throw new ArgumentNullException(nameof(anime));
-            if (storage == null)
-                throw new ArgumentNullException(nameof(storage));
+            ArgumentNullException.ThrowIfNull(anime);
+            ArgumentNullException.ThrowIfNull(storage);
 
             using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
             {
