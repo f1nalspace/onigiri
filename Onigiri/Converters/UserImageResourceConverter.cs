@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Resources;
 
 namespace Finalspace.Onigiri.Converters
 {
@@ -16,15 +17,16 @@ namespace Finalspace.Onigiri.Converters
     {
         private static readonly ConcurrentDictionary<string, ImageSource> _imageSourcesMap = new ConcurrentDictionary<string, ImageSource>();
 
-        private static bool CanLoadResource(Uri uri)
+        private static bool TryGetResource(Uri uri, out StreamResourceInfo info)
         {
             try
             {
-                Application.GetResourceStream(uri);
+                info = Application.GetResourceStream(uri);
                 return true;
             }
             catch (IOException)
             {
+                info = null;
                 return false;
             }
         }
@@ -81,11 +83,18 @@ namespace Finalspace.Onigiri.Converters
                     Assembly asm = Assembly.GetExecutingAssembly();
                     string assemblyName = asm.GetName().Name;
                     string resourceName = $"Resources/{imageName}";
-                    Uri uri = new Uri("pack://application:,,,/" + assemblyName + ";component/" + resourceName, UriKind.RelativeOrAbsolute);
-                    if (false && CanLoadResource(uri))
+                    Uri uri = new Uri(resourceName, UriKind.Relative);
+                    if (TryGetResource(uri, out StreamResourceInfo info))
                     {
-                        result = new BitmapImage(uri);
-                        result.Freeze();
+                        using Stream sourceStream = info.Stream;
+
+                        BitmapImage img = new BitmapImage() { CacheOption = BitmapCacheOption.OnLoad };
+                        img.BeginInit();
+                        img.StreamSource = sourceStream;
+                        img.EndInit();
+                        img.Freeze();
+
+                        result = img;
                         _imageSourcesMap.AddOrUpdate(imageKey, result, (key, old) => result);
                     }
                     else
