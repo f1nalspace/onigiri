@@ -7,5 +7,6 @@ namespace Finalspace.Onigiri.Services
     {
         bool ShowTitlesDialog(TitlesViewModel titlesViewModel);
         void ShowIssuesDialog(IssuesViewModel issuesViewModel);
+        bool ShowConfigurationDialog(ConfigViewModel configViewModel);
     }
 }

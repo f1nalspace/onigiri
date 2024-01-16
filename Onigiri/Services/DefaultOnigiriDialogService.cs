@@ -32,5 +32,14 @@ namespace Finalspace.Onigiri.Services
             window.DataContext = issuesViewModel;
             window.ShowDialog();
         }
+
+        public bool ShowConfigurationDialog(ConfigViewModel configViewModel)
+        {
+            ConfigWindow window = new ConfigWindow();
+            window.Owner = _owner;
+            window.DataContext = configViewModel;
+            bool result = window.ShowDialog() == true;
+            return result;
+        }
     }
 }
