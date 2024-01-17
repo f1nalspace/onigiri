@@ -42,9 +42,6 @@
 
             <!-- Header start -->
             <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Style="{StaticResource infoButton}" Command="{Binding DataContext.ShowDetailsCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}}" CommandParameter="{Binding}" />
-                </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ratingPanel}">
                     <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
                     <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
