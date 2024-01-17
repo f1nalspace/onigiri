@@ -15,12 +15,7 @@
     <ListBox ItemContainerStyle="{StaticResource animeItem}" Style="{StaticResource animeList}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsContainerVirtualizable="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.CacheLength="1,1" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="lvAnimes" ItemsSource="{Binding AnimesView, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
         <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
-                <vwp:VirtualizingWrapPanel x:Name="itemsWrapPanel" SpacingMode="StartAndEndOnly" StretchItems="False" Orientation="Vertical">
-                    <vwp:VirtualizingWrapPanel.ChildrenSize>
-                        <!-- Need to add margin to it, because its WPF -->
-                        <Size Width="660" Height="300" />
-                    </vwp:VirtualizingWrapPanel.ChildrenSize>
-                </vwp:VirtualizingWrapPanel>
+                <vwp:VirtualizingWrapPanel x:Name="itemsWrapPanel" SpacingMode="StartAndEndOnly" StretchItems="False" Orientation="Vertical" ItemSize="{StaticResource cardSizeWithMargin}" />
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemTemplate>

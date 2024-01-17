@@ -41,17 +41,25 @@
     <BitmapImage x:Key="videoQuality1440pImage" UriSource="/Resources/v_1440p.png" />
     <BitmapImage x:Key="videoQuality2160pImage" UriSource="/Resources/v_2160p.png" />
 
-    <!-- Cards-Layout (640x280 + 20x20 margin) -->
+    <SolidColorBrush x:Key="animeTitleBackground" Color="Black" Opacity="0.75" />
+
+    <SolidColorBrush x:Key="transparentBrush" Color="Black" Opacity="0" />
+
+    <!-- Cards-Layout (800x400 + 20x20 total margin) -->
+    <Thickness x:Key="cardMargin" Left="10" Right="10" Top="10" Bottom="10" />
+    <Size x:Key="cardSize" Width="800" Height="400" />
+    <Size x:Key="cardSizeWithMargin" Width="820" Height="420" />
+
     <Style x:Key="mainImageColumn" TargetType="ColumnDefinition">
-        <Setter Property="Width" Value="200" />
+        <Setter Property="Width" Value="260" />
     </Style>
     <Style x:Key="mainBlockColumn" TargetType="ColumnDefinition">
-        <Setter Property="Width" Value="440" />
+        <Setter Property="Width" Value="540" />
     </Style>
 
     <Style x:Key="pictureImage" TargetType="Image">
-        <Setter Property="Width" Value="200" />
-        <Setter Property="Height" Value="280" />
+        <Setter Property="Width" Value="260" />
+        <Setter Property="Height" Value="400" />
         <Setter Property="Stretch" Value="UniformToFill" />
     </Style>
 
@@ -60,11 +68,10 @@
     </Style>
 
     <Style x:Key="animeTitleText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="FontSize" Value="16" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Padding" Value="10" />
+        <Setter Property="Padding" Value="6" />
         <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontSize" Value="20" />
     </Style>
 
     <Style x:Key="video_quality_icon" TargetType="Image">
@@ -117,13 +124,13 @@
     </ControlTemplate>
 
     <Style x:Key="contentTitleRow" TargetType="RowDefinition">
-        <Setter Property="Height" Value="40" />
+        <Setter Property="Height" Value="60" />
     </Style>
     <Style x:Key="contentDescriptionRow" TargetType="RowDefinition">
-        <Setter Property="Height" Value="186" />
+        <Setter Property="Height" Value="*" />
     </Style>
     <Style x:Key="contentCategoriesRow" TargetType="RowDefinition">
-        <Setter Property="Height" Value="54" />
+        <Setter Property="Height" Value="60" />
     </Style>
 
     <Style x:Key="headerPanel" TargetType="DockPanel">
@@ -134,23 +141,114 @@
         <Setter Property="Margin" Value="0 0 8 0" />
     </Style>
 
+    <!-- User State Panel -->
+    
+    <Style x:Key="userStatePanel" TargetType="StackPanel">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Orientation" Value="Horizontal" />
+    </Style>
+
+    <Style x:Key="userIconImage" TargetType="Image">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+    </Style>
+
+    <Style x:Key="userIconStateImage" TargetType="Image">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+    </Style>
+
+    <ControlTemplate x:Key="userStatePanelTemplate">
+        <StackPanel Style="{StaticResource userStatePanel}">
+            
+            <!-- Watchlist Start -->
+            <ItemsControl ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding AddonData.Watchstates}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Value}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Image Style="{StaticResource userIconImage}">
+                                <Image.Source>
+                                    <MultiBinding Converter="{converters:AddonStateImageSourceMultiConverter}">
+                                        <Binding Source="/Resources/" />
+                                        <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                            <Image Source="/Resources/watch.png" Style="{StaticResource userIconStateImage}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <!-- Watchlist End -->
+
+            <!-- Deletelist Start -->
+            <ItemsControl ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding AddonData.Deleteits}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Value}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Image Style="{StaticResource userIconImage}">
+                                <Image.Source>
+                                    <MultiBinding Converter="{converters:AddonStateImageSourceMultiConverter}">
+                                        <Binding Source="/Resources/" />
+                                        <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                            <Image Source="/Resources/delete.png" Style="{StaticResource userIconStateImage}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <!-- Deletelist End -->
+
+        </StackPanel>
+    </ControlTemplate>
+    
+    <!-- Actions Panel -->
+
+    <Style x:Key="actionPanelButton" TargetType="Button">
+        <Setter Property="Width" Value="38" />
+        <Setter Property="Height" Value="38" />
+        <Setter Property="Margin" Value="2 1" />
+    </Style>
+
     <Style x:Key="actionsPanelBack" TargetType="Grid">
         <Setter Property="Margin" Value="2" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="VerticalAlignment" Value="Bottom" />
         <Setter Property="Background" Value="Transparent" />
-    </Style>
-
-    <Style x:Key="actionButton" TargetType="Button">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Margin" Value="2 1" />
-    </Style>
-
-    <Style x:Key="actionPanelButton" TargetType="Button">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Margin" Value="2 1" />
     </Style>
 
     <ControlTemplate x:Key="actionsPanelTemplate">
@@ -279,7 +377,7 @@
                 </Button>
                 -->
             </StackPanel>
-            <Button Grid.Column="1" Style="{StaticResource actionButton}" VerticalAlignment="Bottom">
+            <Button Grid.Column="1" Style="{StaticResource actionPanelButton}" VerticalAlignment="Bottom">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Grid>
@@ -346,7 +444,7 @@
     </Style>
 
     <Style x:Key="ratingIcon" TargetType="Image">
-        <Setter Property="Height" Value="20" />
+        <Setter Property="Height" Value="26" />
         <Setter Property="Stretch" Value="UniformToFill" />
     </Style>
 
@@ -406,47 +504,30 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="infoButton" TargetType="Button" BasedOn="{StaticResource actionButton}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate>
-                    <Grid>
-                        <Image Source="/Resources/show_32x32.png" />
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    
-
-    
-
     <Style x:Key="detailsTitleText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="Foreground" Value="Black" />
         <Setter Property="Padding" Value="10" />
         <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontSize" Value="20" />
     </Style>
 
     <Style x:Key="animeMainlineText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{StaticResource mainlineForeground}" />
     </Style>
 
     <Style x:Key="animeSublineText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontSize" Value="18" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{StaticResource sublineForeground}" />
     </Style>
 
     <Style x:Key="descriptionText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="Foreground" Value="{StaticResource descriptionForeground}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="Padding" Value="8" />
-
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -458,7 +539,7 @@
 
     <Style x:Key="tagItemText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="TextTrimming" Value="None" />
         <Setter Property="TextWrapping" Value="NoWrap" />
         <Setter Property="TextAlignment" Value="Left" />
@@ -467,7 +548,7 @@
 
     <!-- Lists -->
     <Style x:Key="animeList" TargetType="ListBox">
-        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontSize" Value="20" />
 
         <Setter Property="Background" Value="{StaticResource animeListBackground}" />
 
@@ -525,10 +606,4 @@
         <Setter Property="BorderBrush" Value="{StaticResource tagItemBorderBrush}" />
         <Setter Property="BorderThickness" Value="0.25" />
     </Style>
-
-    
-
-    <SolidColorBrush x:Key="animeTitleBackground" Color="Black" Opacity="0.75" />
-
-    <SolidColorBrush x:Key="transparentBrush" Color="Black" Opacity="0" />
 </ResourceDictionary>
