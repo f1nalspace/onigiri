@@ -41,13 +41,80 @@
     <BitmapImage x:Key="videoQuality1440pImage" UriSource="/Resources/v_1440p.png" />
     <BitmapImage x:Key="videoQuality2160pImage" UriSource="/Resources/v_2160p.png" />
 
-    <!-- Cards-Layout (660 x 280 + 20 x 20 margin) -->
+    <!-- Cards-Layout (640x280 + 20x20 margin) -->
     <Style x:Key="mainImageColumn" TargetType="ColumnDefinition">
         <Setter Property="Width" Value="200" />
     </Style>
     <Style x:Key="mainBlockColumn" TargetType="ColumnDefinition">
         <Setter Property="Width" Value="440" />
     </Style>
+
+    <Style x:Key="pictureImage" TargetType="Image">
+        <Setter Property="Width" Value="200" />
+        <Setter Property="Height" Value="280" />
+        <Setter Property="Stretch" Value="UniformToFill" />
+    </Style>
+
+    <Style x:Key="animeLabel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Verdana" />
+    </Style>
+
+    <Style x:Key="animeTitleText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="FontSize" Value="18" />
+    </Style>
+
+    <Style x:Key="video_quality_icon" TargetType="Image">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Width" Value="64" />
+        <Setter Property="Height" Value="50" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="Opacity" Value="0.65" />
+    </Style>
+
+    <ControlTemplate x:Key="videoQualityPanelTemplate">
+        <Grid>
+            <ItemsControl ItemsSource="{Binding VideoHeights, UpdateSourceTrigger=PropertyChanged}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image>
+                            <Image.Style>
+                                <Style TargetType="Image" BasedOn="{StaticResource video_quality_icon}">
+                                    <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int576pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int720pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality720pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int1080pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality1080pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int1440pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality1440pImage}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource int2160pGTConv}}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource videoQuality2160pImage}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </ControlTemplate>
 
     <Style x:Key="contentTitleRow" TargetType="RowDefinition">
         <Setter Property="Height" Value="40" />
@@ -351,67 +418,9 @@
         </Setter>
     </Style>
 
-    <Style x:Key="video_quality_icon" TargetType="Image">
-        <Setter Property="HorizontalAlignment" Value="Left" />
-        <Setter Property="VerticalAlignment" Value="Top" />
-        <Setter Property="Width" Value="64" />
-        <Setter Property="Height" Value="50" />
-        <Setter Property="Stretch" Value="Fill" />
-        <Setter Property="Opacity" Value="0.65" />
-    </Style>
+    
 
-    <ControlTemplate x:Key="videoQualityPanelTemplate">
-        <Grid>
-            <ItemsControl ItemsSource="{Binding VideoHeights, UpdateSourceTrigger=PropertyChanged}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Image>
-                            <Image.Style>
-                                <Style TargetType="Image" BasedOn="{StaticResource video_quality_icon}">
-                                    <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Converter={StaticResource int576pGTConv}}" Value="true">
-                                            <Setter Property="Source" Value="{StaticResource videoQuality576pImage}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Converter={StaticResource int720pGTConv}}" Value="true">
-                                            <Setter Property="Source" Value="{StaticResource videoQuality720pImage}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Converter={StaticResource int1080pGTConv}}" Value="true">
-                                            <Setter Property="Source" Value="{StaticResource videoQuality1080pImage}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Converter={StaticResource int1440pGTConv}}" Value="true">
-                                            <Setter Property="Source" Value="{StaticResource videoQuality1440pImage}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Converter={StaticResource int2160pGTConv}}" Value="true">
-                                            <Setter Property="Source" Value="{StaticResource videoQuality2160pImage}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Grid>
-    </ControlTemplate>
-
-    <!-- Text labels -->
-    <Style x:Key="animeLabel" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="Verdana" />
-    </Style>
-
-    <Style x:Key="animeTitleText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Padding" Value="10" />
-        <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="FontSize" Value="18" />
-    </Style>
+    
 
     <Style x:Key="detailsTitleText" TargetType="TextBlock" BasedOn="{StaticResource animeLabel}">
         <Setter Property="FontSize" Value="16" />
@@ -517,11 +526,7 @@
         <Setter Property="BorderThickness" Value="0.25" />
     </Style>
 
-    <Style x:Key="pictureImage" TargetType="Image">
-        <Setter Property="Width" Value="200" />
-        <Setter Property="Height" Value="280" />
-        <Setter Property="Stretch" Value="UniformToFill" />
-    </Style>
+    
 
     <SolidColorBrush x:Key="animeTitleBackground" Color="Black" Opacity="0.75" />
 
