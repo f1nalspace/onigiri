@@ -85,6 +85,12 @@ namespace Finalspace.Onigiri.ViewModels
                 FileSize = 1337128,
                 Info = mediaInfo,
             });
+
+            AddonData.Deleteits.Add(new UserState() { UserName = "final", Value = false });
+            AddonData.Deleteits.Add(new UserState() { UserName = "anni", Value = true });
+            AddonData.Watchstates.Add(new UserState() { UserName = "final", Value = true });
+            AddonData.Watchstates.Add(new UserState() { UserName = "anni", Value = false });
+            AddonData.Marked = true;
         }
     }
 }
