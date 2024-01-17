@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
+    xmlns:controls="clr-namespace:Finalspace.Onigiri.Controls"
     xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
     x:Class="Finalspace.Onigiri.Views.CardListPage"
     mc:Ignorable="d"
@@ -24,91 +25,7 @@
         </ListBox.ItemsPanel>
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Style="{StaticResource mainImageColumn}" />
-                        <ColumnDefinition Style="{StaticResource mainBlockColumn}" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Image block start -->
-                    <Grid Grid.Column="0">
-                        <!-- Picture start -->
-                        <Image Style="{StaticResource pictureImage}" Source="{Binding Image, UpdateSourceTrigger=PropertyChanged, IsAsync=True, Converter={StaticResource animeImageConverter}, FallbackValue={StaticResource noPictureImage}}" />
-                        <!-- Picture end -->
-
-                        <!-- Anime title start -->
-                        <Grid VerticalAlignment="Bottom" Background="{StaticResource animeTitleBackground}">
-                            <TextBlock Style="{StaticResource animeTitleText}" Text="{Binding MainTitle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=Anime title very extreme long}" />
-                        </Grid>
-                        <!-- Anime title end -->
-
-                        <!-- Quality icon -->
-                        <Button Template="{StaticResource videoQualityPanelTemplate}" />
-                    </Grid>
-                    <!-- Image block end -->
-
-                    <!-- Content start -->
-                    <Grid Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Style="{StaticResource contentTitleRow}" />
-                            <RowDefinition Style="{StaticResource contentDescriptionRow}" />
-                            <RowDefinition Style="{StaticResource contentCategoriesRow}"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Header start -->
-                        <DockPanel Grid.Row="0" LastChildFill="True" Style="{StaticResource headerPanel}">
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button Style="{StaticResource infoButton}" Command="{Binding DataContext.ShowDetailsCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}}" CommandParameter="{Binding}" />
-                            </StackPanel>
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" ToolTip="{Binding PermanentRating, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ratingPanel}">
-                                <Image Name="imgRatingIcon1" Style="{StaticResource ratingIcon0}" />
-                                <Image Name="imgRatingIcon2" Style="{StaticResource ratingIcon1}" />
-                                <Image Name="imgRatingIcon3" Style="{StaticResource ratingIcon2}" />
-                                <Image Name="imgRatingIcon4" Style="{StaticResource ratingIcon3}" />
-                                <Image Name="imgRatingIcon5" Style="{StaticResource ratingIcon4}" />
-                            </StackPanel>
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                                    <TextBlock Text="{Binding EpCount, Mode=OneWay, StringFormat=\{0\} Episodes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeMainlineText}" />
-                                    <TextBlock Text=" " Style="{StaticResource animeMainlineText}" />
-                                    <TextBlock Text="{Binding Type, Mode=OneWay, StringFormat=(\{0\}), TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeMainlineText}" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="8 0 8 0">
-                                    <TextBlock Text="{Binding StartDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeSublineText}" />
-                                    <TextBlock Text="/" Style="{StaticResource animeSublineText}" />
-                                    <TextBlock Text="{Binding EndDate, Mode=OneWay, StringFormat=yyyy-MM-dd, TargetNullValue=None, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource animeSublineText}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </DockPanel>
-                        <!-- Header end -->
-
-                        <!-- Description start -->
-                        <Grid Grid.Row="1">
-                            <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
-                            <Button Template="{StaticResource actionsPanelTemplate}" />
-                        </Grid>
-                        <!-- Description end -->
-
-                        <!-- Tags start, ItemsControl needs a fixed width -->
-                        <ItemsControl Grid.Row="2" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}" Style="{StaticResource tagsItemsControl}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource tagItem}">
-                                        <TextBlock ToolTip="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource tagItemText}" />
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <!-- Tags end -->
-
-                    </Grid>
-                    <!-- Content end -->
-                </Grid>
+                <controls:AnimeCardControl DataContext="{Binding}" />
             </DataTemplate>
         </ListBox.ItemTemplate>
     </ListBox>
