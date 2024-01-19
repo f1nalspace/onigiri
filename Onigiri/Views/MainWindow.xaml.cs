@@ -1,19 +1,16 @@
 ﻿using DevExpress.Mvvm;
-using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.ViewModels;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Ribbon;
-using System.Windows.Navigation;
 
 namespace Finalspace.Onigiri.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow : Window
     {
         public MainWindow()
         {
@@ -23,7 +20,7 @@ namespace Finalspace.Onigiri.Views
             (DataContext as MainViewModel).CloseRequested += () => Close();
         }
 
-        private void RibbonWindow_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
             (DataContext as MainViewModel).WindowLoaded();
         }

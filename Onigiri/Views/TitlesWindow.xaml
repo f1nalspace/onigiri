@@ -7,7 +7,7 @@
         xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
         xmlns:helpers="clr-namespace:Finalspace.Onigiri.Helpers"
         mc:Ignorable="d"
-        Title="Titles" Height="300" Width="500" WindowStartupLocation="CenterOwner">
+        Title="Titles" Height="600" Width="860" WindowStartupLocation="CenterOwner">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
     </dxmvvm:Interaction.Behaviors>

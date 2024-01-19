@@ -1,4 +1,5 @@
 ﻿using Finalspace.Onigiri.Models;
+using System;
 using System.Collections;
 
 namespace Finalspace.Onigiri.Helper
@@ -21,13 +22,8 @@ namespace Finalspace.Onigiri.Helper
 
         public int Compare(object ox, object oy)
         {
-            if (ox == null || oy == null)
+            if (ox is not Anime x || oy is not Anime y)
                 return 0;
-            if (!(ox is Anime) || !(oy is Anime))
-                return 0;
-
-            Anime x = ox as Anime;
-            Anime y = oy as Anime;
 
             int result = 0;
             if (FirstSortKey != AnimeSortKey.None)
@@ -42,12 +38,14 @@ namespace Finalspace.Onigiri.Helper
                         result = x.PermanentRating.CompareTo(y.PermanentRating);
                         break;
                     case AnimeSortKey.StartDate:
-                        if (x.StartDate.HasValue && y.StartDate.HasValue)
-                            result = x.StartDate.Value.CompareTo(y.StartDate.Value);
+                        DateTime xsd = x.StartDate ?? DateTime.MaxValue;
+                        DateTime ysd = y.StartDate ?? DateTime.MaxValue;
+                        result = xsd.CompareTo(ysd);
                         break;
                     case AnimeSortKey.EndDate:
-                        if (x.EndDate.HasValue && y.EndDate.HasValue)
-                            result = x.EndDate.Value.CompareTo(y.EndDate.Value);
+                        DateTime xed = x.EndDate ?? DateTime.MinValue;
+                        DateTime yed = y.EndDate ?? DateTime.MinValue;
+                        result = xed.CompareTo(yed);
                         break;
                 }
                 result *= order;

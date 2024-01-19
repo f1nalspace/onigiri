@@ -1,12 +1,13 @@
-﻿<RibbonWindow x:Class="Finalspace.Onigiri.Views.MainWindow"
+﻿<Window x:Class="Finalspace.Onigiri.Views.MainWindow"
               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
               xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
+              xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
               mc:Ignorable="d"
-              Title="Onigiri" Height="600" Width="800" Icon="../Resources/onigiri.ico" Loaded="RibbonWindow_Loaded"
+              Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico" Loaded="OnWindowLoaded"
               d:DataContext="{d:DesignInstance viewmodels:MainViewModel}">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
@@ -14,101 +15,227 @@
         <dxmvvm:SaveFileDialogService />
     </dxmvvm:Interaction.Behaviors>
     <DockPanel LastChildFill="True">
-        <Ribbon DockPanel.Dock="Top">
-            <Ribbon.ApplicationMenu>
-                <RibbonApplicationMenu>
-                    <RibbonApplicationMenuItem Command="{Binding CmdCreate}" Header="New" ImageSource="/Resources/new_32x32.png"/>
-                    <RibbonApplicationMenuItem Command="{Binding CmdImport}" Header="Import..." ImageSource="/Resources/open2_32x32.png"/>
-                    <RibbonApplicationMenuItem Command="{Binding CmdExport}" Header="Export..." ImageSource="/Resources/open2_32x32.png"/>
-                    <RibbonApplicationMenuItem Command="{Binding CmdExit}" Header="Exit" ImageSource="/Resources/close_32x32.png"/>
-                    <RibbonSeparator />
-                    <RibbonApplicationMenuItem Command="{Binding CmdSettings}" Header="Settings" ImageSource="/Resources/customization_32x32.png"/>
-                    <RibbonApplicationMenuItem Command="{Binding CmdAbout}" Header="About" ImageSource="/Resources/info_32x32.png"/>
-                </RibbonApplicationMenu>
-            </Ribbon.ApplicationMenu>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Create..." Command="{Binding CmdCreate}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/new_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Import..." Command="{Binding CmdImport}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/download_to_local_store_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Export..." Command="{Binding CmdExport}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/download_to_local_store_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Settings" Command="{Binding CmdSettings}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/customization_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="About" Command="{Binding CmdAbout}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/info_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Exit" Command="{Binding CmdExit}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/close_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Data">
+                <MenuItem Header="Reload Database" Command="{Binding CmdRefresh}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/refresh_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/rebuild_database_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Update folders from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/download_to_local_store_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Theme">
+                    <MenuItem Header="Automatic" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Automatic}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Automatic}}">
+                        <MenuItem.Icon>
+                            <Image Source="/Resources/darkmode_trigger_32x32.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Light" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Light}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Light}}">
+                        <MenuItem.Icon>
+                            <Image Source="/Resources/sun_32x32.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Dark" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Dark}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Dark}}">
+                        <MenuItem.Icon>
+                            <Image Source="/Resources/moon_32x32.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Sort" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                    <MenuItem Header="Show" IsCheckable="True" IsChecked="{Binding ShowSorting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Separator />
+                    <MenuItem Header="Primary">
+                        <MenuItem Header="Type" ItemsSource="{Binding SortItems}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding DisplayName}" Command="{Binding DataContext.CmdPrimarySortType, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding}">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="IsChecked" Value="False" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{converters:ReferenceEqualsToBooleanMultiConverter}">
+                                                                <Binding Path="DataContext.FirstSortKey" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}" UpdateSourceTrigger="PropertyChanged" />
+                                                                <Binding />
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="IsChecked" Value="True" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <MenuItem Header="Descending" IsCheckable="True" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </MenuItem>
+                    <MenuItem Header="Secondary">
+                        <MenuItem Header="Type" ItemsSource="{Binding SortItems}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding DisplayName}" Command="{Binding DataContext.CmdSecondarySortType, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding}">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="IsChecked" Value="False" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{converters:ReferenceEqualsToBooleanMultiConverter}">
+                                                                <Binding Path="DataContext.SecondSortKey" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}" UpdateSourceTrigger="PropertyChanged" />
+                                                                <Binding />
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="IsChecked" Value="True" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <MenuItem Header="Descending" IsCheckable="True" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Filter" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                    <MenuItem Header="Show" IsCheckable="True" IsChecked="{Binding ShowFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Separator />
+                    <MenuItem Header="Type" ItemsSource="{Binding AnimeTypes}">
+                        <MenuItem.ItemTemplate>
+                            <DataTemplate>
+                                <MenuItem Header="{Binding Name}" Command="{Binding DataContext.CmdChangeFilterType, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding}">
+                                    <MenuItem.Style>
+                                        <Style TargetType="MenuItem">
+                                            <Setter Property="IsChecked" Value="False" />
+                                            <Style.Triggers>
+                                                <DataTrigger Value="True">
+                                                    <DataTrigger.Binding>
+                                                        <MultiBinding Converter="{converters:ReferenceEqualsToBooleanMultiConverter}">
+                                                            <Binding Path="DataContext.FilterType" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}" />
+                                                            <Binding />
+                                                        </MultiBinding>
+                                                    </DataTrigger.Binding>
+                                                    <Setter Property="IsChecked" Value="True" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </MenuItem.Style>
+                                </MenuItem>
+                            </DataTemplate>
+                        </MenuItem.ItemTemplate>
+                    </MenuItem>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Window">
+                <MenuItem Header="Titles" Command="{Binding CmdTitles}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/titles_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Issues" Command="{Binding CmdIssues}">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/suggestion_32x32.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
 
-            <RibbonTab Header="Home" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
-                <RibbonGroup Header="Actions">
-                    <RibbonButton ToolTip="Reload Database" Command="{Binding CmdRefresh}" Label="Refresh" LargeImageSource="/Resources/refresh_32x32.png" />
-                    <RibbonButton ToolTip="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database" Label="Rebuild Database" LargeImageSource="/Resources/rebuild_database_32x32.png" />
-                    <RibbonButton ToolTip="Update folders from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store" Label="Update Folders" LargeImageSource="/Resources/download_to_local_store_32x32.png" />
-                </RibbonGroup>
-                <RibbonGroup Header="Export/Import">
-                    <RibbonButton ToolTip="Export to a database file" Command="{Binding CmdExport}" Label="Export..." LargeImageSource="/Resources/download_to_local_store_32x32.png" />
-                    <RibbonButton ToolTip="Import from a database file" Command="{Binding CmdImport}" Label="Import..." LargeImageSource="/Resources/download_to_local_store_32x32.png" />
-                </RibbonGroup>
-                <RibbonGroup Header="Windows">
-                    <RibbonButton ToolTip="Show titles" Command="{Binding CmdTitles}" Label="Titles" LargeImageSource="/Resources/titles_32x32.png" />
-                    <RibbonButton ToolTip="Show issues" Command="{Binding CmdIssues}" Label="Issues" LargeImageSource="/Resources/suggestion_32x32.png" />
-                </RibbonGroup>
-            </RibbonTab>
-
-            <RibbonTab Header="View" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
-                <RibbonGroup Header="Theme">
-                    <RibbonRadioButton GroupName="theme" ToolTip="Automatic detection" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Automatic}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Automatic}}" Label="Auto" LargeImageSource="/Resources/darkmode_trigger_32x32.png" />
-                    <RibbonRadioButton GroupName="theme" ToolTip="Light" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Light}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Light}}" Label="Light" LargeImageSource="/Resources/sun_32x32.png" />
-                    <RibbonRadioButton GroupName="theme" ToolTip="Dark" Command="{Binding CmdChangeTheme}" CommandParameter="{x:Static viewmodels:MainTheme.Dark}" IsChecked="{Binding Theme, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource themeBoolConv}, ConverterParameter={x:Static viewmodels:MainTheme.Dark}}" Label="Dark" LargeImageSource="/Resources/moon_32x32.png" />
-                </RibbonGroup>
-            </RibbonTab>
-
-            <RibbonTab Header="Sorting" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
-                <RibbonGroup Header="Primary">
-                    <StackPanel Orientation="Vertical">
-                        <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
-                            <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FirstSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <RibbonGalleryCategory Header="First field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
-                            </RibbonGallery>
-                        </RibbonComboBox>
-                        <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
+        <Grid DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <GroupBox Header="Sorting" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShowSorting, UpdateSourceTrigger=PropertyChanged, Converter={dxmvvm:BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <GroupBox Header="Primary">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Grid.Column="0" Width="150" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" SelectedItem="{Binding FirstSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" Style="{StaticResource fiterCombobox}" />
+                                <CheckBox Grid.Column="1" Content="Descending" IsChecked="{Binding IsFirstSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Command="{Binding CmdChangedSort}" Style="{StaticResource fiterCheckbox}" />
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Secondary">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Grid.Column="0" Width="150" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" SelectedItem="{Binding SecondSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" Style="{StaticResource fiterCombobox}" />
+                                <CheckBox Grid.Column="1" Content="Descending" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Command="{Binding CmdChangedSort}" Style="{StaticResource fiterCheckbox}" />
+                            </StackPanel>
+                        </GroupBox>
                     </StackPanel>
-                </RibbonGroup>
-                <RibbonGroup Header="Secondary">
-                    <StackPanel Orientation="Vertical">
-                        <RibbonComboBox Grid.Column="0" IsEditable="True" IsReadOnly="True">
-                            <RibbonGallery Command="{Binding CmdChangedSort}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SecondSortKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <RibbonGalleryCategory Header="Second field" ItemsSource="{Binding SortItems}" DisplayMemberPath="DisplayName" />
-                            </RibbonGallery>
-                        </RibbonComboBox>
-                        <RibbonCheckBox Command="{Binding CmdChangedSort}" Grid.Column="1" IsChecked="{Binding IsSecondSortOrderDesc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Label="Descending" />
+                </GroupBox>
+                <GroupBox Header="Filtering" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShowFilter, UpdateSourceTrigger=PropertyChanged, Converter={dxmvvm:BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <GroupBox Header="By Type">
+                            <ComboBox Width="150" ItemsSource="{Binding AnimeTypes}" DisplayMemberPath="Name" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterCombobox}" />
+                        </GroupBox>
+                        <GroupBox Header="By Title">
+                            <Grid>
+                                <Grid.Resources>
+                                    <dxmvvm:StringToVisibilityConverter x:Key="stringVisConv" Inverse="True" HiddenInsteadOfCollapsed="True" />
+                                </Grid.Resources>
+                                <TextBox Text="{Binding FilterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterTitleTextbox}" />
+                                <Label Content="No title" Visibility="{Binding FilterTitle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource stringVisConv}}" Style="{StaticResource fiterTitleLabelEmptyHint}" />
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="By States">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Width="150" ItemsSource="{Binding WatchStates}" DisplayMemberPath="Name" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterWatchState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterCombobox}" />
+                                <CheckBox Content="Marked" IsChecked="{Binding FilterMarked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterCheckbox}" />
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="By Category">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Width="150" ItemsSource="{Binding FilterCategories}" DisplayMemberPath="DisplayName" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterCombobox}" />
+                                <ComboBox Width="150" ItemsSource="{Binding FilterCategoryWeights}" DisplayMemberPath="DisplayName" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategoryMinWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource fiterCombobox}" />
+                            </StackPanel>
+                        </GroupBox>
                     </StackPanel>
-                </RibbonGroup>
-            </RibbonTab>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
 
-            <RibbonTab Header="Filtering" IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14">
-                <RibbonGroup Header="By Type">
-                    <RibbonComboBox IsEditable="True" IsReadOnly="True">
-                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <RibbonGalleryCategory ItemsSource="{Binding AnimeTypes}" DisplayMemberPath="Name" />
-                        </RibbonGallery>
-                    </RibbonComboBox>
-                </RibbonGroup>
-                <RibbonGroup Header="By Title">
-                    <RibbonTextBox Command="{Binding CmdChangedFilter}" Text="{Binding FilterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                </RibbonGroup>
-                <RibbonGroup Header="By States">
-                    <RibbonComboBox Label="Watched" IsEditable="True" IsReadOnly="True">
-                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterWatchState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <RibbonGalleryCategory ItemsSource="{Binding WatchStates}" DisplayMemberPath="Name" />
-                        </RibbonGallery>
-                    </RibbonComboBox>
-                    <RibbonCheckBox Label="Marked" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterMarked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <RibbonCheckBox Label="To remove" Command="{Binding CmdChangedFilter}" IsChecked="{Binding FilterRemove, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </RibbonGroup>
-                <RibbonGroup Header="By Category">
-                    <RibbonComboBox Label="Type" IsEditable="False" IsReadOnly="False">
-                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <RibbonGalleryCategory ItemsSource="{Binding FilterCategories, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
-                        </RibbonGallery>
-                    </RibbonComboBox>
-                    <RibbonComboBox Label="Weight" IsEditable="False" IsReadOnly="False">
-                        <RibbonGallery Command="{Binding CmdChangedFilter}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterCategoryMinWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <RibbonGalleryCategory ItemsSource="{Binding FilterCategoryWeights, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName" />
-                        </RibbonGallery>
-                    </RibbonComboBox>
-                </RibbonGroup>
-            </RibbonTab>
-
-        </Ribbon>
         <StatusBar DockPanel.Dock="Bottom" FontSize="16">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -175,4 +302,4 @@
             </Grid>
         </DockPanel>
     </DockPanel>
-</RibbonWindow>
+</Window>

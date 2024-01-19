@@ -147,7 +147,9 @@ namespace Finalspace.Onigiri.ViewModels
                 50.0,
             };
 
-            List<CategoryItemViewModel> filterCatsWeights = new List<CategoryItemViewModel>(MinWeightPercentages.Length);
+            List<CategoryItemViewModel> filterCatsWeights = new List<CategoryItemViewModel>();
+            filterCatsWeights.Add(AnyCategoryWeightItem);
+
             foreach (double weight in MinWeightPercentages)
             {
                 filterCatsWeights.Add(new CategoryItemViewModel()
@@ -191,12 +193,16 @@ namespace Finalspace.Onigiri.ViewModels
                 return string.Compare(a.DisplayName, b.DisplayName);
             });
 
+            filterCats.Insert(0, AnyFilterCategory);
+
             DispatcherService.Invoke(() =>
             {
-                FilterCategoryWeights.Clear();
                 FilterCategories.Clear();
                 FilterCategories.AddRange(filterCats);
+
+                FilterCategoryWeights.Clear();
                 FilterCategoryWeights.AddRange(filterCatsWeights);
+
                 UpdateSort(false);
             });
         }
@@ -363,12 +369,14 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Static collections
+        private static readonly SortItemViewModel NotSortedItem = new SortItemViewModel() { DisplayName = "Not sorted", Value = AnimeSortKey.None };
+
         public IList<SortItemViewModel> SortItems
         {
             get
             {
                 return new SortItemViewModel[] {
-                    new SortItemViewModel() { DisplayName = "Not sorted", Value = AnimeSortKey.None },
+                    NotSortedItem,
                     new SortItemViewModel() { DisplayName = "Sort by title", Value = AnimeSortKey.Title },
                     new SortItemViewModel() { DisplayName = "Sort by rating", Value = AnimeSortKey.Rating },
                     new SortItemViewModel() { DisplayName = "Sort by start date", Value = AnimeSortKey.StartDate },
@@ -377,12 +385,14 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
+        private static readonly NameItemViewModel AnyFilterType = new NameItemViewModel() { Name = "Any" };
+
         public IList<NameItemViewModel> AnimeTypes
         {
             get
             {
                 return new NameItemViewModel[] {
-                    new NameItemViewModel() { Name = "All" },
+                    AnyFilterType,
                     new NameItemViewModel() { Name = "TV Series" },
                     new NameItemViewModel() { Name = "OVA" },
                     new NameItemViewModel() { Name = "Movie" },
@@ -390,12 +400,14 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
+        private static readonly WatchStateItemViewModel AnyWatchStateItem = new WatchStateItemViewModel() { Name = "Any" };
+
         public IList<NameItemViewModel> WatchStates
         {
             get
             {
                 return new NameItemViewModel[] {
-                    new WatchStateItemViewModel() { Name = "All" },
+                    AnyWatchStateItem,
                     new WatchStateItemViewModel() { Name = "Not watched by Anni", FilterProperty = "HasAnniUnwatched" },
                     new WatchStateItemViewModel() { Name = "Not watched by Final", FilterProperty = "HasFinalUnwatched" },
                     new WatchStateItemViewModel() { Name = "Not watched by Both", FilterProperty = "HasBothUnwatched" },
@@ -403,30 +415,39 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
+        private static readonly CategoryItemViewModel AnyFilterCategory = new CategoryItemViewModel() { DisplayName = "Any" };
+        private static readonly CategoryItemViewModel AnyCategoryWeightItem = new CategoryItemViewModel() { DisplayName = "Any" };
+
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategories { get; }
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategoryWeights { get; }
         #endregion
 
         #region Sorting
+        public bool ShowSorting
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
         public SortItemViewModel FirstSortKey
         {
             get => GetValue<SortItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateSort(true));
         }
         public SortItemViewModel SecondSortKey
         {
             get => GetValue<SortItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateSort(true));
         }
         public bool IsFirstSortOrderDesc
         {
             get => GetValue<bool>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateSort(true));
         }
         public bool IsSecondSortOrderDesc
         {
             get => GetValue<bool>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateSort(true));
         }
         private void UpdateSort(bool forceRefresh)
         {
@@ -445,33 +466,49 @@ namespace Finalspace.Onigiri.ViewModels
             if (forceRefresh)
                 collView.Refresh();
         }
+
+        private void ChangePrimarySortType(SortItemViewModel item)
+        {
+            FirstSortKey = item;
+        }
+
+        private void ChangeSecondarySortType(SortItemViewModel item)
+        {
+            SecondSortKey = item;
+        }
         #endregion
 
         #region Filters
+        public bool ShowFilter
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
         public string FilterTitle
         {
             get => GetValue<string>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateFilter());
         }
         public NameItemViewModel FilterType
         {
             get => GetValue<NameItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateFilter());
         }
         public WatchStateItemViewModel FilterWatchState
         {
             get => GetValue<WatchStateItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateFilter());
         }
         public CategoryItemViewModel FilterCategory
         {
             get => GetValue<CategoryItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateFilter());
         }
         public CategoryItemViewModel FilterCategoryMinWeight
         {
             get => GetValue<CategoryItemViewModel>();
-            set => SetValue(value);
+            set => SetValue(value, () => UpdateFilter());
         }
         public bool FilterMarked
         {
@@ -482,6 +519,11 @@ namespace Finalspace.Onigiri.ViewModels
         {
             get => GetValue<bool>();
             set => SetValue(value);
+        }
+
+        private void ChangeFilterType(NameItemViewModel type)
+        {
+            FilterType = type;
         }
 
         private bool AnimesViewFilter(object item)
@@ -502,7 +544,7 @@ namespace Finalspace.Onigiri.ViewModels
                 if (!found)
                     result = false;
             }
-            if (result && (FilterType != null && (!"All".Equals(FilterType.Name, StringComparison.InvariantCultureIgnoreCase))))
+            if (result && (FilterType != AnyFilterType))
             {
                 if (!FilterType.Name.Equals(anime.Type, StringComparison.InvariantCultureIgnoreCase))
                     result = false;
@@ -520,7 +562,7 @@ namespace Finalspace.Onigiri.ViewModels
                     }
                 }
             }
-            if (result && (FilterCategory != null))
+            if (result && (FilterCategory != AnyFilterCategory))
             {
                 Category category = anime.TopCategories.FirstOrDefault((a) => a.Id == FilterCategory.Id);
                 if (category != null)
@@ -564,6 +606,9 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleWatched { get; }
 
         public DelegateCommand CmdChangedSort { get; }
+        public DelegateCommand<SortItemViewModel> CmdPrimarySortType { get; }
+        public DelegateCommand<SortItemViewModel> CmdSecondarySortType { get; }
+        public DelegateCommand<NameItemViewModel> CmdChangeFilterType { get; }
         public DelegateCommand CmdChangedFilter { get; }
         public DelegateCommand<MainTheme> CmdChangeTheme { get; }
 
@@ -758,11 +803,17 @@ namespace Finalspace.Onigiri.ViewModels
             LoadingHeader = "Ready";
             LoadingSubject = string.Empty;
             LoadingPercentage = -1;
-            FirstSortKey = SortItems[4];
+
+            FirstSortKey = SortItems.First(s => s.Value == AnimeSortKey.EndDate);
             IsFirstSortOrderDesc = true;
+
             SecondSortKey = SortItems[0];
             IsFirstSortOrderDesc = false;
-            FilterType = AnimeTypes[0];
+
+            FilterType = AnyFilterType;
+            FilterCategory = AnyFilterCategory;
+            FilterCategoryMinWeight = AnyCategoryWeightItem;
+            FilterWatchState = AnyWatchStateItem;
 
             // Commands
             CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanToggleMarked);
@@ -770,6 +821,9 @@ namespace Finalspace.Onigiri.ViewModels
             CmdUserActionToggleDelete = new DelegateCommand<Tuple<Anime, string>>(ToggleDeletion, CanToggleDeletion);
 
             CmdChangedSort = new DelegateCommand(() => UpdateSort(true));
+            CmdPrimarySortType = new DelegateCommand<SortItemViewModel>(ChangePrimarySortType);
+            CmdSecondarySortType = new DelegateCommand<SortItemViewModel>(ChangeSecondarySortType);
+            CmdChangeFilterType = new DelegateCommand<NameItemViewModel>(ChangeFilterType);
             CmdChangedFilter = new DelegateCommand(UpdateFilter);
             CmdChangeTheme = new DelegateCommand<MainTheme>(ChangeTheme);
 
