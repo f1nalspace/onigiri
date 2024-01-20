@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriConsole", "OnigiriCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriTests", "OnigiriTests\OnigiriTests.csproj", "{B2FB629E-1FBA-4200-BAF1-C72916165827}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriPlatform", "OnigiriPlatform\OnigiriPlatform.csproj", "{DB6EFD93-31CD-4527-A014-741864593C35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +35,10 @@ Global
 		{B2FB629E-1FBA-4200-BAF1-C72916165827}.Debug|x64.Build.0 = Debug|x64
 		{B2FB629E-1FBA-4200-BAF1-C72916165827}.Release|x64.ActiveCfg = Release|x64
 		{B2FB629E-1FBA-4200-BAF1-C72916165827}.Release|x64.Build.0 = Release|x64
+		{DB6EFD93-31CD-4527-A014-741864593C35}.Debug|x64.ActiveCfg = Debug|x64
+		{DB6EFD93-31CD-4527-A014-741864593C35}.Debug|x64.Build.0 = Debug|x64
+		{DB6EFD93-31CD-4527-A014-741864593C35}.Release|x64.ActiveCfg = Release|x64
+		{DB6EFD93-31CD-4527-A014-741864593C35}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

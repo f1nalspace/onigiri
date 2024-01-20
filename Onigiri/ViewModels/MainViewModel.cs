@@ -17,6 +17,7 @@ using DevExpress.Mvvm;
 using Finalspace.Onigiri.Storage;
 using System.ComponentModel.Design;
 using System.Diagnostics;
+using Finalspace.Onigiri.Security;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -770,7 +771,8 @@ namespace Finalspace.Onigiri.ViewModels
                 Theme = MainTheme.Light;
 
             // Services
-            CoreService = new OnigiriService();
+            IUserService userService = OnigiriUserServiceFactory.Instance.Create();
+            CoreService = new OnigiriService(userService);
 
             // Storages
             _currentStorage = new FolderAnimeFilesStorage(OnigiriPaths.PersistentPath, CoreService.Config.MaxThreadCount);

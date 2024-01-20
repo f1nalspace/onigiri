@@ -34,9 +34,9 @@ namespace Finalspace.Onigiri
         public Animes Animes { get; }
         public Issues Issues { get; }
 
-        public OnigiriService()
+        public OnigiriService(IUserService userService)
         {
-            _userService = new Win32UserService();
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
 
             _currentUser = _userService.GetCurrentUser();
 
