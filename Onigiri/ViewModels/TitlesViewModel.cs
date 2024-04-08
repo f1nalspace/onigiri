@@ -44,7 +44,7 @@ namespace Finalspace.Onigiri.ViewModels
             RaisePropertyChanged(() => LoadingWindowVisibility);
         }
 
-        private readonly IList<Title> _titles;
+        private readonly List<Title> _titles;
         public ICollectionView TitlesView
         {
             get => GetValue<ICollectionView>();
@@ -62,7 +62,7 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
-        private HashSet<ulong> _excludedAnimes;
+        private readonly HashSet<ulong> _excludedAnimes;
 
         public string FilterString
         {
@@ -112,15 +112,14 @@ namespace Finalspace.Onigiri.ViewModels
                 if (FilterString.StartsWith("#"))
                 {
                     string tmp = FilterString.Substring(1);
-                    ulong searchAid = 0;
-                    if (ulong.TryParse(tmp, out searchAid))
+                    if (ulong.TryParse(tmp, out ulong searchAid))
                     {
                         allowNameMatch = false;
                         if (title.Aid != searchAid)
                             result = false;
                     }
                 }
-                if (allowNameMatch && !title.Name.ToLower().Contains(FilterString.ToLower()))
+                if (allowNameMatch && !title.Name.Contains(FilterString, StringComparison.InvariantCultureIgnoreCase))
                     result = false;
             }
             if (result && _excludedAnimes.Count > 0)
@@ -130,7 +129,7 @@ namespace Finalspace.Onigiri.ViewModels
             }
             if (result && (!string.IsNullOrEmpty(SelectedFilterType) && !"All".Equals(SelectedFilterType)))
             {
-                if (!title.Type.ToLower().Contains(SelectedFilterType.ToLower()))
+                if (!title.Type.Contains(SelectedFilterType, StringComparison.InvariantCultureIgnoreCase))
                     result = false;
             }
             return (result);
@@ -139,6 +138,7 @@ namespace Finalspace.Onigiri.ViewModels
         public void UpdateFilter()
         {
             Debug.Assert(_filterWorker == null || !_filterWorker.IsBusy);
+
             _filterWorker = new BackgroundWorker();
             _filterWorker.DoWork += _filterWorker_DoWork;
             _filterWorker.RunWorkerCompleted += _filterWorker_RunWorkerCompleted;
@@ -174,8 +174,6 @@ namespace Finalspace.Onigiri.ViewModels
         {
             _filterTimer.Change(250, Timeout.Infinite);
         }
-
-        
 
         private readonly bool _allowButtons;
         public bool AllowButtons => _allowButtons;
