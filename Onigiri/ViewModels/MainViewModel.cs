@@ -729,10 +729,7 @@ namespace Finalspace.Onigiri.ViewModels
                 _users.Clear();
                 _users.AddRange(config.Config.Users);
 
-                DispatcherService.Invoke(() =>
-                {
-                    UsersView.Refresh();
-                });
+                UsersView.Refresh();
             }
         }
 
