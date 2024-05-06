@@ -278,6 +278,14 @@ namespace Finalspace.Onigiri
                     DirectoryInfo[] dirs = searchDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     foreach (DirectoryInfo dir in dirs)
                     {
+                        if (dir.Name.StartsWith("_"))
+                        {
+                            // Anime group folder
+                            DirectoryInfo[] subdirs = dir.GetDirectories();
+                            foreach (DirectoryInfo subdir in subdirs)
+                                animeDirs.Add(subdir);
+                            continue;
+                        }
                         animeDirs.Add(dir);
                     }
                 }
