@@ -279,7 +279,7 @@
                     </Button.Template>
                 </Button>
 
-                <ItemsControl ItemsSource="{Binding DataContext.CoreService.Config.Users, RelativeSource={RelativeSource AncestorType=Page, Mode=FindAncestor}}">
+                <ItemsControl ItemsSource="{Binding DataContext.UsersView, RelativeSource={RelativeSource AncestorType=Page, Mode=FindAncestor}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />

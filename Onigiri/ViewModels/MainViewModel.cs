@@ -51,6 +51,12 @@ namespace Finalspace.Onigiri.ViewModels
         public int TotalAnimeCount => _animes.Count;
         #endregion
 
+        #region Users
+        private readonly List<User> _users;
+
+        public ICollectionView UsersView { get; }
+        #endregion
+
         #region Status & Loading
         public bool IsNotLoading
         {
@@ -133,6 +139,9 @@ namespace Finalspace.Onigiri.ViewModels
 
             CoreService.Startup(new StatusChangedEventHandler(ChangedStatus));
 
+            _users.Clear();
+            _users.AddRange(CoreService.Config.Users);
+
             CoreService.ClearIssues();
             CoreService.Load(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
             LoadingPercentage = -1;
@@ -205,6 +214,8 @@ namespace Finalspace.Onigiri.ViewModels
                 FilterCategoryWeights.AddRange(filterCatsWeights);
 
                 UpdateSort(false);
+
+                UsersView.Refresh();
             });
         }
         #endregion
@@ -712,7 +723,17 @@ namespace Finalspace.Onigiri.ViewModels
         {
             ConfigViewModel config = new ConfigViewModel(CoreService.Config);
             if (DlgService.ShowConfigurationDialog(config))
+            {
                 CoreService.SaveConfig();
+
+                _users.Clear();
+                _users.AddRange(config.Config.Users);
+
+                DispatcherService.Invoke(() =>
+                {
+                    UsersView.Refresh();
+                });
+            }
         }
 
         private void ShowTitlesDialog()
@@ -786,6 +807,10 @@ namespace Finalspace.Onigiri.ViewModels
             };
             FilterCategories = new ExtendedObservableCollection<CategoryItemViewModel>();
             FilterCategoryWeights = new ExtendedObservableCollection<CategoryItemViewModel>();
+
+            _users = new List<User>(32);
+            UsersView = new ListCollectionView(_users);
+            BindingOperations.EnableCollectionSynchronization(_users, _users);
 
             // Workers
             RefreshWorker = new BackgroundWorker();
