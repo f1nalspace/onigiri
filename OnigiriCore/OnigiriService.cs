@@ -289,11 +289,16 @@ namespace Finalspace.Onigiri
 
                 var sortedAnimeDirs = animeDirs.OrderBy(d => d.FullName).ToArray();
 
-#if !SINGLE_THREAD_PROCESSING
                 int threadCount = Config.MaxThreadCount;
-                ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
+
+#if !SINGLE_THREAD_PROCESSING
+                ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
+#else
+                ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 1 };
+#endif
+
                 Anime[] animes = new Anime[sortedAnimeDirs.Length];
-                Parallel.ForEach(sortedAnimeDirs, poptions, (animeDir, state, index) =>
+                Parallel.ForEach(sortedAnimeDirs, parallelOptions, (animeDir, state, index) =>
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
@@ -302,21 +307,39 @@ namespace Finalspace.Onigiri
                     animes[index] = anime;
                 });
                 list.AddRange(animes.Where(a => a is not null));
-#else
-                foreach (var animeDir in sortedAnimeDirs)
+
+                if (flags.HasFlag(UpdateFlags.ParseMediaInfo))
                 {
-                    int c = Interlocked.Increment(ref count);
-                    int percentage = (int)((c / (double)totalDirCount) * 100.0);
-                    statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                    Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
-                    if (anime is not null)
-                        list.Add(anime);
+                    statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} media infos" });
+
+                    log.Info($"Find media files from {list.Count} animes");
+                    count = 0;
+                    Stopwatch watch = Stopwatch.StartNew();
+                    Parallel.ForEach(list, parallelOptions, (anime, state, index) =>
+                    {
+                        int c = Interlocked.Increment(ref count);
+                        int percentage = (int)((c / (double)totalDirCount) * 100.0);
+                        statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
+                        DirectoryInfo animeDir = new DirectoryInfo(anime.FoundPath);
+                        if (animeDir.Exists)
+                        {
+                            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(animeDir, Config.MaxThreadCount);
+                            anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
+                            anime.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
+                        }
+                        else
+                        {
+                            anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>();
+                            anime.MediaFiles = new ObservableCollection<string>();
+                        }
+                    });
+                    int totalMediaFiles = list.Sum(a => a.MediaFileCount);
+                    watch.Stop();
+                    log.Debug($"Found {totalMediaFiles} media files from {list.Count} animes, took {watch.Elapsed.TotalSeconds} secs");
                 }
-#endif
             }
 
             Anime[] sortedAnimes = list.OrderBy(a => a.FoundPath).ToArray();
-
             Animes.Set(sortedAnimes);
         }
 
@@ -529,16 +552,6 @@ namespace Finalspace.Onigiri
                 watch.Stop();
                 log.Debug($"Loading addon data file '{addonFilePath}' took {watch.Elapsed.TotalSeconds} secs");
             }
-
-            // Find media files
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find media files in: {sourceDir.Name}" });
-            log.Info($"Find media files from path '{sourceDir.FullName}'");
-            watch.Restart();
-            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(sourceDir, Config.MaxThreadCount);
-            result.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
-            result.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
-            watch.Stop();
-            log.Debug($"Found {result.MediaFiles.Count} media files in path '{sourceDir.FullName}', took {watch.Elapsed.TotalSeconds} secs");
 
             return result;
         }

@@ -39,5 +39,10 @@ namespace Finalspace.Onigiri.Enums
         /// Download the titles XML, without touching the persistent cache or the local store.
         /// </summary>
         DownloadTitles = 1 << 5,
+
+        /// <summary>
+        /// Parses the media files and extracts the meta data, such as video size, bitrate, etc.
+        /// </summary>
+        ParseMediaInfo = 1 << 6,
     }
 }
