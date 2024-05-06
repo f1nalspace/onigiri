@@ -556,12 +556,12 @@ namespace Finalspace.Onigiri.ViewModels
                 if (!found)
                     result = false;
             }
-            if (result && (FilterType != AnyFilterType))
+            if (result && (FilterType is not null && FilterType != AnyFilterType))
             {
                 if (!FilterType.Name.Equals(anime.Type, StringComparison.InvariantCultureIgnoreCase))
                     result = false;
             }
-            if (result && (FilterWatchState != null && !string.IsNullOrEmpty(FilterWatchState.FilterProperty)))
+            if (result && (FilterWatchState is not null && !string.IsNullOrEmpty(FilterWatchState.FilterProperty)))
             {
                 AdditionalData addonData = anime.AddonData;
                 Type t = addonData.GetType();
@@ -574,7 +574,7 @@ namespace Finalspace.Onigiri.ViewModels
                     }
                 }
             }
-            if (result && (FilterCategory != AnyFilterCategory))
+            if (result && (FilterCategory is not null && FilterCategory != AnyFilterCategory))
             {
                 Category category = anime.TopCategories.FirstOrDefault((a) => a.Id == FilterCategory.Id);
                 if (category != null)
