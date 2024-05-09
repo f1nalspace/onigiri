@@ -137,7 +137,7 @@ namespace Finalspace.Onigiri.ViewModels
             }
         }
 
-        private async Task<RefreshResult> RefreshAsync()
+        private Task<RefreshResult> RefreshAsync() => Task.Run(async () =>
         {
             await CoreService.StartupAsync(new StatusChangedEventHandler(ChangedStatus));
 
@@ -211,7 +211,7 @@ namespace Finalspace.Onigiri.ViewModels
             RefreshResult result = new RefreshResult(filterCats, filterCatsWeights);
 
             return result;
-        }
+        });
 
         private bool CanRefresh() => _refreshLock.CurrentCount > 0;
         private async void Refresh()
@@ -269,7 +269,7 @@ namespace Finalspace.Onigiri.ViewModels
             Database
         }
 
-        private async Task UpdateAsync(UpdateType updateType)
+        private Task UpdateAsync(UpdateType updateType) => Task.Run(async () =>
         {
             bool writeStorage = false;
             UpdateFlags updateFlags = UpdateFlags.None;
@@ -303,7 +303,7 @@ namespace Finalspace.Onigiri.ViewModels
             Anime[] items = CoreService.Animes.Items.ToArray();
             _animes.Clear();
             _animes.AddRange(items);
-        }
+        });
 
         private bool CanUpdate(string s) => _updateLock.CurrentCount > 0;
         private async void Update(string updateTypeText)
@@ -481,49 +481,37 @@ namespace Finalspace.Onigiri.ViewModels
         #region Static collections
         private static readonly SortItemViewModel NotSortedItem = new SortItemViewModel() { DisplayName = "Not sorted", Value = AnimeSortKey.None };
 
-        public IList<SortItemViewModel> SortItems
+        public IReadOnlyCollection<SortItemViewModel> SortItems => _sortItems;
+        private static readonly SortItemViewModel[] _sortItems = new SortItemViewModel[]
         {
-            get
-            {
-                return new SortItemViewModel[] {
-                    NotSortedItem,
-                    new SortItemViewModel() { DisplayName = "Sort by title", Value = AnimeSortKey.Title },
-                    new SortItemViewModel() { DisplayName = "Sort by rating", Value = AnimeSortKey.Rating },
-                    new SortItemViewModel() { DisplayName = "Sort by start date", Value = AnimeSortKey.StartDate },
-                    new SortItemViewModel() { DisplayName = "Sort by end date", Value = AnimeSortKey.EndDate },
-                };
-            }
-        }
+            NotSortedItem,
+            new SortItemViewModel() { DisplayName = "Sort by title", Value = AnimeSortKey.Title },
+            new SortItemViewModel() { DisplayName = "Sort by rating", Value = AnimeSortKey.Rating },
+            new SortItemViewModel() { DisplayName = "Sort by start date", Value = AnimeSortKey.StartDate },
+            new SortItemViewModel() { DisplayName = "Sort by end date", Value = AnimeSortKey.EndDate },
+        };
 
         private static readonly NameItemViewModel AnyFilterType = new NameItemViewModel() { Name = "Any" };
 
-        public IList<NameItemViewModel> AnimeTypes
+        public IReadOnlyCollection<NameItemViewModel> AnimeTypes => _animeTypes;
+        private static readonly NameItemViewModel[] _animeTypes = new NameItemViewModel[]
         {
-            get
-            {
-                return new NameItemViewModel[] {
-                    AnyFilterType,
-                    new NameItemViewModel() { Name = "TV Series" },
-                    new NameItemViewModel() { Name = "OVA" },
-                    new NameItemViewModel() { Name = "Movie" },
-                };
-            }
-        }
+            AnyFilterType,
+            new NameItemViewModel() { Name = "TV Series" },
+            new NameItemViewModel() { Name = "OVA" },
+            new NameItemViewModel() { Name = "Movie" },
+        };
 
         private static readonly WatchStateItemViewModel AnyWatchStateItem = new WatchStateItemViewModel() { Name = "Any" };
 
-        public IList<NameItemViewModel> WatchStates
+        public IReadOnlyCollection<NameItemViewModel> WatchStates => _watchStates;
+        private static readonly NameItemViewModel[] _watchStates = new NameItemViewModel[]
         {
-            get
-            {
-                return new NameItemViewModel[] {
                     AnyWatchStateItem,
                     new WatchStateItemViewModel() { Name = "Not watched by Anni", FilterProperty = "HasAnniUnwatched" },
                     new WatchStateItemViewModel() { Name = "Not watched by Final", FilterProperty = "HasFinalUnwatched" },
                     new WatchStateItemViewModel() { Name = "Not watched by Both", FilterProperty = "HasBothUnwatched" },
-                };
-            }
-        }
+        };
 
         private static readonly CategoryItemViewModel AnyFilterCategory = new CategoryItemViewModel() { DisplayName = "Any" };
         private static readonly CategoryItemViewModel AnyCategoryWeightItem = new CategoryItemViewModel() { DisplayName = "Any" };
@@ -875,7 +863,7 @@ namespace Finalspace.Onigiri.ViewModels
             FirstSortKey = SortItems.First(s => s.Value == AnimeSortKey.EndDate);
             IsFirstSortOrderDesc = true;
 
-            SecondSortKey = SortItems[0];
+            SecondSortKey = SortItems.First();
             IsFirstSortOrderDesc = false;
 
             FilterType = AnyFilterType;
