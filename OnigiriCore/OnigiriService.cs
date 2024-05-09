@@ -9,6 +9,8 @@ using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
 using log4net;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -59,7 +61,7 @@ namespace Finalspace.Onigiri
         /// <remarks>Uses the 'SearchTypeLanguages' for probing titles</remarks>
         /// <param name="name">The title of the anime without special characters</param>
         /// <returns>Found aid or zero</returns>
-        public Title FindTitle(string name)
+        public Task<Title> FindTitleAsync(string name) => Task.Run(() =>
         {
             Title result = null;
             foreach (SearchTypeLanguage stl in Config.SearchTypeLanguages)
@@ -79,7 +81,7 @@ namespace Finalspace.Onigiri
                     log.Error($"Invalid search type language '{stl.Type}/{stl.Lang}'!");
             }
             return result;
-        }
+        });
 
         private static string ResolveSearchPath(SearchPath searchPath)
         {
@@ -101,7 +103,7 @@ namespace Finalspace.Onigiri
             return path;
         }
 
-        private Anime GetOrUpdate(string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+        private async Task<Anime> GetOrUpdate(string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
         {
             if (string.IsNullOrWhiteSpace(sourcePath))
                 throw new ArgumentNullException(nameof(sourcePath));
@@ -151,7 +153,7 @@ namespace Finalspace.Onigiri
             {
                 // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
                 log.Debug($"Find title by name '{cleanTitleName}' in folder '{folderName}'");
-                Title title = FindTitle(cleanTitleName);
+                Title title = await FindTitleAsync(cleanTitleName);
                 if (title is not null)
                 {
                     log.Debug($"Found title by name '{cleanTitleName}' in folder '{folderName}', got result: {title}");
@@ -173,7 +175,7 @@ namespace Finalspace.Onigiri
                 if (updateDetails)
                 {
                     log.Info($"Request details for aid {aid} as '{cleanTitleName}'");
-                    TextContent content = HttpApi.RequestAnime(aid);
+                    TextContent content = await HttpApi.RequestAnimeAsync(aid);
                     if (content is not null && !string.IsNullOrEmpty(content.Text))
                     {
                         log.Info($"Save details xml file a'{animeXmlFilePath}'");
@@ -184,11 +186,11 @@ namespace Finalspace.Onigiri
                 }
             }
 
-            Anime anime = LoadAnimeFromSourceDir(sourceDir, statusChanged);
+            Anime anime = await LoadAnimeFromSourceDirAsync(sourceDir, statusChanged);
             Debug.Assert(anime is not null);
 
             // Find picture
-            string imageFilePath = FindImage(sourceDir);
+            string imageFilePath = await FindImageFileAsync(sourceDir);
             if (!string.IsNullOrWhiteSpace(imageFilePath) && string.IsNullOrWhiteSpace(anime.Picture))
                 anime.Picture = Path.GetFileName(imageFilePath);
 
@@ -206,7 +208,7 @@ namespace Finalspace.Onigiri
                     else
                     {
                         imageFilePath = Path.Combine(sourceDir.FullName, anime.Picture);
-                        HttpApi.DownloadPicture(anime.Picture, imageFilePath);
+                        await HttpApi.DownloadPictureAsync(anime.Picture, imageFilePath);
                         if (!File.Exists(imageFilePath))
                         {
                             log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
@@ -221,7 +223,7 @@ namespace Finalspace.Onigiri
                 File.Exists(imageFilePath))
             {
                 // TODO(tspaete): More robust image file read
-                byte[] imageData = File.ReadAllBytes(imageFilePath);
+                byte[] imageData = await File.ReadAllBytesAsync(imageFilePath);
                 if (imageData is not null && imageData.Length > 0)
                 {
                     string filename = Path.GetFileName(imageFilePath);
@@ -242,7 +244,7 @@ namespace Finalspace.Onigiri
             Issues.Clear();
         }
 
-        public void UpdateSources(UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
+        public async Task UpdateSourcesAsync(UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
         {
             if (flags == UpdateFlags.None)
                 throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
@@ -251,8 +253,8 @@ namespace Finalspace.Onigiri
 
             // Download anime titles dump raw file from anidb if needed
             if (flags.HasFlag(UpdateFlags.DownloadTitles))
-                ReadTitles(statusChanged, true);
-
+                await ReadTitlesAsync(statusChanged, true);
+            
             List<Anime> list = new List<Anime>();
 
             using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
@@ -299,22 +301,18 @@ namespace Finalspace.Onigiri
 
                 int threadCount = Config.MaxThreadCount;
 
-#if !SINGLE_THREAD_PROCESSING
                 ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
-#else
-                ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 1 };
-#endif
 
-                Anime[] animes = new Anime[sortedAnimeDirs.Length];
-                Parallel.ForEach(sortedAnimeDirs, parallelOptions, (animeDir, state, index) =>
+                ConcurrentBag<Anime> animes = new ConcurrentBag<Anime>();
+                await Parallel.ForEachAsync(sortedAnimeDirs, parallelOptions, async (animeDir, token) =>
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                    Anime anime = GetOrUpdate(animeDir.FullName, flags, statusChanged);
-                    animes[index] = anime;
+                    Anime anime = await GetOrUpdate(animeDir.FullName, flags, statusChanged);
+                    animes.Add(anime);
                 });
-                list.AddRange(animes.Where(a => a is not null));
+                list.AddRange(animes.Where(a => a is not null).OrderBy(a => a.MainTitle));
 
                 if (flags.HasFlag(UpdateFlags.ParseMediaInfo))
                 {
@@ -323,7 +321,7 @@ namespace Finalspace.Onigiri
                     log.Info($"Find media files from {list.Count} animes");
                     count = 0;
                     Stopwatch watch = Stopwatch.StartNew();
-                    Parallel.ForEach(list, parallelOptions, (anime, state, index) =>
+                    await Parallel.ForEachAsync(list, parallelOptions, async (anime, token) =>
                     {
                         int c = Interlocked.Increment(ref count);
                         int percentage = (int)((c / (double)totalDirCount) * 100.0);
@@ -331,7 +329,7 @@ namespace Finalspace.Onigiri
                         DirectoryInfo animeDir = new DirectoryInfo(anime.FoundPath);
                         if (animeDir.Exists)
                         {
-                            IEnumerable<AnimeMediaFile> extendedMediaFiles = GetExtendedMediaFiles(animeDir, Config.MaxThreadCount);
+                            AnimeMediaFile[] extendedMediaFiles = await GetExtendedMediaFilesAsync(animeDir);
                             anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
                             anime.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
                         }
@@ -351,7 +349,7 @@ namespace Finalspace.Onigiri
             Animes.Set(sortedAnimes);
         }
 
-        private static string FindImage(DirectoryInfo dir)
+        private static Task<string> FindImageFileAsync(DirectoryInfo dir) => Task.Run(() =>
         {
             FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
             DateTime? bestDate = null;
@@ -370,9 +368,9 @@ namespace Finalspace.Onigiri
             if (bestImage is not null)
                 return bestImage.FullName;
             return null;
-        }
+        });
 
-        public static readonly HashSet<string> MediaFileExtensions = new HashSet<string>
+        public static readonly FrozenSet<string> MediaFileExtensions = new HashSet<string>
         {
             ".avi",
             ".mkv",
@@ -381,9 +379,9 @@ namespace Finalspace.Onigiri
             ".mpg",
             ".mpeg",
             ".mp4"
-        };
+        }.ToFrozenSet();
 
-        private static AnimeMediaFile[] GetExtendedMediaFiles(DirectoryInfo dir, int maxThreadCount)
+        private static async Task<AnimeMediaFile[]> GetExtendedMediaFilesAsync(DirectoryInfo dir)
         {
             FileInfo[] files = dir
                 .GetFiles("*", SearchOption.TopDirectoryOnly)
@@ -392,58 +390,29 @@ namespace Finalspace.Onigiri
                 .OrderBy(f => f.Name)
                 .ToArray();
 
-            AnimeMediaFile[] result = new AnimeMediaFile[files.Length];
+            ConcurrentBag<AnimeMediaFile> list = new ConcurrentBag<AnimeMediaFile>();
 
-#if !SINGLE_THREAD_PROCESSING
-            int threadCount = Math.Min(4, maxThreadCount);
-            ParallelOptions poptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
-            Parallel.ForEach(files, poptions, (file, state, index) =>
+            await Parallel.ForEachAsync(files, async (file, token) =>
             {
-                MediaInfo info = null;
                 try
                 {
-                    using Task<MediaInfo> task = MediaInfoParser.Parse(file);
-                    task.Wait();
-                    info = task.Result;
+                    MediaInfo info = await MediaInfoParser.Parse(file);
+
+                    AnimeMediaFile animeMediaFile = new AnimeMediaFile()
+                    {
+                        FileName = file.Name,
+                        FileSize = (ulong)file.Length,
+                        Info = info,
+                    };
+                    list.Add(animeMediaFile);
                 }
                 catch
                 {
                     // @TODO(final): Log error!
                 }
-
-                AnimeMediaFile animeMediaFile = new AnimeMediaFile()
-                {
-                    FileName = file.Name,
-                    FileSize = (ulong)file.Length,
-                    Info = info,
-                };
-                result[index] = animeMediaFile;
             });
-#else
-            long index = 0;
-            foreach (FileInfo file in files)
-            {
-                MediaInfo info = null;
-                try
-                {
-                    using Task<MediaInfo> task = MediaInfoParser.Parse(file);
-                    task.Wait();
-                    info = task.Result;
-                }
-                catch (Exception e)
-                {
-                    // @TODO(final): Log error!
-                }
 
-                AnimeMediaFile animeMediaFile = new AnimeMediaFile()
-                {
-                    FileName = file.Name,
-                    FileSize = (ulong)file.Length,
-                    Info = info,
-                };
-                result[index++] = animeMediaFile;
-            }
-#endif
+            AnimeMediaFile[] result = list.OrderBy(a => a.FileName).ToArray();
 
             return result;
         }
@@ -469,7 +438,7 @@ namespace Finalspace.Onigiri
         /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
         /// <returns>The resulting <see cref="Anime"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="sourceDir"/> is <c>null</c>.</exception>
-        private Anime LoadAnimeFromSourceDir(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
+        private async Task<Anime> LoadAnimeFromSourceDirAsync(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
         {
             ArgumentNullException.ThrowIfNull(sourceDir);
 
@@ -483,7 +452,7 @@ namespace Finalspace.Onigiri
             statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find aid from: {sourceDir.Name}" });
             log.Info($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
             watch.Restart();
-            Title foundTitle = FindTitle(cleanTitleName);
+            Title foundTitle = await FindTitleAsync(cleanTitleName);
             watch.Stop();
             log.Debug($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
             if (foundTitle is null)
@@ -529,7 +498,7 @@ namespace Finalspace.Onigiri
             statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {sourceDir.Name}" });
             log.Info($"Find image for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
             watch.Restart();
-            string imageFilePath = FindImage(sourceDir);
+            string imageFilePath = await FindImageFileAsync(sourceDir);
             watch.Stop();
             log.Debug($"Find image in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
             if (!string.IsNullOrEmpty(imageFilePath) && File.Exists(imageFilePath))
@@ -650,7 +619,7 @@ namespace Finalspace.Onigiri
             }
         }
 
-        private void ReadTitles(StatusChangedEventHandler statusChanged, bool overwrite)
+        private async Task<Titles> ReadTitlesAsync(StatusChangedEventHandler statusChanged, bool overwrite)
         {
             string xmlFilePath = OnigiriPaths.AnimeTitlesDumpXMLFilePath;
             string rawFilePath = OnigiriPaths.AnimeTitlesDumpRawFilePath;
@@ -661,7 +630,7 @@ namespace Finalspace.Onigiri
             {
                 log.Info($"Download anime titles dump to '{rawFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Downloading titles database", Percentage = -1 });
-                HttpApi.DownloadTitlesDump(rawFilePath);
+                await HttpApi.DownloadTitlesDumpAsync(rawFilePath);
             }
             if (!File.Exists(rawFilePath))
                 log.Warn($"Not found anime titles dump file '{rawFilePath}'!");
@@ -680,24 +649,27 @@ namespace Finalspace.Onigiri
                 log.Debug($"Use already existing anime titles xml file '{xmlFilePath}'");
 
             // Read anime titles
+            Titles result = new Titles();
             if (File.Exists(xmlFilePath))
             {
                 log.Info($"Parse titles dump xml file '{xmlFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Parse titles database", Percentage = -1 });
-                Titles.ReadFromFile(xmlFilePath);
+                result.ReadFromFile(xmlFilePath);
             }
             else
                 log.Warn($"Not found anime titles xml file '{xmlFilePath}'!");
 
             // Print out anime title statistics
-            log.Info($"Found {Titles.Items.Count} anime titles total");
-            log.Info($"Found {Titles.AIDCount} animes total");
+            log.Info($"Found {result.Items.Count} anime titles total");
+            log.Info($"Found {result.AIDCount} animes total");
+
+            return result;
         }
 
-        public void Startup(StatusChangedEventHandler statusChanged = null)
+        public async Task StartupAsync(StatusChangedEventHandler statusChanged = null)
         {
             log.Info("Started service");
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = "Startup", Subject = "", Percentage = -1 });
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = "StartupAsync", Subject = "", Percentage = -1 });
 
             string configFilePath = OnigiriPaths.ConfigFilePath;
 
@@ -721,7 +693,7 @@ namespace Finalspace.Onigiri
             }
             
             // Download anime titles dump raw file from anidb if needed
-            ReadTitles(statusChanged, false);
+            await ReadTitlesAsync(statusChanged, false);
         }
 
         public void SaveConfig()
