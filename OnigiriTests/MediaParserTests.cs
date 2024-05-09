@@ -1,6 +1,8 @@
+using Finalspace.Onigiri;
 using Finalspace.Onigiri.Media;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +12,30 @@ namespace OnigiriTests
     [TestClass]
     public class MediaParserTests
     {
+        static IEnumerable<FileInfo> AddFilesFromFolder(DirectoryInfo rootDir)
+        {
+            if (!rootDir.Attributes.HasFlag(FileAttributes.System))
+            {
+                FileInfo[] subFiles = rootDir.GetFiles();
+                foreach (FileInfo subFile in subFiles)
+                {
+                    if (subFile.Attributes.HasFlag(FileAttributes.System))
+                        continue;
+                    string ext = subFile.Extension.ToLower();
+                    if (OnigiriService.MediaFileExtensions.Contains(ext))
+                        yield return subFile;
+                }
+
+                DirectoryInfo[] subdirs = rootDir.GetDirectories();
+                foreach (DirectoryInfo subdir in subdirs)
+                {
+                    IEnumerable<FileInfo> subfiles = AddFilesFromFolder(subdir);
+                    foreach (FileInfo subfile in subfiles)
+                        yield return subfile;
+                }
+            }
+        }
+
         [TestMethod]
         public void TestAvi()
         {
@@ -21,10 +47,7 @@ namespace OnigiriTests
             if (!folder.Exists)
                 Assert.Fail($"Folder path '{folderPath}' does not exists");
 
-            FileInfo[] files = folder
-                .GetFiles("*.avi", SearchOption.TopDirectoryOnly)
-                .OrderBy(f => f.Name)
-                .ToArray();
+            List<FileInfo> files = AddFilesFromFolder(folder).ToList();
 
             foreach (FileInfo file in files)
             {
@@ -33,15 +56,22 @@ namespace OnigiriTests
                 MediaInfo info = task.Result;
                 Assert.IsNotNull(info);
 
-                VideoInfo video = info.Video.FirstOrDefault();
-                Assert.IsNotNull(video);
-                Assert.IsTrue(video.Width > 0 && video.Height > 0 && !video.Codec.Id.IsEmpty);
+                Console.WriteLine(FormattableString.Invariant($"\tContainer: '{info.Format}', Duration: {info.Duration.TotalSeconds} secs"));
 
-                AudioInfo audio = info.Audio.FirstOrDefault();
-                Assert.IsNotNull(audio);
-                Assert.IsTrue(audio.Channels > 0 && audio.SampleRate > 0 && !audio.Codec.Id.IsEmpty);
+                foreach (VideoInfo video in info.Video)
+                {
+                    Assert.IsNotNull(video);
+                    Console.WriteLine(FormattableString.Invariant($"\tVideo: {video.Width}x{video.Height}, {video.FrameCount} frames, {video.FrameRate} fps [Codec:'{video.Codec}', Name: '{video.Name}']"));
+                    Assert.IsTrue(video.Width > 0 && video.Height > 0 && !video.Codec.Id.IsEmpty);
+                }
+
+                foreach (AudioInfo audio in info.Audio)
+                {
+                    Assert.IsNotNull(audio);
+                    Console.WriteLine(FormattableString.Invariant($"\tAudio: {audio.Channels} channels, {audio.SampleRate} Hz, {audio.BitsPerSample} bits/sample, {audio.BitRate / 1000} kHz [Codec: '{audio.Codec}', Name: '{audio.Name}']"));
+                    Assert.IsTrue(audio.Channels > 0 && audio.SampleRate > 0 && !audio.Codec.Id.IsEmpty);
+                }
             }
-
         }
     }
 }
