@@ -2,6 +2,7 @@
 using Finalspace.Onigiri.Events;
 using Finalspace.Onigiri.Media;
 using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.Security;
 using Finalspace.Onigiri.Storage;
 using log4net.Config;
 using System;
@@ -65,7 +66,7 @@ namespace Finalspace.Onigiri
             }
         }
 
-        static void ProcessArguments(string[] args, OnigiriService system, IAnimeStorage storage)
+        static async Task ProcessArguments(string[] args, OnigiriService system, IAnimeStorage storage)
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
@@ -89,7 +90,7 @@ namespace Finalspace.Onigiri
             }
 
             // Starup onigiri system
-            system.Startup(new StatusChangedEventHandler((s, e) =>
+            await system.StartupAsync(new StatusChangedEventHandler((s, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Header))
                     Console.WriteLine(e.Header);
@@ -101,7 +102,7 @@ namespace Finalspace.Onigiri
             {
                 system.ClearIssues();
 
-                system.UpdateSources(UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture);
+                await system.UpdateSourcesAsync(UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture);
             }
 
             // Show
@@ -138,85 +139,14 @@ namespace Finalspace.Onigiri
                 system.SaveConfig();
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
 
             Console.WriteLine(string.Join(" ", args));
 
-#if true
-
-            string usersPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            string folderPath = Path.Combine(usersPath, "OneDrive", "Q3");
-            //string folderPath = @"X:\";
-            //string folderPath = @"E:\_Anime";
-
-            Console.WriteLine($"Get media files from: {folderPath}");
-            DirectoryInfo folder = new DirectoryInfo(folderPath);
-            if (!folder.Exists)
-                throw new DirectoryNotFoundException($"Folder path '{folderPath}' does not exists");
-
-            List<FileInfo> files = new List<FileInfo>(100000);
-
-            void AddFilesFromFolder(DirectoryInfo rootDir)
-            {
-                if (rootDir.Attributes.HasFlag(FileAttributes.System))
-                    return;
-
-                FileInfo[] skipFiles = rootDir.GetFiles("skip.txt");
-                if (skipFiles.Length > 0)
-                    return;
-
-                FileInfo[] subFiles = rootDir.GetFiles();
-                foreach (FileInfo subFile in subFiles)
-                {
-                    if (subFile.Attributes.HasFlag(FileAttributes.System))
-                        continue;
-                    string ext = subFile.Extension.ToLower();
-                    if (OnigiriService.MediaFileExtensions.Contains(ext))
-                        files.Add(subFile);
-                }
-
-                DirectoryInfo[] subdirs = rootDir.GetDirectories();
-                foreach (DirectoryInfo subdir in subdirs)
-                    AddFilesFromFolder(subdir);
-            }
-
-            AddFilesFromFolder(folder);
-
-            FileInfo[] mediaFiles = files.OrderBy(f => f.Name).ToArray();
-
-            Console.WriteLine($"Parse {mediaFiles.Length} media files");
-            foreach (FileInfo mediaFile in mediaFiles)
-            {
-                Console.WriteLine($"Parse media file: {mediaFile.Name}");
-                Task<MediaInfo> task = MediaInfoParser.Parse(mediaFile);
-                task.Wait();
-                MediaInfo info = task.Result;
-                if (info != null)
-                {
-                    Console.WriteLine(FormattableString.Invariant($"\tContainer: '{info.Format}', Duration: {info.Duration.TotalSeconds} secs"));
-
-                    foreach (VideoInfo video in info.Video)
-                        Console.WriteLine(FormattableString.Invariant($"\tVideo: {video.Width}x{video.Height}, {video.FrameCount} frames, {video.FrameRate} fps [Codec:'{video.Codec}', Name: '{video.Name}']"));
-
-                    foreach (AudioInfo audio in info.Audio)
-                        Console.WriteLine(FormattableString.Invariant($"\tAudio: {audio.Channels} channels, {audio.SampleRate} Hz, {audio.BitsPerSample} bits/sample, {audio.BitRate / 1000} kHz [Codec: '{audio.Codec}', Name: '{audio.Name}']"));
-                }
-                else
-                    Console.Error.WriteLine($"\tFailed getting media infos");
-            }
-
-            Console.WriteLine("press any key to exit");
-            Console.ReadKey();
-
-#endif
-
-#if false
-
-
             XmlConfigurator.Configure();
+
             if (args.Length == 0)
             {
                 string exeName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
@@ -235,16 +165,17 @@ namespace Finalspace.Onigiri
                 return;
             }
 
-            OnigiriService system = new OnigiriService();
+            IUserService userService = OnigiriUserServiceFactory.Instance.Create();
+
+            OnigiriService system = new OnigiriService(userService);
 
             string persistentPath = OnigiriPaths.PersistentPath;
 
             FolderAnimeFilesStorage persistenceStorage = new FolderAnimeFilesStorage(persistentPath, system.Config.MaxThreadCount);
 
-            ProcessArguments(args, system, persistenceStorage);
+            await ProcessArguments(args, system, persistenceStorage);
 
             Console.ReadKey();           
-#endif
 
         }
     }
