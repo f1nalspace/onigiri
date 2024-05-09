@@ -62,6 +62,20 @@ namespace Finalspace.Onigiri.Models
             _groups = groups.ToImmutableArray();
         }
 
+        public void Set(params AnimeGroup[] groups)
+        {
+            if (groups == null)
+                throw new ArgumentNullException(nameof(groups));
+
+            _groups = groups.ToImmutableArray();
+
+            var list = new List<Anime>();
+            foreach (AnimeGroup group in groups)
+                list.AddRange(group.Items.Select(i => i.Anime));
+
+            _items = list.ToImmutableArray();
+        }
+
         private Anime FindSequel(ulong prequelAid)
         {
             Anime result = Items.FirstOrDefault((a) => a.IsSequal(prequelAid));
