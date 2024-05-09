@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri.AniDB
 {
@@ -22,7 +23,7 @@ namespace Finalspace.Onigiri.AniDB
         private static string ProtoVer = "1";
         private static int DefaultDelay = 1500;
 
-        public static TextContent RequestAnime(ulong aid)
+        public static async Task<TextContent> RequestAnimeAsync(ulong aid)
         {
             Thread.Sleep(DefaultDelay);
             string url = ApiURL;
@@ -32,7 +33,7 @@ namespace Finalspace.Onigiri.AniDB
             url = url.Replace("{{aid}}", aid.ToString());
             try
             {
-                TextContent result = HttpUtils.DownloadText(url);
+                TextContent result = await HttpUtils.DownloadTextAsync(url);
                 return result;
             }
             catch (Exception e)
@@ -42,20 +43,20 @@ namespace Finalspace.Onigiri.AniDB
             return null;
         }
 
-        public static void DownloadTitlesDump(string filePath)
+        public static async Task DownloadTitlesDumpAsync(string targetFilePath)
         {
             Thread.Sleep(DefaultDelay);
             try
             {
-                HttpUtils.DownloadFile(TitlesDumpURL, filePath);
+                await HttpUtils.DownloadFileAsync(TitlesDumpURL, targetFilePath);
             }
             catch (Exception e)
             {
-                log.Error($"Failed downloading titles dump from '{TitlesDumpURL}' to '{filePath}'!", e);
+                log.Error($"Failed downloading titles dump from '{TitlesDumpURL}' to '{targetFilePath}'!", e);
             }
         }
 
-        public static void DownloadPicture(string picture, string targetFilePath)
+        public static async Task DownloadPictureAsync(string picture, string targetFilePath)
         {
             string imageExt = Path.GetExtension(picture);
             string sourcePictureUrl = ImageServerURL + picture;
@@ -63,7 +64,7 @@ namespace Finalspace.Onigiri.AniDB
             Thread.Sleep(DefaultDelay);
             try
             {
-                HttpUtils.DownloadFile(sourcePictureUrl, targetFilePath);
+                await HttpUtils.DownloadFileAsync(sourcePictureUrl, targetFilePath);
             } catch (Exception e)
             {
                 log.Error($"Failed downloading picture from '{sourcePictureUrl}' to '{targetFilePath}'!", e);

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri.Utils
@@ -14,7 +15,7 @@ namespace Finalspace.Onigiri.Utils
     {
         private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36";
 
-        public static void DownloadFile(string url, string filePath)
+        public static async Task DownloadFileAsync(string url, string targetFilePath, CancellationToken cancellationToken = default)
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -24,23 +25,23 @@ namespace Finalspace.Onigiri.Utils
             {
                 hclient.DefaultRequestHeaders.Add("user-agent", UserAgent);
 
-                using (HttpResponseMessage response = hclient.Send(new HttpRequestMessage(HttpMethod.Get, url)))
+                using (HttpResponseMessage response = await hclient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken))
                 {
                     response.EnsureSuccessStatusCode();
 
                     using HttpContent content = response.Content;
 
-                    using (Stream outputStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                    using (Stream outputStream = new FileStream(targetFilePath, FileMode.Create, FileAccess.Write))
                     {
-                        using Stream sourceStream = content.ReadAsStream();
-                        sourceStream.CopyTo(outputStream);
+                        using Stream sourceStream = await content.ReadAsStreamAsync(cancellationToken);
+                        await sourceStream.CopyToAsync(outputStream, cancellationToken);
                         outputStream.Flush();
                     }
                 }
             }
         }
 
-        public static TextContent DownloadText(string url)
+        public static async Task<TextContent> DownloadTextAsync(string url, CancellationToken cancellationToken = default)
         {
             TextContent result = new TextContent();
 
@@ -52,7 +53,7 @@ namespace Finalspace.Onigiri.Utils
             {
                 hclient.DefaultRequestHeaders.Add("user-agent", UserAgent);
 
-                using (HttpResponseMessage response = hclient.Send(new HttpRequestMessage(HttpMethod.Get, url)))
+                using (HttpResponseMessage response = await hclient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken))
                 {
                     response.EnsureSuccessStatusCode();
 
@@ -61,10 +62,7 @@ namespace Finalspace.Onigiri.Utils
 
                         string[] encodings = content.Headers.ContentEncoding.Select(s => s.ToLower()).ToArray();
 
-                        Task<byte[]> task = content.ReadAsByteArrayAsync();
-                        task.Wait();
-
-                        byte[] data = task.Result;
+                        byte[] data = await content.ReadAsByteArrayAsync(cancellationToken);
 
                         bool isGZip = encodings.Contains("gzip");
                         if (isGZip)
@@ -79,10 +77,10 @@ namespace Finalspace.Onigiri.Utils
                                     int count = 0;
                                     do
                                     {
-                                        count = stream.Read(buffer, 0, size);
+                                        count = await stream.ReadAsync(buffer, 0, size, cancellationToken);
                                         if (count > 0)
                                         {
-                                            memory.Write(buffer, 0, count);
+                                            await memory.WriteAsync(buffer, 0, count, cancellationToken);
                                         }
                                     }
                                     while (count > 0);
