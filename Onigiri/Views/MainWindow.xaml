@@ -7,13 +7,15 @@
               xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
               xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
               mc:Ignorable="d"
-              Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico" Loaded="OnWindowLoaded"
+              Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico"
               d:DataContext="{d:DesignInstance viewmodels:MainViewModel}">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:OpenFileDialogService />
         <dxmvvm:SaveFileDialogService />
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}" />
     </dxmvvm:Interaction.Behaviors>
+    
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">

@@ -20,11 +20,6 @@ namespace Finalspace.Onigiri.Views
             (DataContext as MainViewModel).CloseRequested += () => Close();
         }
 
-        private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            (DataContext as MainViewModel).WindowLoaded();
-        }
-
         private void UpdateFrameDataContext(object sender)
         {
             FrameworkElement content = mainFrame.Content as FrameworkElement;

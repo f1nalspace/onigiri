@@ -539,7 +539,7 @@ namespace Finalspace.Onigiri
         /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
         /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
         /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
-        public void Load(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
+        public Task LoadAsync(IAnimeStorage storage, StatusChangedEventHandler statusChanged) => Task.Run(() =>
         {
             ArgumentNullException.ThrowIfNull(storage);
 
@@ -565,7 +565,7 @@ namespace Finalspace.Onigiri
                 watch.Stop();
                 log.Debug($"Refresh animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
             }
-        }
+        });
 
         /// <summary>
         /// Saves the <see cref="Animes"/> to the specified <see cref="IAnimeStorage"/>.

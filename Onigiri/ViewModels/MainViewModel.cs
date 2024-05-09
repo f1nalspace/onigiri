@@ -15,13 +15,16 @@ using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
 using DevExpress.Mvvm;
 using Finalspace.Onigiri.Storage;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using Finalspace.Onigiri.Security;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Collections.Immutable;
+using DevExpress.Mvvm.UI;
 
 namespace Finalspace.Onigiri.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ViewModelBase, IDisposable
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -120,32 +123,32 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Refresh worker
-        private BackgroundWorker RefreshWorker { get; set; }
-        private void RefreshWorkerComplete(RunWorkerCompletedEventArgs e)
+        private readonly SemaphoreSlim _refreshLock = new SemaphoreSlim(1, 1);
+
+        class RefreshResult
         {
-            if (e.Error != null)
-                log.Error("Refresh failed!", e.Error);
-            AnimesView.Refresh();
-            RaisePropertyChanged(() => VisibleAnimeCount);
-            RaisePropertyChanged(() => TotalAnimeCount);
+            public ImmutableArray<CategoryItemViewModel> FilterCategories { get; }
+            public ImmutableArray<CategoryItemViewModel> FilterCategoryWeights { get; }
 
-            CmdRefresh.RaiseCanExecuteChanged();
-
-            FinishedLoading();
+            public RefreshResult(IEnumerable<CategoryItemViewModel> filterCategories, IEnumerable<CategoryItemViewModel> filterCategoryWeights)
+            {
+                FilterCategories = filterCategories.ToImmutableArray();
+                FilterCategoryWeights = filterCategoryWeights.ToImmutableArray();
+            }
         }
-        private void RefreshWorkerProc()
-        {
-            StartedLoading("Refreshing");
 
-            CoreService.Startup(new StatusChangedEventHandler(ChangedStatus));
+        private async Task<RefreshResult> RefreshAsync()
+        {
+            await CoreService.StartupAsync(new StatusChangedEventHandler(ChangedStatus));
 
             _users.Clear();
             _users.AddRange(CoreService.Config.Users);
 
             CoreService.ClearIssues();
-            CoreService.Load(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
-            LoadingPercentage = -1;
 
+            await CoreService.LoadAsync(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
+
+            LoadingPercentage = -1;
             LoadingHeader = "Update listview...";
             LoadingSubject = string.Empty;
 
@@ -205,54 +208,77 @@ namespace Finalspace.Onigiri.ViewModels
 
             filterCats.Insert(0, AnyFilterCategory);
 
-            DispatcherService.Invoke(() =>
-            {
-                FilterCategories.Clear();
-                FilterCategories.AddRange(filterCats);
+            RefreshResult result = new RefreshResult(filterCats, filterCatsWeights);
 
-                FilterCategoryWeights.Clear();
-                FilterCategoryWeights.AddRange(filterCatsWeights);
-
-                UpdateSort(false);
-
-                UsersView.Refresh();
-            });
+            return result;
         }
-        #endregion
 
-        #region Update worker
-        private BackgroundWorker UpdateWorker { get; set; }
-        private void UpdateWorkerComplete(RunWorkerCompletedEventArgs e)
+        private bool CanRefresh() => _refreshLock.CurrentCount > 0;
+        private async void Refresh()
         {
-            if (e.Error != null)
-                log.Error("Refresh failed!", e.Error);
+            StartedLoading("Refreshing");
+
+            RefreshResult refreshResult = null;
+
+            await _refreshLock.WaitAsync();
+            try
+            {
+                refreshResult = await RefreshAsync();
+            }
+            catch (Exception e)
+            {
+                log.Error("Refresh failed!", e);
+                throw;
+            }
+            finally
+            {
+                _refreshLock.Release();
+            }
+
+            FilterCategories.Clear();
+            FilterCategoryWeights.Clear();
+
+            if (refreshResult is not null)
+            {
+                FilterCategories.AddRange(refreshResult.FilterCategories);
+                FilterCategoryWeights.AddRange(refreshResult.FilterCategoryWeights);
+            }
+
+            UpdateSort(false);
+
+            UsersView.Refresh();
+
             AnimesView.Refresh();
+
             RaisePropertyChanged(() => VisibleAnimeCount);
             RaisePropertyChanged(() => TotalAnimeCount);
 
             CmdRefresh.RaiseCanExecuteChanged();
 
             FinishedLoading();
-
-            if (CoreService.Issues.Count > 0)
-                ShowIssuesDialog();
-
-
         }
-        private void UpdateWorkerProc(object value)
+        #endregion
+
+        #region Update worker
+        private readonly SemaphoreSlim _updateLock = new SemaphoreSlim(1, 1);
+
+        enum UpdateType
         {
-            string updateType = (string)value;
+            None = 0,
+            Store,
+            Database
+        }
 
-            StartedLoading("Updating");
-
+        private async Task UpdateAsync(UpdateType updateType)
+        {
             bool writeStorage = false;
             UpdateFlags updateFlags = UpdateFlags.None;
-            if ("Store".Equals(updateType))
+            if (updateType == UpdateType.Store)
             {
                 updateFlags = UpdateFlags.DownloadTitles | UpdateFlags.DownloadDetails | UpdateFlags.DownloadPicture;
                 writeStorage = true;
             }
-            else if ("Database".Equals(updateType))
+            else if (updateType == UpdateType.Database)
             {
                 updateFlags = UpdateFlags.ReadOnly;
                 writeStorage = true;
@@ -265,7 +291,7 @@ namespace Finalspace.Onigiri.ViewModels
             CoreService.ClearIssues();
 
             if (updateFlags != UpdateFlags.None)
-                CoreService.UpdateSources(updateFlags, new StatusChangedEventHandler(ChangedStatus));
+                await CoreService.UpdateSourcesAsync(updateFlags, new StatusChangedEventHandler(ChangedStatus));
 
             if (writeStorage)
                 CoreService.Save(_currentStorage, new StatusChangedEventHandler(ChangedStatus));
@@ -278,42 +304,130 @@ namespace Finalspace.Onigiri.ViewModels
             _animes.Clear();
             _animes.AddRange(items);
         }
+
+        private bool CanUpdate(string s) => _updateLock.CurrentCount > 0;
+        private async void Update(string updateTypeText)
+        {
+            if (!Enum.TryParse(updateTypeText, out UpdateType updateType))
+                throw new FormatException($"Invalid Update Type '{updateTypeText}'");
+
+            StartedLoading($"Updating {updateType}");
+
+            await _updateLock.WaitAsync();
+            try
+            {
+                await UpdateAsync(updateType);
+            }
+            catch (Exception e)
+            {
+                log.Error($"Update as '{updateType}' failed!", e);
+            }
+            finally
+            {
+                _updateLock.Release();
+            }
+
+            AnimesView.Refresh();
+
+            RaisePropertyChanged(() => VisibleAnimeCount);
+            RaisePropertyChanged(() => TotalAnimeCount);
+
+            CmdRefresh.RaiseCanExecuteChanged();
+
+            FinishedLoading();
+
+            if (CoreService.Issues.Count > 0)
+                ShowIssuesDialog();
+        }
         #endregion
 
         #region Export worker
-        private BackgroundWorker ExportWorker { get; set; }
-        private void ExportWorkerComplete(RunWorkerCompletedEventArgs e)
+        private readonly SemaphoreSlim _exportLock = new SemaphoreSlim(1, 1);
+
+        private Task ExportAsync(string filePath) => Task.Run(() =>
         {
-            if (e.Error != null)
-                log.Error("Export failed!", e.Error);
+            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(filePath);
+
+            CoreService.Save(databaseStorage, new StatusChangedEventHandler(ChangedStatus));            
+        });
+
+        private bool CanExport() => _exportLock.CurrentCount > 0;
+        private async void Export()
+        {
+            ISaveFileDialogService dlg = GetService<ISaveFileDialogService>();
+            dlg.Title = "Save to Onigiri Database";
+            dlg.Filter = "Onigiri database file|*.onigiridb";
+            dlg.AddExtension = true;
+            dlg.DefaultExt = ".onigiridb";
+            if (!dlg.ShowDialog())
+                return;
+
+            string filePath = dlg.File.GetFullName();
+
+            StartedLoading("Exporting");
+
+            await _exportLock.WaitAsync();
+            try
+            {
+                await ExportAsync(filePath);
+            }
+            catch (Exception e)
+            {
+                log.Error($"Export to '{filePath}' failed!", e);
+            }
+            finally
+            {
+                _exportLock.Release();
+            }
 
             CmdExport.RaiseCanExecuteChanged();
 
             FinishedLoading();
         }
-
-        private void ExportWorkerProc(object value)
-        {
-            string path = value as string;
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(value));
-
-            StartedLoading("Exporting");
-
-            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(path);
-
-            CoreService.Save(databaseStorage, new StatusChangedEventHandler(ChangedStatus));
-        }
         #endregion
 
         #region Import worker
-        private BackgroundWorker ImportWorker { get; set; }
-        private void ImportWorkerComplete(RunWorkerCompletedEventArgs e)
+        private readonly SemaphoreSlim _importLock = new SemaphoreSlim(1, 1);
+
+        private async Task ImportAsync(string filePath)
         {
-            if (e.Error != null)
-                log.Error("Import failed!", e.Error);
+            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(filePath);
+
+            await CoreService.LoadAsync(databaseStorage, new StatusChangedEventHandler(ChangedStatus)).ConfigureAwait(false);
+
+            _animes.Clear();
+            _animes.AddRange(CoreService.Animes.Items);
+        }
+
+        private bool CanImport() => _importLock.CurrentCount > 0;
+        private async void Import()
+        {
+            IOpenFileDialogService dlg = GetService<IOpenFileDialogService>();
+            dlg.Title = "Save to Onigiri Database";
+            dlg.Filter = "Onigiri database file|*.onigiridb";
+            if (!dlg.ShowDialog())
+                return;
+
+            string filePath = dlg.File.GetFullName();
+
+            StartedLoading($"Importing from '{filePath}'");
+
+            await _importLock.WaitAsync();
+            try
+            {
+                await ImportAsync(filePath);
+            }
+            catch (Exception e)
+            {
+                log.Error($"Import from '{filePath}' failed!", e);
+            }
+            finally
+            {
+                _importLock.Release();
+            }
 
             AnimesView.Refresh();
+
             RaisePropertyChanged(() => VisibleAnimeCount);
             RaisePropertyChanged(() => TotalAnimeCount);
 
@@ -321,28 +435,12 @@ namespace Finalspace.Onigiri.ViewModels
 
             FinishedLoading();
         }
-
-        private void ImportWorkerProc(object value)
-        {
-            string path = value as string;
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(value));
-
-            StartedLoading("Importing");
-
-            DatabaseAnimeFilesStorage databaseStorage = new DatabaseAnimeFilesStorage(path);
-
-            CoreService.Load(databaseStorage, new StatusChangedEventHandler(ChangedStatus));
-
-            _animes.Clear();
-            _animes.AddRange(CoreService.Animes.Items);
-        }
         #endregion
 
         #region Action icons
         private void SaveAddonData(Anime anime)
         {
-            string addonFilePath = Path.Combine(anime.FoundPath, OnigiriPaths.AnimeXMLAddonFilename);
+            string addonFilePath = System.IO.Path.Combine(anime.FoundPath, OnigiriPaths.AnimeXMLAddonFilename);
             anime.AddonData.SaveToFile(addonFilePath);
         }
         private bool CanAddonDataByChanged(Anime anime)
@@ -351,7 +449,7 @@ namespace Finalspace.Onigiri.ViewModels
             return Directory.Exists(anime.FoundPath);
         }
 
-        private bool CanToggleMarked(Anime anime) 
+        private bool CanToggleMarked(Anime anime)
             => anime is not null && CanAddonDataByChanged(anime);
         private void ToggleMarked(Anime anime)
         {
@@ -359,7 +457,7 @@ namespace Finalspace.Onigiri.ViewModels
             SaveAddonData(anime);
         }
 
-        private bool CanToggleWatched(Tuple<Anime, string> pair) 
+        private bool CanToggleWatched(Tuple<Anime, string> pair)
             => pair is not null && pair.Item1 is not null && !string.IsNullOrEmpty(pair.Item2) && CanAddonDataByChanged(pair.Item1);
         private void ToggleWatched(Tuple<Anime, string> pair)
         {
@@ -429,6 +527,7 @@ namespace Finalspace.Onigiri.ViewModels
 
         private static readonly CategoryItemViewModel AnyFilterCategory = new CategoryItemViewModel() { DisplayName = "Any" };
         private static readonly CategoryItemViewModel AnyCategoryWeightItem = new CategoryItemViewModel() { DisplayName = "Any" };
+        private bool isDisposed;
 
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategories { get; }
         public ExtendedObservableCollection<CategoryItemViewModel> FilterCategoryWeights { get; }
@@ -608,11 +707,14 @@ namespace Finalspace.Onigiri.ViewModels
         private void UpdateFilter()
         {
             AnimesView.Refresh();
+
             RaisePropertyChanged(() => VisibleAnimeCount);
         }
         #endregion
 
         #region Commands
+        public DelegateCommand OnLoadedCommand { get; }
+
         public DelegateCommand<Anime> CmdToggleMarked { get; }
         public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleDelete { get; }
         public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleWatched { get; }
@@ -626,8 +728,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         public DelegateCommand CmdRefresh { get; }
         public DelegateCommand<string> CmdUpdate { get; }
-        public DelegateCommand CmdExport { get; }
         public DelegateCommand CmdImport { get; }
+        public DelegateCommand CmdExport { get; }
         public DelegateCommand CmdSettings { get; }
         public DelegateCommand CmdExit { get; }
 
@@ -665,59 +767,13 @@ namespace Finalspace.Onigiri.ViewModels
                 SetTheme(MainTheme.Light);
         }
 
-        public void WindowLoaded()
+        public void OnLoaded()
         {
-#if false
-            DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 250);
-            timer.Tick += (s, e) => {
-                if (CmdRefresh.CanExecute(null))
-                    CmdRefresh.Execute(null);
-                timer.Stop();
-            };
-            timer.Start();
-#endif
+            Refresh();
         }
 
-        private bool CanExport() => ExportWorker != null && !ExportWorker.IsBusy;
-        private void Export()
-        {
-            ISaveFileDialogService dlg = GetService<ISaveFileDialogService>();
-            dlg.Title = "Save to Onigiri Database";
-            dlg.Filter = "Onigiri database file|*.onigiridb";
-            dlg.AddExtension = true;
-            dlg.DefaultExt = ".onigiridb";
-            if (dlg.ShowDialog())
-            {
-                string filePath = dlg.File.GetFullName();
-                ExportWorker.RunWorkerAsync(filePath);
-            }
-        }
 
-        private bool CanImport() => ImportWorker != null && !ImportWorker.IsBusy;
-        private void Import()
-        {
-            IOpenFileDialogService dlg = GetService<IOpenFileDialogService>();
-            dlg.Title = "Save to Onigiri Database";
-            dlg.Filter = "Onigiri database file|*.onigiridb";
-            if (dlg.ShowDialog())
-            {
-                string filePath = dlg.File.GetFullName();
-                ImportWorker.RunWorkerAsync(filePath);
-            }
-        }
 
-        private bool CanRefresh() => RefreshWorker != null && !RefreshWorker.IsBusy;
-        private void Refresh()
-        {
-            RefreshWorker.RunWorkerAsync(false);
-        }
-
-        private bool CanUpdate(string s) => UpdateWorker != null && !UpdateWorker.IsBusy;
-        private void Update(string s)
-        {
-            UpdateWorker.RunWorkerAsync(s);
-        }
 
         private void ShowSettingsDialog()
         {
@@ -802,26 +858,14 @@ namespace Finalspace.Onigiri.ViewModels
                 CustomSort = new AnimeSorter(),
                 Filter = AnimesViewFilter
             };
+            BindingOperations.EnableCollectionSynchronization(_animes, _animes);
+
             FilterCategories = new ExtendedObservableCollection<CategoryItemViewModel>();
             FilterCategoryWeights = new ExtendedObservableCollection<CategoryItemViewModel>();
 
             _users = new List<User>(32);
             UsersView = new ListCollectionView(_users);
             BindingOperations.EnableCollectionSynchronization(_users, _users);
-
-            // Workers
-            RefreshWorker = new BackgroundWorker();
-            RefreshWorker.RunWorkerCompleted += (s, e) => RefreshWorkerComplete(e);
-            RefreshWorker.DoWork += (s, e) => RefreshWorkerProc();
-            UpdateWorker = new BackgroundWorker();
-            UpdateWorker.RunWorkerCompleted += (s, e) => UpdateWorkerComplete(e);
-            UpdateWorker.DoWork += (s, e) => UpdateWorkerProc(e.Argument);
-            ExportWorker = new BackgroundWorker();
-            ExportWorker.RunWorkerCompleted += (s, e) => ExportWorkerComplete(e);
-            ExportWorker.DoWork += (s, e) => ExportWorkerProc(e.Argument);
-            ImportWorker = new BackgroundWorker();
-            ImportWorker.RunWorkerCompleted += (s, e) => ImportWorkerComplete(e);
-            ImportWorker.DoWork += (s, e) => ImportWorkerProc(e.Argument);
 
             // Default values
             LoadingHeader = "Ready";
@@ -840,6 +884,8 @@ namespace Finalspace.Onigiri.ViewModels
             FilterWatchState = AnyWatchStateItem;
 
             // Commands
+            OnLoadedCommand = new DelegateCommand(OnLoaded);
+
             CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanToggleMarked);
             CmdUserActionToggleWatched = new DelegateCommand<Tuple<Anime, string>>(ToggleWatched, CanToggleWatched);
             CmdUserActionToggleDelete = new DelegateCommand<Tuple<Anime, string>>(ToggleDeletion, CanToggleDeletion);
@@ -863,9 +909,29 @@ namespace Finalspace.Onigiri.ViewModels
 
             CmdTitles = new DelegateCommand(ShowTitlesDialog);
             CmdIssues = new DelegateCommand(ShowIssuesDialog);
+        }
 
-            // Refresh directly at startup
-            RefreshWorker.RunWorkerAsync();
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    _updateLock.Dispose();
+                    _exportLock.Dispose();
+                    _importLock.Dispose();
+                    _refreshLock.Dispose();
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }
