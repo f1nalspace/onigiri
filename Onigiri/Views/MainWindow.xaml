@@ -8,7 +8,11 @@
               xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
               mc:Ignorable="d"
               Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico"
-              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}">
+              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}" 
+              Style="{StaticResource MaterialDesignWindow}"
+              Background="{DynamicResource MaterialDesignPaper}"
+              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+            >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:OpenFileDialogService />
@@ -238,7 +242,7 @@
             </StackPanel>
         </Grid>
 
-        <StatusBar DockPanel.Dock="Bottom" FontSize="16">
+        <StatusBar DockPanel.Dock="Bottom" FontSize="16" Background="{DynamicResource MaterialDesign.Brush.Background}" Foreground="{DynamicResource MaterialDesign.Brush.Foreground}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>

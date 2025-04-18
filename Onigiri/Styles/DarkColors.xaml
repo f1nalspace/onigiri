@@ -1,19 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Controls -->
-
-    <SolidColorBrush x:Key="controlBackground">
-        <SolidColorBrush.Color>
-            <Color R="19" G="23" B="29" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-    
-    <SolidColorBrush x:Key="controlForeground">
-        <SolidColorBrush.Color>
-            <Color R="129" G="140" B="153" A="255" />
-        </SolidColorBrush.Color>
-    </SolidColorBrush>
-
     <!-- Anime Card List -->
 
     <SolidColorBrush x:Key="animeListBackground">

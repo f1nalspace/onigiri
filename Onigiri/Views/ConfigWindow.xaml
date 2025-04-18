@@ -10,7 +10,7 @@
         d:DataContext="{d:DesignInstance viewModels:ConfigViewModel, IsDesignTimeCreatable=False}"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        mc:Ignorable="d">
+        mc:Ignorable="d" Style="{StaticResource MaterialDesignWindow}">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:FolderBrowserDialogService />

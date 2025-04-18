@@ -1,9 +1,9 @@
 ﻿using Finalspace.Onigiri.ViewModels;
 using Finalspace.Onigiri.Views;
+using MaterialDesignThemes.Wpf;
 using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Finalspace.Onigiri.Services
 {
@@ -12,18 +12,6 @@ namespace Finalspace.Onigiri.Services
         public MainTheme CurrentTheme { get; private set; }
 
         private ResourceDictionary ThemeDictionary
-        {
-            get => Application.Current.Resources.MergedDictionaries[0];
-            set => Application.Current.Resources.MergedDictionaries[0] = value;
-        }
-
-        private ResourceDictionary ControlsDictionary
-        {
-            get => Application.Current.Resources.MergedDictionaries[1];
-            set => Application.Current.Resources.MergedDictionaries[1] = value;
-        }
-
-        private ResourceDictionary AppDictionary
         {
             get => Application.Current.Resources.MergedDictionaries[2];
             set => Application.Current.Resources.MergedDictionaries[2] = value;
@@ -34,16 +22,25 @@ namespace Finalspace.Onigiri.Services
             if (theme == MainTheme.Dark)
             {
                 CurrentTheme = MainTheme.Dark;
+
+                var paletteHelper = new PaletteHelper();
+                Theme paletteTheme = paletteHelper.GetTheme();
+                paletteTheme.SetBaseTheme(BaseTheme.Dark);
+                paletteHelper.SetTheme(paletteTheme);
+
                 ThemeDictionary = new ResourceDictionary() { Source = new Uri($"Styles/DarkColors.xaml", UriKind.Relative) };
             }
             else
             {
                 CurrentTheme = MainTheme.Light;
+
+                var paletteHelper = new PaletteHelper();
+                Theme paletteTheme = paletteHelper.GetTheme();
+                paletteTheme.SetBaseTheme(BaseTheme.Light);
+                paletteHelper.SetTheme(paletteTheme);
+
                 ThemeDictionary = new ResourceDictionary() { Source = new Uri($"Styles/LightColors.xaml", UriKind.Relative) };
             }
-
-            ControlsDictionary = new ResourceDictionary() { Source = new Uri($"Styles/Controls.xaml", UriKind.Relative) };
-            AppDictionary = new ResourceDictionary() { Source = new Uri($"Styles/Onigiri.xaml", UriKind.Relative) };
 
             //
             // Reload frame, otherwise the style changes won't be applied

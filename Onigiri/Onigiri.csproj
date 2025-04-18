@@ -148,6 +148,7 @@
     <Resource Include="Resources\watch_false.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Management" Version="6.0.0" />

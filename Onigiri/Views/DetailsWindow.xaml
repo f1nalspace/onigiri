@@ -10,8 +10,7 @@
         Height="450" 
         Width="800" 
         FontFamily="Arial"
-        d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
-        d:Background="White">
+        d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}" Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

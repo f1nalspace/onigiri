@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Finalspace.Onigiri.Views"
         mc:Ignorable="d"
-        Title="Issues" Height="450" Width="800" WindowStartupLocation="CenterOwner">
+        Title="Issues" Height="450" Width="800" WindowStartupLocation="CenterOwner" Style="{StaticResource MaterialDesignWindow}">
     <Window.Resources>
         <Style x:Key="iconSolved" TargetType="Image">
             <Setter Property="Source" Value="/Resources/mark_false.png" />
