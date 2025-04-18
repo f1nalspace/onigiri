@@ -9,7 +9,7 @@ namespace Finalspace.Onigiri.Utils
     {
         public static uint ComputeCRC(ReadOnlySpan<byte> data)
         {
-            if (data == null)
+            if (data.Length == 0)
                 throw new ArgumentNullException(nameof(data));
             byte[] hash = CRC32.ComputeHash(data);
             if (hash.Length == 4)

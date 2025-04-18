@@ -10,15 +10,11 @@
         Height="450" 
         Width="800" 
         FontFamily="Arial"
-        d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}" Style="{StaticResource MaterialDesignWindow}">
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Styles/Controls.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/Styles/AllResources.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
+        d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}" 
+        Style="{StaticResource MaterialDesignWindow}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+    >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -29,19 +25,12 @@
         </StackPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" />
+                <ColumnDefinition Style="{StaticResource mainImageColumn}" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <!-- Picture start -->
-                <Image Style="{StaticResource pictureImage}">
-                    <Image.Source>
-                        <MultiBinding Converter="{StaticResource animeImageConverter}" FallbackValue="{StaticResource noPictureImage}">
-                            <Binding Path="Aid" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" IsAsync="True" />
-                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Page}}" IsAsync="True"/>
-                        </MultiBinding>
-                    </Image.Source>
-                </Image>
+                <Image Style="{StaticResource pictureImage}" Source="{Binding Image, UpdateSourceTrigger=PropertyChanged, IsAsync=True, Converter={StaticResource animeImageConverter}, FallbackValue={StaticResource noPictureImage}}" />
                 <!-- Picture end -->
             </Grid>
             <TabControl Grid.Column="1" SelectedIndex="0">

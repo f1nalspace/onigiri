@@ -261,7 +261,7 @@
         <Setter Property="Margin" Value="2" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="VerticalAlignment" Value="Bottom" />
-        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Background" Value="Red" />
     </Style>
 
     <ControlTemplate x:Key="actionsPanelTemplate">

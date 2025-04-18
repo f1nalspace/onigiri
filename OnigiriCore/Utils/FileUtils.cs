@@ -14,7 +14,7 @@ namespace Finalspace.Onigiri.Utils
                 byte[] result = new byte[size];
                 using (Stream inputStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    inputStream.Read(result, 0, (int)size);
+                    inputStream.ReadExactly(result);
                 }
                 return (result);
             }

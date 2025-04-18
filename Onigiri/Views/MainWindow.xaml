@@ -9,7 +9,7 @@
               mc:Ignorable="d"
               Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico"
               d:DataContext="{d:DesignInstance viewmodels:MainViewModel}" 
-              Style="{StaticResource MaterialDesignWindow}"
+              Style="{DynamicResource MaterialDesignWindow}"
               Background="{DynamicResource MaterialDesignPaper}"
               TextElement.Foreground="{DynamicResource MaterialDesignBody}"
             >

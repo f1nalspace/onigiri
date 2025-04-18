@@ -12,7 +12,7 @@ namespace Finalspace.Onigiri.Converters
     {
         private static BitmapImage LoadImage(ReadOnlySpan<byte> imageData)
         {
-            if (imageData == null || imageData.Length == 0) return null;
+            if (imageData.Length == 0) return null;
             BitmapImage image = new BitmapImage();
             using (MemoryStream mem = new MemoryStream(imageData.Length))
             {

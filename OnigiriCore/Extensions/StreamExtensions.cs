@@ -22,7 +22,7 @@ namespace Finalspace.Onigiri.Extensions
         {
             int structLength = Marshal.SizeOf(typeof(T));
             byte[] structData = new byte[structLength];
-            stream.Read(structData, 0, structLength);
+            stream.ReadExactly(structData);
             GCHandle ptr = GCHandle.Alloc(structData, GCHandleType.Pinned);
             T result = (T)Marshal.PtrToStructure(ptr.AddrOfPinnedObject(), typeof(T));
             ptr.Free();
@@ -42,10 +42,10 @@ namespace Finalspace.Onigiri.Extensions
         public static string ReadText(this Stream stream, Encoding encoding)
         {
             byte[] dataLengthBytes = new byte[4];
-            stream.Read(dataLengthBytes, 0, 4);
+            stream.ReadExactly(dataLengthBytes);
             uint dataLength = BitConverter.ToUInt32(dataLengthBytes, 0);
             byte[] data = new byte[dataLength];
-            stream.Read(data, 0, (int)dataLength);
+            stream.ReadExactly(data);
             string result = encoding.GetString(data);
             return (result);
         }

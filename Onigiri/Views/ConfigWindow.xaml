@@ -10,7 +10,11 @@
         d:DataContext="{d:DesignInstance viewModels:ConfigViewModel, IsDesignTimeCreatable=False}"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        mc:Ignorable="d" Style="{StaticResource MaterialDesignWindow}">
+        mc:Ignorable="d" 
+        Style="{StaticResource MaterialDesignWindow}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:FolderBrowserDialogService />

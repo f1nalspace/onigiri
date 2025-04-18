@@ -125,13 +125,13 @@ namespace Finalspace.Onigiri.Storage
                         throw new FormatException($"Missing details block");
 
                     byte[] detailsData = new byte[header.DetailsLength];
-                    stream.Read(detailsData, 0, (int)header.DetailsLength);
+                    stream.ReadExactly(detailsData);
 
                     byte[] pictureData = null;
                     if (header.PictureLength > 0)
                     {
                         pictureData = new byte[header.PictureLength];
-                        stream.Read(pictureData, 0, (int)header.PictureLength);
+                        stream.ReadExactly(pictureData);
                     }
 
                     animeFile = new AnimeFile(header.Aid, detailsData.ToImmutableArray(), pictureData?.ToImmutableArray() ?? ImmutableArray<byte>.Empty);

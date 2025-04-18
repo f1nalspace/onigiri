@@ -15,13 +15,19 @@ namespace Finalspace.Onigiri.Utils
     {
         private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36";
 
+        private static HttpClient AquireHttpClient()
+        {
+            HttpClientHandler handler = new HttpClientHandler
+            {
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls13,
+                ServerCertificateCustomValidationCallback = delegate { return true; },
+            };
+            return new HttpClient(handler);
+        }
+
         public static async Task DownloadFileAsync(string url, string targetFilePath, CancellationToken cancellationToken = default)
         {
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            using (HttpClient hclient = new HttpClient())
+            using (HttpClient hclient = AquireHttpClient())
             {
                 hclient.DefaultRequestHeaders.Add("user-agent", UserAgent);
 
@@ -45,11 +51,7 @@ namespace Finalspace.Onigiri.Utils
         {
             TextContent result = new TextContent();
 
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            using (HttpClient hclient = new HttpClient())
+            using (HttpClient hclient = AquireHttpClient())
             {
                 hclient.DefaultRequestHeaders.Add("user-agent", UserAgent);
 
