@@ -6,13 +6,15 @@
               xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
               xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
               xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
+              xmlns:controls="clr-namespace:Finalspace.Onigiri.Controls"
               mc:Ignorable="d"
-              Title="Onigiri" d:Height="600" d:Width="800" Icon="../Resources/onigiri.ico"
-              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}" 
-              Style="{DynamicResource MaterialDesignWindow}"
-              Background="{DynamicResource MaterialDesignPaper}"
-              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-            >
+              d:Height="600" 
+              d:Width="800" 
+              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
+              Title="Onigiri" 
+              Icon="../Resources/onigiri.ico"
+              Style="{DynamicResource windowStyle}"
+              >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:OpenFileDialogService />
@@ -242,7 +244,10 @@
             </StackPanel>
         </Grid>
 
-        <StatusBar DockPanel.Dock="Bottom" FontSize="16" Background="{DynamicResource MaterialDesign.Brush.Background}" Foreground="{DynamicResource MaterialDesign.Brush.Foreground}">
+        <StatusBar 
+            DockPanel.Dock="Bottom" 
+            Style="{StaticResource statusBarStyle}"
+            >
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -271,39 +276,41 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0">
-                <TextBlock Text="Number of animes" />
-            </StatusBarItem>
-            <Separator Grid.Column="1" />
-            <StatusBarItem Grid.Column="2">
-                <TextBlock Text="{Binding VisibleAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StatusBarItem>
-            <StatusBarItem Grid.Column="3">
-                <TextBlock Text="of" />
-            </StatusBarItem>
-            <StatusBarItem Grid.Column="4">
-                <TextBlock Text="{Binding TotalAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StatusBarItem>
-            <Separator Grid.Column="5" />
+            <StatusBar.Items>
+                <StatusBarItem Grid.Column="0">
+                    <TextBlock Text="Number of animes" />
+                </StatusBarItem>
+                <Separator Grid.Column="1" />
+                <StatusBarItem Grid.Column="2">
+                    <TextBlock Text="{Binding VisibleAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="3">
+                    <TextBlock Text="of" />
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="4">
+                    <TextBlock Text="{Binding TotalAnimeCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StatusBarItem>
+                <Separator Grid.Column="5" />
 
-            <StatusBarItem Grid.Column="6"/>
-            <StatusBarItem Grid.Column="7">
-                <TextBlock Text="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StatusBarItem>
-            <Separator Grid.Column="8" />
-            <StatusBarItem Grid.Column="9">
-                <TextBlock Text="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StatusBarItem>
+                <StatusBarItem Grid.Column="6"/>
+                <StatusBarItem Grid.Column="7">
+                    <TextBlock Text="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StatusBarItem>
+                <Separator Grid.Column="8" />
+                <StatusBarItem Grid.Column="9">
+                    <TextBlock Text="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StatusBarItem>
+            </StatusBar.Items>
         </StatusBar>
         <DockPanel x:Name="MainContent">
             <Grid>
-                <DockPanel Background="White" Panel.ZIndex="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Visibility="{Binding LoadingWindowVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-                    <StackPanel Margin="5">
-                        <TextBlock Width="300" TextTrimming="CharacterEllipsis" Text="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
-                        <TextBlock Width="300" TextTrimming="CharacterEllipsis" Text="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
-                        <ProgressBar Width="300" Height="20" Value="{Binding LoadingPercentage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsIndeterminate="{Binding IsLoadingMarque, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
-                    </StackPanel>
-                </DockPanel>
+                <controls:LoadingBarControl 
+                    Panel.ZIndex="1" 
+                    Visibility="{Binding LoadingWindowVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    LoadingHeader="{Binding LoadingHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    LoadingSubject="{Binding LoadingSubject, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsLoadingMarque="{Binding IsLoadingMarque, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    LoadingPercentage="{Binding LoadingPercentage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Frame Name="mainFrame" DataContext="{Binding}" LoadCompleted="mainFrame_LoadCompleted" DataContextChanged="mainFrame_DataContextChanged" ContentRendered="mainFrame_ContentRendered" Source="CardListPage.xaml" Background="{StaticResource transparentBrush}" NavigationUIVisibility="Hidden" />
             </Grid>
         </DockPanel>

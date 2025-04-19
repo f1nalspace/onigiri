@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Finalspace.Onigiri.Views"
         mc:Ignorable="d"
-        Title="Issues" Height="450" Width="800" WindowStartupLocation="CenterOwner" 
-        Style="{DynamicResource MaterialDesignWindow}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Title="Issues" 
+        Height="450" 
+        Width="800" 
+        WindowStartupLocation="CenterOwner" 
+        Style="{StaticResource windowStyle}"
         >
     <Window.Resources>
         <Style x:Key="iconSolved" TargetType="Image">
@@ -32,10 +33,7 @@
             IsSynchronizedWithCurrentItem="True" 
             ScrollViewer.CanContentScroll="True" 
             SelectedItem="{Binding SelectedIssue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-            FontSize="18" 
             SelectionMode="Single"
-            Background="{DynamicResource MaterialDesign.Brush.Background}"
-            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
             >
             <ListView.View>
                 <GridView>
@@ -62,7 +60,7 @@
                 </GridView>
             </ListView.View>
             <ListView.Style>
-                <Style TargetType="ListView">
+                <Style TargetType="ListView" BasedOn="{StaticResource listViewStyle}">
                     <Style.Triggers>
                         <Trigger Property="HasItems" Value="False">
                             <Setter Property="Template">

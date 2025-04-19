@@ -6,11 +6,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
         xmlns:helpers="clr-namespace:Finalspace.Onigiri.Helpers"
+        xmlns:controls="clr-namespace:Finalspace.Onigiri.Controls"
+        xmlns:vm="clr-namespace:Finalspace.Onigiri.ViewModels"
         mc:Ignorable="d"
-        Title="Titles" Height="600" Width="860" WindowStartupLocation="CenterOwner" 
-        Style="{DynamicResource MaterialDesignWindow}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        d:DataContext="{d:DesignInstance vm:TitlesViewModel, IsDesignTimeCreatable=False}"
+        Title="Titles" 
+        Height="600" 
+        Width="860" 
+        WindowStartupLocation="CenterOwner" 
+        Style="{StaticResource windowStyle}"
         >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
@@ -19,21 +23,15 @@
         <converters:BoolVisibilityConverter x:Key="boolVisConverter"/>
     </Window.Resources>
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
         <DockPanel IsEnabled="{Binding IsNotLoading, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" LastChildFill="True">
             <DockPanel LastChildFill="True" DockPanel.Dock="Top">
-                <TextBlock Text="Filter:" Margin="0 0 10 0" FontSize="16" />
-                <TextBox Text="{Binding FilterString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="TextBox_KeyUp" FontSize="16" />
+                <TextBlock Text="Filter:" Margin="0 0 10 0" />
+                <TextBox Text="{Binding FilterString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="TextBox_KeyUp" />
             </DockPanel>
             <DockPanel LastChildFill="True" DockPanel.Dock="Top">
-                <TextBlock Text="Type:" Margin="0 0 10 0" FontSize="16" />
+                <TextBlock Text="Type:" Margin="0 0 10 0" />
                 <ComboBox SelectedValue="{Binding SelectedFilterType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FilterTypes}" />
             </DockPanel>
-            <!--<DockPanel LastChildFill="True" DockPanel.Dock="Top">
-                <TextBlock Text="{Binding SelectedTitleText, UpdateSourceTrigger=PropertyChanged}" FontSize="16" />
-            </DockPanel>-->
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -50,11 +48,8 @@
                     IsSynchronizedWithCurrentItem="True" 
                     ScrollViewer.CanContentScroll="True" 
                     SelectedItem="{Binding SelectedTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                    FontSize="16" 
                     SelectionMode="Single" 
                     Grid.Row="0"
-                    Background="{DynamicResource MaterialDesign.Brush.Background}"
-                    Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
                     >
                     <ListView.View>
                         <GridView>
@@ -67,7 +62,7 @@
                         </GridView>
                     </ListView.View>
                     <ListView.Style>
-                        <Style TargetType="ListView">
+                        <Style TargetType="ListView" BasedOn="{StaticResource listViewStyle}">
                             <Style.Triggers>
                                 <Trigger Property="HasItems" Value="False">
                                     <Setter Property="Template">
@@ -93,8 +88,10 @@
                 </StackPanel>
             </Grid>
         </DockPanel>
-        <DockPanel Visibility="{Binding LoadingWindowVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="Loading" FontSize="20" />
-        </DockPanel>
+        <controls:LoadingBarControl 
+            Visibility="{Binding LoadingWindowVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+            LoadingHeader="Loading"
+            IsLoadingMarque="True"
+        />
     </Grid>
 </Window>

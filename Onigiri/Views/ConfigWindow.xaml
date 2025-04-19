@@ -11,9 +11,7 @@
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         mc:Ignorable="d" 
-        Style="{StaticResource MaterialDesignWindow}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Style="{DynamicResource windowStyle}"
         >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />

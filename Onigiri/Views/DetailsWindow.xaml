@@ -9,11 +9,8 @@
         Title="DetailsWindow" 
         Height="450" 
         Width="800" 
-        FontFamily="Arial"
         d:DataContext="{d:DesignInstance viewModels:TestAnimeViewModel, IsDesignTimeCreatable=True}" 
-        Style="{StaticResource MaterialDesignWindow}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Style="{StaticResource windowStyle}"
     >
     <Grid>
         <Grid.RowDefinitions>

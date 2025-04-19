@@ -9,7 +9,8 @@
              d:DesignHeight="400"
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewmodels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
-             d:Background="Black">
+             d:Background="Black"
+             Style="{StaticResource userControlStyle}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Style="{StaticResource mainImageColumn}" />
@@ -28,8 +29,8 @@
             </Grid>
             <!-- Anime title end -->
 
-            <!-- Quality icon -->
-            <Button Template="{StaticResource videoQualityPanelTemplate}" />
+            <!-- Quality icons -->
+            <Button Template="{StaticResource videoQualityPanelTemplate}" VerticalAlignment="Top"/>
         </Grid>
         <!-- Image block end -->
 
@@ -68,10 +69,13 @@
             <!-- Description start -->
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
-                <Button Template="{StaticResource actionsPanelTemplate}" />
-                <Button Template="{StaticResource userStatePanelTemplate}" />
+                <Grid>
+                    <Button Template="{StaticResource actionsPanelTemplate}" VerticalAlignment="Bottom" />
+                    <Button Template="{StaticResource userStatePanelTemplate}" VerticalAlignment="Bottom" />
+                </Grid>
             </Grid>
             <!-- Description end -->
+
 
             <!-- Tags start -->
             <ItemsControl Grid.Row="2" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding TopCategories}" Style="{StaticResource tagsItemsControl}">

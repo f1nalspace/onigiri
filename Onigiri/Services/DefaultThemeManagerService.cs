@@ -2,7 +2,6 @@
 using Finalspace.Onigiri.Views;
 using MaterialDesignThemes.Wpf;
 using System;
-using System.Linq;
 using System.Windows;
 
 namespace Finalspace.Onigiri.Services
