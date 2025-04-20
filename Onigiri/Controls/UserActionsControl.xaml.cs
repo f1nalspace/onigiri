@@ -3,6 +3,7 @@ using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,10 +17,6 @@ namespace Finalspace.Onigiri.Controls
     /// </summary>
     public partial class UserActionsPanel : UserControl
     {
-        private static readonly List<User> _defaultUsers = new List<User>() {
-            new User() { UserName = "final", DisplayName = "Final" },
-        };
-
         public static readonly DependencyProperty ToggleRemoveAnimeCommandProperty =
             DependencyProperty.Register(nameof(ToggleRemoveAnimeCommand), typeof(ICommand), typeof(UserActionsPanel), new PropertyMetadata(defaultValue: null));
 

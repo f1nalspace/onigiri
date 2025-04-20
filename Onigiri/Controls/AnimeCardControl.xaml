@@ -70,7 +70,7 @@
             <!-- Description start -->
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
-                <Grid>
+                <Grid VerticalAlignment="Bottom">
                     <controls:UserStatesControl DataContext="{Binding}" />
                     <controls:UserActionsPanel DataContext="{Binding}"
                         UsersView="{Binding DataContext.UsersView, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}"

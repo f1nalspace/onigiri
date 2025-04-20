@@ -25,9 +25,9 @@
                 <StackPanel x:Name="innerActionPanel" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
                     <Button 
                         Style="{StaticResource actionPanelButton}" 
-                        VerticalAlignment="Bottom" 
                         Command="{Binding CmdToggleMarkedAnime, ElementName=userActionsControl}"
                         CommandParameter="{Binding DataContext, ElementName=userActionsControl}"
+                        VerticalAlignment="Bottom"
                     >
                         <Button.Template>
                             <ControlTemplate>
@@ -41,7 +41,7 @@
                         </Button.Template>
                     </Button>
 
-                    <ItemsControl ItemsSource="{Binding UsersView, ElementName=userActionsControl, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom">
+                    <ItemsControl d:ItemsSource="{converters:UsersSampleData}" ItemsSource="{Binding UsersView, ElementName=userActionsControl, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
@@ -49,8 +49,12 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <Button Command="{Binding CmdToggleRemoveAnime, ElementName=userActionsControl}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Button Grid.Row="0" Command="{Binding CmdToggleRemoveAnime, ElementName=userActionsControl}">
                                         <Button.CommandParameter>
                                             <MultiBinding Converter="{StaticResource animeUserMultiConv}">
                                                 <Binding Path="DataContext" ElementName="userActionsControl" />
@@ -78,7 +82,7 @@
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-                                    <Button Command="{Binding CmdToggleWatchedAnime, ElementName=userActionsControl}">
+                                    <Button Grid.Row="1" Command="{Binding CmdToggleWatchedAnime, ElementName=userActionsControl}">
                                         <Button.CommandParameter>
                                             <MultiBinding Converter="{StaticResource animeUserMultiConv}">
                                                 <Binding Path="DataContext" ElementName="userActionsControl" />
@@ -106,7 +110,7 @@
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -129,5 +133,5 @@
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </UserControl.Resources>
-    <Button Template="{StaticResource actionsPanelTemplate}" VerticalAlignment="Bottom" />
+    <Button Template="{StaticResource actionsPanelTemplate}" Height="64" />
 </UserControl>
