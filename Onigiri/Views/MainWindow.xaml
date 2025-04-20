@@ -10,7 +10,7 @@
               mc:Ignorable="d"
               d:Height="600" 
               d:Width="800" 
-              d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
+              d:DataContext="{d:DesignInstance viewmodels:TestMainViewModel, IsDesignTimeCreatable=True}"
               Title="Onigiri" 
               Icon="../Resources/onigiri.ico"
               Style="{DynamicResource windowStyle}"

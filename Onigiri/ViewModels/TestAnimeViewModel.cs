@@ -90,10 +90,10 @@ namespace Finalspace.Onigiri.ViewModels
                 Info = mediaInfo,
             });
 
-            AddonData.Deleteits.Add(new UserState() { UserName = "final", Value = false });
+            AddonData.Deleteits.Add(new UserState() { UserName = "final", Value = true });
             AddonData.Deleteits.Add(new UserState() { UserName = "anni", Value = true });
             AddonData.Watchstates.Add(new UserState() { UserName = "final", Value = true });
-            AddonData.Watchstates.Add(new UserState() { UserName = "anni", Value = false });
+            AddonData.Watchstates.Add(new UserState() { UserName = "anni", Value = true });
             AddonData.Marked = true;
         }
     }

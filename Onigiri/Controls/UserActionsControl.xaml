@@ -1,0 +1,133 @@
+﻿<UserControl x:Class="Finalspace.Onigiri.Controls.UserActionsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Finalspace.Onigiri.Controls"
+             xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
+             xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="64" 
+             d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewmodels:TestAnimeViewModel, IsDesignTimeCreatable=True}"
+             x:Name="userActionsControl"
+             Style="{StaticResource userControlStyle}"
+    >
+    <UserControl.Resources>
+        <converters:AnimeUserMultiConverter x:Key="animeUserMultiConv" />
+        <ControlTemplate x:Key="actionsPanelTemplate" TargetType="Button">
+            <Grid Style="{StaticResource actionsPanelBack}" x:Name="outerActionPanel">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel x:Name="innerActionPanel" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
+                    <Button 
+                        Style="{StaticResource actionPanelButton}" 
+                        VerticalAlignment="Bottom" 
+                        Command="{Binding CmdToggleMarkedAnime, ElementName=userActionsControl}"
+                        CommandParameter="{Binding DataContext, ElementName=userActionsControl}"
+                    >
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Image Name="markIcon" Source="/Resources/mark_false.png" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="markIcon" Property="Source" Value="/Resources/mark.png" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <ItemsControl ItemsSource="{Binding UsersView, ElementName=userActionsControl, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <Button Command="{Binding CmdToggleRemoveAnime, ElementName=userActionsControl}">
+                                        <Button.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource animeUserMultiConv}">
+                                                <Binding Path="DataContext" ElementName="userActionsControl" />
+                                                <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                            </MultiBinding>
+                                        </Button.CommandParameter>
+                                        <Button.Template>
+                                            <ControlTemplate>
+                                                <Grid>
+                                                    <Image>
+                                                        <Image.Source>
+                                                            <MultiBinding Converter="{StaticResource userImgConv}">
+                                                                <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                                                <Binding Path="DisabledImage" UpdateSourceTrigger="PropertyChanged" />
+                                                            </MultiBinding>
+                                                        </Image.Source>
+                                                    </Image>
+                                                    <Image x:Name="deleteIcon" Source="/Resources/delete_false.png" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="deleteIcon" Property="Source" Value="/Resources/delete.png" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <Button Command="{Binding CmdToggleWatchedAnime, ElementName=userActionsControl}">
+                                        <Button.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource animeUserMultiConv}">
+                                                <Binding Path="DataContext" ElementName="userActionsControl" />
+                                                <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                            </MultiBinding>
+                                        </Button.CommandParameter>
+                                        <Button.Template>
+                                            <ControlTemplate>
+                                                <Grid>
+                                                    <Image>
+                                                        <Image.Source>
+                                                            <MultiBinding Converter="{StaticResource userImgConv}">
+                                                                <Binding Path="UserName" UpdateSourceTrigger="PropertyChanged" />
+                                                                <Binding Path="DisabledImage" UpdateSourceTrigger="PropertyChanged" />
+                                                            </MultiBinding>
+                                                        </Image.Source>
+                                                    </Image>
+                                                    <Image x:Name="markIcon" Source="/Resources/watch_false.png" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="markIcon" Property="Source" Value="/Resources/watch.png" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Button Grid.Column="1" Style="{StaticResource actionPanelButton}" VerticalAlignment="Bottom">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Image Source="/Resources/add_32x32.png" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger SourceName="outerActionPanel" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="innerActionPanel" Property="Visibility" Value="Visible" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <Button Template="{StaticResource actionsPanelTemplate}" VerticalAlignment="Bottom" />
+</UserControl>

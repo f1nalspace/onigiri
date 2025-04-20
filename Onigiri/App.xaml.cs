@@ -1,5 +1,4 @@
-﻿using Dark.Net;
-using DevExpress.Mvvm;
+﻿using DevExpress.Mvvm;
 using Finalspace.Onigiri.Services;
 using log4net.Config;
 using System.Windows;
@@ -23,7 +22,6 @@ namespace Finalspace.Onigiri
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            DarkNet.Instance.SetCurrentProcessTheme(Theme.Light);
         }
     }
 }

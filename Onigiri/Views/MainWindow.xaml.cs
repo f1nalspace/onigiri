@@ -1,5 +1,4 @@
-﻿using Dark.Net;
-using DevExpress.Mvvm;
+﻿using DevExpress.Mvvm;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.ViewModels;
 using System.Linq;

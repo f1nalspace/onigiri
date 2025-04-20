@@ -1,4 +1,5 @@
 ﻿using Finalspace.Onigiri.Models;
+using Finalspace.Onigiri.ViewModels;
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -13,7 +14,7 @@ namespace Finalspace.Onigiri.Converters
                 values[0] is Anime anime &&
                 values[1] is string userName)
             {
-                return new Tuple<Anime, string>(anime, userName);
+                return new AnimeUserViewModel(anime, userName);
             }
             return null;
         }

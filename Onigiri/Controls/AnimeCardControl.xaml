@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:Finalspace.Onigiri.Controls"
              xmlns:viewmodels="clr-namespace:Finalspace.Onigiri.ViewModels"
              xmlns:converters="clr-namespace:Finalspace.Onigiri.Converters"
              mc:Ignorable="d" 
@@ -70,8 +71,13 @@
             <Grid Grid.Row="1">
                 <TextBlock Text="{Binding Description, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource animeDescConv}, ConverterParameter=500}" Style="{StaticResource descriptionText}" />
                 <Grid>
-                    <Button Template="{StaticResource actionsPanelTemplate}" VerticalAlignment="Bottom" />
-                    <Button Template="{StaticResource userStatePanelTemplate}" VerticalAlignment="Bottom" />
+                    <controls:UserStatesControl DataContext="{Binding}" />
+                    <controls:UserActionsPanel DataContext="{Binding}"
+                        UsersView="{Binding DataContext.UsersView, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}"
+                        ToggleRemoveAnimeCommand="{Binding DataContext.CmdUserActionToggleDelete, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}"
+                        ToggleWatchedAnimeCommand="{Binding DataContext.CmdUserActionToggleWatched, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}"
+                        ToggleMarkedAnimeCommand="{Binding DataContext.CmdToggleMarked, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}, UpdateSourceTrigger=PropertyChanged}"
+                    />
                 </Grid>
             </Grid>
             <!-- Description end -->

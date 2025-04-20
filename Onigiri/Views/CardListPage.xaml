@@ -9,8 +9,8 @@
     x:Class="Finalspace.Onigiri.Views.CardListPage"
     mc:Ignorable="d"
     d:DesignHeight="450"
-    d:DesignWidth="1300"
-    d:DataContext="{d:DesignInstance viewmodels:MainViewModel, IsDesignTimeCreatable=True}"
+    d:DesignWidth="1800"
+    d:DataContext="{d:DesignInstance viewmodels:TestMainViewModel, IsDesignTimeCreatable=True}"
     Title="ListViewPage"
     Style="{StaticResource pageStyle}"
     >

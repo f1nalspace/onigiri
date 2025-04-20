@@ -20,7 +20,6 @@ using Finalspace.Onigiri.Security;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Immutable;
-using DevExpress.Mvvm.UI;
 
 namespace Finalspace.Onigiri.ViewModels
 {
@@ -45,7 +44,7 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Anime list & properties
-        private readonly List<Anime> _animes;
+        protected readonly List<Anime> _animes;
 
         public ICollectionView AnimesView { get; }
 
@@ -55,7 +54,7 @@ namespace Finalspace.Onigiri.ViewModels
         #endregion
 
         #region Users
-        private readonly List<User> _users;
+        protected readonly List<User> _users;
 
         public ICollectionView UsersView { get; }
         #endregion
@@ -450,31 +449,32 @@ namespace Finalspace.Onigiri.ViewModels
         }
 
         private bool CanToggleMarked(Anime anime)
-            => anime is not null && CanAddonDataByChanged(anime);
+            => anime is not null;
         private void ToggleMarked(Anime anime)
         {
             anime.AddonData.Marked = !anime.AddonData.Marked;
-            SaveAddonData(anime);
+            if (CanAddonDataByChanged(anime))
+                SaveAddonData(anime);
         }
 
-        private bool CanToggleWatched(Tuple<Anime, string> pair)
-            => pair is not null && pair.Item1 is not null && !string.IsNullOrEmpty(pair.Item2) && CanAddonDataByChanged(pair.Item1);
-        private void ToggleWatched(Tuple<Anime, string> pair)
+        private bool CanToggleWatched(AnimeUserViewModel animeUser) => animeUser is not null;
+        private void ToggleWatched(AnimeUserViewModel animeUser)
         {
-            Anime anime = pair.Item1;
-            string username = pair.Item2;
+            Anime anime = animeUser.Anime;
+            string username = animeUser.Username;
             anime.AddonData.ToggleWatchState(username);
-            SaveAddonData(anime);
+            if (CanAddonDataByChanged(anime))
+                SaveAddonData(anime);
         }
 
-        private bool CanToggleDeletion(Tuple<Anime, string> pair)
-            => pair is not null && pair.Item1 is not null && !string.IsNullOrEmpty(pair.Item2) && CanAddonDataByChanged(pair.Item1);
-        private void ToggleDeletion(Tuple<Anime, string> pair)
+        private bool CanToggleDeletion(AnimeUserViewModel animeUser) => animeUser is not null;
+        private void ToggleDeletion(AnimeUserViewModel animeUser)
         {
-            Anime anime = pair.Item1;
-            string username = pair.Item2;
+            Anime anime = animeUser.Anime;
+            string username = animeUser.Username;
             anime.AddonData.ToggleDeleteit(username);
-            SaveAddonData(anime);
+            if (CanAddonDataByChanged(anime))
+                SaveAddonData(anime);
         }
         #endregion
 
@@ -704,8 +704,8 @@ namespace Finalspace.Onigiri.ViewModels
         public DelegateCommand OnLoadedCommand { get; }
 
         public DelegateCommand<Anime> CmdToggleMarked { get; }
-        public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleDelete { get; }
-        public DelegateCommand<Tuple<Anime, string>> CmdUserActionToggleWatched { get; }
+        public DelegateCommand<AnimeUserViewModel> CmdUserActionToggleDelete { get; }
+        public DelegateCommand<AnimeUserViewModel> CmdUserActionToggleWatched { get; }
 
         public DelegateCommand CmdChangedSort { get; }
         public DelegateCommand<SortItemViewModel> CmdPrimarySortType { get; }
@@ -759,9 +759,6 @@ namespace Finalspace.Onigiri.ViewModels
         {
             Refresh();
         }
-
-
-
 
         private void ShowSettingsDialog()
         {
@@ -856,9 +853,10 @@ namespace Finalspace.Onigiri.ViewModels
             BindingOperations.EnableCollectionSynchronization(_users, _users);
 
             // Default values
-            LoadingHeader = "Ready";
+            LoadingHeader = string.Empty;
             LoadingSubject = string.Empty;
             LoadingPercentage = -1;
+            IsNotLoading = true;
 
             FirstSortKey = SortItems.First(s => s.Value == AnimeSortKey.EndDate);
             IsFirstSortOrderDesc = true;
@@ -875,8 +873,8 @@ namespace Finalspace.Onigiri.ViewModels
             OnLoadedCommand = new DelegateCommand(OnLoaded);
 
             CmdToggleMarked = new DelegateCommand<Anime>(ToggleMarked, CanToggleMarked);
-            CmdUserActionToggleWatched = new DelegateCommand<Tuple<Anime, string>>(ToggleWatched, CanToggleWatched);
-            CmdUserActionToggleDelete = new DelegateCommand<Tuple<Anime, string>>(ToggleDeletion, CanToggleDeletion);
+            CmdUserActionToggleWatched = new DelegateCommand<AnimeUserViewModel>(ToggleWatched, CanToggleWatched);
+            CmdUserActionToggleDelete = new DelegateCommand<AnimeUserViewModel>(ToggleDeletion, CanToggleDeletion);
 
             CmdChangedSort = new DelegateCommand(() => UpdateSort(true));
             CmdPrimarySortType = new DelegateCommand<SortItemViewModel>(ChangePrimarySortType);
