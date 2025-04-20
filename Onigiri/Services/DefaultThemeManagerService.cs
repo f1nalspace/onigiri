@@ -1,4 +1,5 @@
-﻿using Finalspace.Onigiri.ViewModels;
+﻿using Finalspace.Onigiri.Helpers;
+using Finalspace.Onigiri.ViewModels;
 using Finalspace.Onigiri.Views;
 using MaterialDesignThemes.Wpf;
 using System;
@@ -40,6 +41,9 @@ namespace Finalspace.Onigiri.Services
 
                 ThemeDictionary = new ResourceDictionary() { Source = new Uri($"Styles/LightColors.xaml", UriKind.Relative) };
             }
+
+            foreach (Window window in Application.Current.Windows)
+                WindowHelper.SetTheme(window, CurrentTheme);
 
             //
             // Reload frame, otherwise the style changes won't be applied

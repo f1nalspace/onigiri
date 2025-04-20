@@ -14,6 +14,7 @@
               Title="Onigiri" 
               Icon="../Resources/onigiri.ico"
               Style="{DynamicResource windowStyle}"
+              Loaded="Window_Loaded"
               >
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />

@@ -1,9 +1,13 @@
 ﻿using DevExpress.Mvvm;
+using Finalspace.Onigiri.Helpers;
 using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.ViewModels;
+using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Finalspace.Onigiri.Views
 {
@@ -19,7 +23,7 @@ namespace Finalspace.Onigiri.Views
             DataContext = new MainViewModel();
             (DataContext as MainViewModel).CloseRequested += () => Close();
         }
-
+       
         private void UpdateFrameDataContext(object sender)
         {
             FrameworkElement content = mainFrame.Content as FrameworkElement;
@@ -47,6 +51,12 @@ namespace Finalspace.Onigiri.Views
                 foreach (ResourceDictionary resource in resourceDicts)
                     page.Resources.MergedDictionaries.Add(resource);
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            IThemeManagerService srv = ServiceContainer.Default.GetService<IThemeManagerService>();
+            WindowHelper.SetTheme(this, srv.CurrentTheme);
         }
     }
 }
