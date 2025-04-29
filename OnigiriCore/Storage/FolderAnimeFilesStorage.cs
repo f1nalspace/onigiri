@@ -198,7 +198,7 @@ namespace Finalspace.Onigiri.Storage
             if (anime == null)
                 return new ExecutionResult<Anime>(new FormatException("Anime serializer is broken!"));
 
-            anime.Image = pictureData.Length > 0 ? new AnimeImage(anime.Picture, pictureData) : null;
+            anime.Image = pictureData.Length > 0 ? new AnimeImage(anime.Picture, pictureData.AsSpan()) : null;
 
             return new ExecutionResult<Anime>(anime);
         }

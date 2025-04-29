@@ -227,7 +227,7 @@ namespace Finalspace.Onigiri
                 if (imageData is not null && imageData.Length > 0)
                 {
                     string filename = Path.GetFileName(imageFilePath);
-                    anime.Image = new AnimeImage(filename, imageData.ToImmutableArray());
+                    anime.Image = new AnimeImage(filename, imageData);
                 }
                 else
                 {
@@ -508,7 +508,7 @@ namespace Finalspace.Onigiri
                 if (imageData is not null && imageData.Length > 0)
                 {
                     string filename = Path.GetFileName(imageFilePath);
-                    result.Image = new AnimeImage(filename, imageData.ToImmutableArray());
+                    result.Image = new AnimeImage(filename, imageData);
                 }
                 else
                 {

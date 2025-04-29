@@ -8,21 +8,9 @@ namespace Finalspace.Onigiri.Models
         public string FileName { get; }
         public ImmutableArray<byte> Data { get; }
 
-        public AnimeImage(string fileName, ImmutableArray<byte> data)
+        public AnimeImage(string fileName, ReadOnlySpan<byte> data)
         {
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentNullException(nameof(fileName));
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            FileName = fileName;
-            Data = data;
-        }
-
-        public AnimeImage(string fileName, byte[] data)
-        {
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentNullException(nameof(fileName));
-            ArgumentNullException.ThrowIfNull(data);
+            ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
             FileName = fileName;
             Data = data.ToImmutableArray();
         }
