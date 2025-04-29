@@ -15,6 +15,7 @@ namespace Finalspace.Onigiri.ViewModels
     public class TitlesViewModel : ViewModelBase, IDisposable
     {
         private BackgroundWorker _filterWorker;
+
         private Timer _filterTimer;
 
         public IDispatcherService DispatcherService => GetService<IDispatcherService>();
@@ -22,7 +23,7 @@ namespace Finalspace.Onigiri.ViewModels
         public MainViewModel Main
         {
             get => GetValue<MainViewModel>();
-            private set => SetValue(value);
+            set => SetValue(value);
         }
 
         public bool IsNotLoading
@@ -44,7 +45,7 @@ namespace Finalspace.Onigiri.ViewModels
             RaisePropertyChanged(() => LoadingWindowVisibility);
         }
 
-        private readonly List<Title> _titles;
+        private readonly List<Title> _titles = new List<Title>();
         public ICollectionView TitlesView
         {
             get => GetValue<ICollectionView>();
@@ -175,21 +176,31 @@ namespace Finalspace.Onigiri.ViewModels
             _filterTimer.Change(250, Timeout.Infinite);
         }
 
-        private readonly bool _allowButtons;
-        public bool AllowButtons => _allowButtons;
 
-        public TitlesViewModel(MainViewModel main, bool allowButtons)
+        public bool AllowButtons
         {
-            Main = main;
-            _allowButtons = allowButtons;
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
+        public TitlesViewModel()
+        {
+            Main = null;
+            AllowButtons = true;
 
             _filterTimer = new Timer((c) => UpdateFilter(), null, Timeout.Infinite, Timeout.Infinite);
 
-            _titles = new List<Title>();
+            _titles.AddRange(new[] { 
+                new Title() { Name = "blubb", Aid = 42, Type = "main", Lang = "en" },
+            });
+
             _excludedAnimes = new HashSet<ulong>();
+
             _selectedFilterType = "All";
+
             TitlesView = CollectionViewSource.GetDefaultView(_titles);
             TitlesView.Filter = TitleFilter;
+
             ListCollectionView collView = TitlesView as ListCollectionView;
             collView.CustomSort = new TitleSorter();
         }

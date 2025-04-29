@@ -15,15 +15,11 @@ namespace Finalspace.Onigiri.ViewModels
         public MainViewModel Main
         {
             get => GetValue<MainViewModel>();
-            private set => SetValue(value);
+            set => SetValue(value);
         }
 
-        private readonly IList<Issue> _issues;
-        public ICollectionView IssuesView
-        {
-            get => GetValue<ICollectionView>();
-            private set => SetValue(value);
-        }
+        private readonly List<Issue> _issues = new List<Issue>();
+        public ICollectionView IssuesView { get; }
 
         public Issue SelectedIssue
         {
@@ -41,20 +37,34 @@ namespace Finalspace.Onigiri.ViewModels
 
         public DelegateCommand<Issue> CmdSelectTitle { get; private set; }
 
-        public IssuesViewModel(MainViewModel main)
+        public IssuesViewModel()
         {
-            Main = main;
-            _issues = new List<Issue>();
+            /*
+            _issues.AddRange(new[] { 
+                new Issue(Enums.IssueKind.TitleNotFound, "Title not found", "bla blubb", null),
+            });
+            */
+
             IssuesView = CollectionViewSource.GetDefaultView(_issues);
+
             ListCollectionView collView = IssuesView as ListCollectionView;
             collView.CustomSort = new IssuesSorter();
+
             CmdSelectTitle = new DelegateCommand<Issue>((issue) =>
             {
-                using TitlesViewModel titlesViewModel = new TitlesViewModel(Main, true);
+                using TitlesViewModel titlesViewModel = new TitlesViewModel()
+                {
+                    Main = Main,
+                    AllowButtons = true,
+                };
+
                 titlesViewModel.SetTitles(Main.CoreService.Titles.Items);
+
                 titlesViewModel.StartRefreshTimer();
+
                 titlesViewModel.FilterString = string.Empty; //issue.Value as string;
-                if (Main.DlgService.ShowTitlesDialog(titlesViewModel))
+
+                if (Main?.DlgService.ShowTitlesDialog(titlesViewModel) ?? false)
                 {
                     Title title = titlesViewModel.SelectedTitle;
                     if (title != null)

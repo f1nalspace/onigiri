@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Finalspace.Onigiri.Views"
+        xmlns:vms="clr-namespace:Finalspace.Onigiri.ViewModels"
         mc:Ignorable="d"
         Title="Issues" 
         Height="450" 
         Width="800" 
         WindowStartupLocation="CenterOwner" 
         Style="{StaticResource windowStyle}"
+        d:DataContext="{d:DesignInstance vms:IssuesViewModel, IsDesignTimeCreatable=True}"
         >
     <Window.Resources>
         <Style x:Key="iconSolved" TargetType="Image">
@@ -21,9 +23,8 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    <Grid>
+    <Grid Margin="10">
         <ListView 
-            Margin="0 10 0 0" 
             VirtualizingPanel.IsVirtualizing="True" 
             VirtualizingPanel.IsContainerVirtualizable="True" 
             VirtualizingPanel.VirtualizationMode="Recycling" 
@@ -38,7 +39,7 @@
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn>
+                        <GridViewColumn Header="State">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image Width="16" Height="16" Stretch="UniformToFill" Style="{StaticResource iconSolved}" />
@@ -46,13 +47,13 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" />
-                        <GridViewColumn Header="Kind" DisplayMemberBinding="{Binding Kind}" />
-                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}" />
+                        <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path, UpdateSourceTrigger=PropertyChanged}" />
+                        <GridViewColumn Header="Kind" DisplayMemberBinding="{Binding Kind, UpdateSourceTrigger=PropertyChanged}" />
+                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
                         <GridViewColumn Header="Action">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Fix Name" Width="60" Command="{Binding DataContext.CmdSelectTitle, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                    <Button Content="Fix Name" Command="{Binding DataContext.CmdSelectTitle, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

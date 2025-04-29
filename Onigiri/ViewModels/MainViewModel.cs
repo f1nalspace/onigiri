@@ -776,7 +776,12 @@ namespace Finalspace.Onigiri.ViewModels
 
         private void ShowTitlesDialog()
         {
-            using TitlesViewModel titlesViewModel = new TitlesViewModel(this, false);
+            using TitlesViewModel titlesViewModel = new TitlesViewModel()
+            {
+                Main = this,
+                AllowButtons = false,
+            };
+
             titlesViewModel.SetTitles(CoreService.Titles.Items);
             titlesViewModel.SetExcludedAnimes(CoreService.Animes.Items.Select((a) => a.Aid));
             titlesViewModel.StartRefreshTimer();
@@ -785,7 +790,8 @@ namespace Finalspace.Onigiri.ViewModels
 
         private void ShowIssuesDialog()
         {
-            IssuesViewModel issuesViewModel = new IssuesViewModel(this);
+            IssuesViewModel issuesViewModel = new IssuesViewModel();
+            issuesViewModel.Main = this;
             issuesViewModel.SetIssues(CoreService.Issues.Items);
             DlgService.ShowIssuesDialog(issuesViewModel);
         }
