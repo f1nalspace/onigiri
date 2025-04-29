@@ -23,7 +23,7 @@
         <Setter Property="TextElement.FontWeight" Value="Medium" />
     </Style>
 
-    <Style x:Key="listViewStyle" TargetType="ListView">
+    <Style x:Key="listViewStyle" TargetType="ListView" BasedOn="{StaticResource MaterialDesignListView}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Background}" />
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Foreground}" />
         <Setter Property="FontFamily" Value="{materialDesign:MaterialDesignFont}" />
