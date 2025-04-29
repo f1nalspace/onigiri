@@ -3,47 +3,68 @@ using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Models
 {
-    public class Category : BindableBase
+    public class Tag : BindableBase
     {
-        [XmlAttribute("Id")]
+        [XmlAttribute()]
         public ulong Id
         {
             get => GetValue<ulong>();
             set => SetValue(value);
         }
 
-        [XmlAttribute("ParentId")]
+        [XmlAttribute()]
         public ulong ParentId
         {
             get => GetValue<ulong>();
             set => SetValue(value);
         }
 
-        [XmlElement("Name")]
+        [XmlElement()]
         public string Name
         {
             get => GetValue<string>();
             set => SetValue(value);
         }
 
-        [XmlElement("Description")]
+        [XmlElement()]
         public string Description
         {
             get => GetValue<string>();
             set => SetValue(value);
         }
 
-        [XmlAttribute("Weight")]
+        [XmlAttribute()]
         public int Weight
         {
             get => GetValue<int>();
             set => SetValue(value);
         }
 
-        [XmlAttribute("Hentai")]
-        public bool Hentai
+        [XmlAttribute()]
+        public bool IsLocalSpoiler
         {
             get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
+        [XmlAttribute()]
+        public bool IsGlobalSpoiler
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
+        [XmlAttribute()]
+        public bool Verified
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
+        [XmlAttribute()]
+        public string Update
+        {
+            get => GetValue<string>();
             set => SetValue(value);
         }
 

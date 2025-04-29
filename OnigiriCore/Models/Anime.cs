@@ -148,6 +148,14 @@ namespace Finalspace.Onigiri.Models
             set => SetValue(value);
         }
 
+        [XmlArray("Tags")]
+        [XmlArrayItem("Tag")]
+        public ObservableCollection<Tag> Tags
+        {
+            get => GetValue<ObservableCollection<Tag>>();
+            set => SetValue(value);
+        }
+
         [XmlArray("Episodes")]
         [XmlArrayItem("Episode")]
         public ObservableCollection<Episode> Episodes
@@ -241,6 +249,8 @@ namespace Finalspace.Onigiri.Models
             };
             Categories = new ObservableCollection<Category>();
             Categories.CollectionChanged += (s, e) => RaisePropertyChanged(() => Categories);
+            Tags = new ObservableCollection<Tag>();
+            Tags.CollectionChanged += (s, e) => RaisePropertyChanged(() => Tags);
             TopCategories = new ObservableCollection<Category>();
             TopCategories.CollectionChanged += (s, e) => RaisePropertyChanged(() => TopCategories);
             Episodes = new ObservableCollection<Episode>();
@@ -329,10 +339,45 @@ namespace Finalspace.Onigiri.Models
                                     Weight = weight
                                 });
                             }
+
+                            XmlNodeList tagNodes = rootNode.SelectNodes("tags/tag");
+                            foreach (XmlNode tagNode in tagNodes)
+                            {
+                                ulong id = XMLUtils.GetAttribute<ulong>(tagNode, "id", 0);
+                                ulong parentId = XMLUtils.GetAttribute<ulong>(tagNode, "parentid", 0);
+                                int weight = XMLUtils.GetAttribute<int>(tagNode, "weight", 0);
+                                string name = XMLUtils.GetValue(tagNode, "name", string.Empty);
+                                string desc = XMLUtils.GetValue(tagNode, "description", string.Empty);
+                                Tags.Add(new Tag()
+                                {
+                                    Name = name,
+                                    Description = desc,
+                                    Id = id,
+                                    ParentId = parentId,
+                                    Weight = weight
+                                });
+                            }
                         }
                         catch (Exception e1)
                         {
                             throw new IOException($"Failed reading titles from file '{filePath}'!", e1);
+                        }
+
+                        // Tags vs Categories
+                        if (Tags.Count > 0)
+                        {
+                            Categories.Clear();
+                            foreach (var tag in Tags)
+                            {
+                                Categories.Add(new Category()
+                                {
+                                    Id = tag.Id,
+                                    ParentId = tag.ParentId,
+                                    Name = tag.Name,
+                                    Description = tag.Description,
+                                    Weight = tag.Weight
+                                });
+                            }
                         }
 
                         // Top categories
