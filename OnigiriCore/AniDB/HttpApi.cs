@@ -2,14 +2,22 @@
 using Finalspace.Onigiri.Utils;
 using log4net;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
-using System.Threading;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri.AniDB
 {
-    public static class HttpApi
+    interface IHttpApi
+    {
+        Task<TextContent> RequestAnimeAsync(ulong aid);
+        Task DownloadTitlesDumpAsync(string targetFilePath);
+        Task DownloadPictureAsync(string picture, string targetFilePath);
+    }
+
+    class HttpApi : IHttpApi
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -21,11 +29,10 @@ namespace Finalspace.Onigiri.AniDB
         private static string ClientName = "onigiri";
         private static string ClientVer = "1";
         private static string ProtoVer = "1";
-        private static int DefaultDelay = 1500;
+        private static int DefaultDelay = 3000;
 
-        public static async Task<TextContent> RequestAnimeAsync(ulong aid)
+        public async Task<TextContent> RequestAnimeAsync(ulong aid)
         {
-            Thread.Sleep(DefaultDelay);
             string url = ApiURL;
             url = url.Replace("{{clientName}}", ClientName);
             url = url.Replace("{{clientVer}}", ClientVer);
@@ -33,6 +40,7 @@ namespace Finalspace.Onigiri.AniDB
             url = url.Replace("{{aid}}", aid.ToString());
             try
             {
+                await Task.Delay(DefaultDelay);
                 TextContent result = await HttpUtils.DownloadTextAsync(url);
                 return result;
             }
@@ -43,11 +51,11 @@ namespace Finalspace.Onigiri.AniDB
             return null;
         }
 
-        public static async Task DownloadTitlesDumpAsync(string targetFilePath)
+        public async Task DownloadTitlesDumpAsync(string targetFilePath)
         {
-            Thread.Sleep(DefaultDelay);
             try
             {
+                await Task.Delay(DefaultDelay);
                 await HttpUtils.DownloadFileAsync(TitlesDumpURL, targetFilePath);
             }
             catch (Exception e)
@@ -56,14 +64,14 @@ namespace Finalspace.Onigiri.AniDB
             }
         }
 
-        public static async Task DownloadPictureAsync(string picture, string targetFilePath)
+        public async Task DownloadPictureAsync(string picture, string targetFilePath)
         {
             string imageExt = Path.GetExtension(picture);
             string sourcePictureUrl = ImageServerURL + picture;
             targetFilePath = Path.ChangeExtension(targetFilePath, imageExt);
-            Thread.Sleep(DefaultDelay);
             try
             {
+                await Task.Delay(DefaultDelay);
                 await HttpUtils.DownloadFileAsync(sourcePictureUrl, targetFilePath);
             } catch (Exception e)
             {
