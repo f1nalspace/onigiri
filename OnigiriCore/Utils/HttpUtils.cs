@@ -19,7 +19,7 @@ namespace Finalspace.Onigiri.Utils
         {
             HttpClientHandler handler = new HttpClientHandler
             {
-                SslProtocols = System.Security.Authentication.SslProtocols.Tls13,
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls12,
                 ServerCertificateCustomValidationCallback = delegate { return true; },
             };
             return new HttpClient(handler);
