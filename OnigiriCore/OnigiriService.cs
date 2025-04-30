@@ -31,6 +31,8 @@ namespace Finalspace.Onigiri
 
         private readonly IUserIdentity _currentUser;
 
+        private readonly IHttpApi _api;
+
         public Config Config { get; }
         public Titles Titles { get; }
         public Animes Animes { get; }
@@ -41,6 +43,8 @@ namespace Finalspace.Onigiri
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
 
             _currentUser = _userService.GetCurrentUser();
+
+            _api = new HttpApi();
 
             if (!Directory.Exists(OnigiriPaths.AppSettingsPath))
                 Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
@@ -175,7 +179,7 @@ namespace Finalspace.Onigiri
                 if (updateDetails)
                 {
                     log.Info($"Request details for aid {aid} as '{cleanTitleName}'");
-                    TextContent content = await HttpApi.RequestAnimeAsync(aid);
+                    TextContent content = await _api.RequestAnimeAsync(aid);
                     if (content is not null && !string.IsNullOrEmpty(content.Text))
                     {
                         log.Info($"Save details xml file a'{animeXmlFilePath}'");
@@ -208,7 +212,7 @@ namespace Finalspace.Onigiri
                     else
                     {
                         imageFilePath = Path.Combine(sourceDir.FullName, anime.Picture);
-                        await HttpApi.DownloadPictureAsync(anime.Picture, imageFilePath);
+                        await _api.DownloadPictureAsync(anime.Picture, imageFilePath);
                         if (!File.Exists(imageFilePath))
                         {
                             log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
@@ -304,14 +308,14 @@ namespace Finalspace.Onigiri
                 ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
 
                 ConcurrentBag<Anime> animes = new ConcurrentBag<Anime>();
-                await Parallel.ForEachAsync(sortedAnimeDirs, parallelOptions, async (animeDir, token) =>
+                foreach (DirectoryInfo animeDir in sortedAnimeDirs)
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
                     Anime anime = await GetOrUpdate(animeDir.FullName, flags, statusChanged);
                     animes.Add(anime);
-                });
+                }
                 list.AddRange(animes.Where(a => a is not null).OrderBy(a => a.MainTitle));
 
                 if (flags.HasFlag(UpdateFlags.ParseMediaInfo))
@@ -630,7 +634,7 @@ namespace Finalspace.Onigiri
             {
                 log.Info($"Download anime titles dump to '{rawFilePath}'");
                 statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Downloading titles database", Percentage = -1 });
-                await HttpApi.DownloadTitlesDumpAsync(rawFilePath);
+                await _api.DownloadTitlesDumpAsync(rawFilePath);
             }
             if (!File.Exists(rawFilePath))
                 log.Warn($"Not found anime titles dump file '{rawFilePath}'!");
