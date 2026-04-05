@@ -6,13 +6,14 @@ using System.Runtime.Versioning;
 namespace Finalspace.Onigiri.Win32;
 
 [SupportedOSPlatform(nameof(OSPlatform.Windows))]
-class Win32ImpersonationContext : IImpersonationContext
+sealed class Win32ImpersonationContext : IImpersonationContext
 {
-    private readonly IUserIdentity _identity;
+    private readonly Win32UserIdentity _identity;
 
-    public Win32ImpersonationContext(IUserIdentity identity)
+    public Win32ImpersonationContext(Win32UserIdentity identity)
     {
-        _identity = identity ?? throw new ArgumentNullException(nameof(identity));
+        ArgumentNullException.ThrowIfNull(identity);
+        _identity = identity;
     }
 
     public void Dispose()
