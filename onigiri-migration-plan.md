@@ -5,7 +5,7 @@
 Onigiri is a Windows-only WPF anime database app built on .NET 9.0 with DevExpress MVVM and MaterialDesignThemes. The goal is to make it cross-platform by:
 
 1. Migrating core/platform/console/test projects from .NET 9.0 to .NET 10.0 (removing Windows-only TFMs)
-2. Replacing `DevExpressMvvm` (WPF-only) with a **custom MVVM layer that mimics the DevExpress API**, built on top of `CommunityToolkit.Mvvm` — so model/ViewModel code requires only a `using` change
+2. Replacing `DevExpressMvvm` (WPF-only) with the existing **custom MVVM layer that mimics the DevExpress API** stored in the `Finalspace.Onigiri.MVVM` namespace, built on top of `CommunityToolkit.Mvvm` — so model/ViewModel code requires only a `using` change
 3. **Creating a new `OnigiriAvalonia` project** alongside the existing `Onigiri` WPF project, using AvaloniaUI
 4. Adding Linux/macOS platform support in OnigiriPlatform
 
@@ -27,170 +27,11 @@ This is the foundation all projects depend on, so it must be migrated first.
 - Keep `FFmpeg.AutoGen` v5.0.0 for now (multi-platform native libs are a Phase 5 follow-up)
 - Keep the ffmpeg DLL `<Content>` items (they still work for Windows builds)
 
-### 1B. Custom MVVM Layer — Create `OnigiriCore/MVVM/`
+### 1B. Use Custom MVVM Layer from `OnigiriCore/MVVM/`
 
-Build a DevExpress-API-compatible MVVM layer on top of `CommunityToolkit.Mvvm`. This means **all 19 model classes and all ViewModels need only a `using` change** — no property/method rewrites.
+Use the already existing MVVM layer that is DevExpress-API-compatible that is based on `CommunityToolkit.Mvvm`. This means **all 19 model classes and all ViewModels need only a `using` change** — no property/method rewrites.
 
-#### `OnigiriCore/MVVM/BindableBase.cs`
-
-Extends `CommunityToolkit.Mvvm.ComponentModel.ObservableObject`. Mimics the DevExpress dictionary-backed property storage API.
-
-```csharp
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace Finalspace.Onigiri.MVVM;
-
-public abstract class BindableBase : ObservableObject
-{
-    private readonly Dictionary<string, object?> _propertyBag = new();
-
-    protected T? GetValue<T>([CallerMemberName] string? propertyName = null)
-    {
-        if (_propertyBag.TryGetValue(propertyName!, out var value))
-            return (T?)value;
-        return default;
-    }
-
-    protected void SetValue<T>(T? value, [CallerMemberName] string? propertyName = null)
-    {
-        if (_propertyBag.TryGetValue(propertyName!, out var existing) && EqualityComparer<T>.Default.Equals((T?)existing, value))
-            return;
-        _propertyBag[propertyName!] = value;
-        OnPropertyChanged(propertyName);
-    }
-
-    protected void SetValue<T>(T? value, Action callback, [CallerMemberName] string? propertyName = null)
-    {
-        if (_propertyBag.TryGetValue(propertyName!, out var existing) && EqualityComparer<T>.Default.Equals((T?)existing, value))
-            return;
-        _propertyBag[propertyName!] = value;
-        OnPropertyChanged(propertyName);
-        callback();
-    }
-
-    protected void RaisePropertyChanged(string propertyName)
-        => OnPropertyChanged(propertyName);
-
-    protected void RaisePropertyChanged<T>(System.Linq.Expressions.Expression<Func<T>> propertyExpression)
-    {
-        var memberExpr = (System.Linq.Expressions.MemberExpression)propertyExpression.Body;
-        OnPropertyChanged(memberExpr.Member.Name);
-    }
-
-    protected void RaisePropertiesChanged(params string[] propertyNames)
-    {
-        foreach (var name in propertyNames)
-            OnPropertyChanged(name);
-    }
-}
-```
-
-**Key points:**
-- Dictionary-backed storage preserves the exact DevExpress behavior (no backing fields needed in models)
-- `SetValue(value, callback)` overload supports the side-effect pattern used in `Anime.MediaFiles`, `Relation.TypeStr`, `MainViewModel.FilterTitle`, etc.
-- `RaisePropertyChanged(() => X)` lambda overload supports the expression-tree pattern used throughout
-- Inheriting `ObservableObject` gives us `INotifyPropertyChanged` for free and interop with CommunityToolkit ecosystem
-
-#### `OnigiriCore/MVVM/IServiceContainer.cs`
-
-```csharp
-namespace Finalspace.Onigiri.MVVM;
-
-public interface IServiceContainer
-{
-    void RegisterService(object service);
-    T? GetService<T>() where T : class;
-}
-```
-
-#### `OnigiriCore/MVVM/ServiceContainer.cs`
-
-Mimics `DevExpress.Mvvm.ServiceContainer`:
-
-```csharp
-namespace Finalspace.Onigiri.MVVM;
-
-public class ServiceContainer : IServiceContainer
-{
-    public static ServiceContainer Default { get; } = new();
-
-    private readonly Dictionary<Type, object> _services = new();
-
-    public void RegisterService(object service)
-    {
-        // Register by all interfaces the service implements
-        foreach (var iface in service.GetType().GetInterfaces())
-            _services[iface] = service;
-    }
-
-    public T? GetService<T>() where T : class
-    {
-        _services.TryGetValue(typeof(T), out var service);
-        return service as T;
-    }
-}
-```
-
-#### `OnigiriCore/MVVM/ViewModelBase.cs`
-
-Extends `BindableBase`, adds service resolution — mimics `DevExpress.Mvvm.ViewModelBase`:
-
-```csharp
-namespace Finalspace.Onigiri.MVVM;
-
-public abstract class ViewModelBase : BindableBase
-{
-    protected T? GetService<T>() where T : class
-        => ServiceContainer.Default.GetService<T>();
-}
-```
-
-#### `OnigiriCore/MVVM/DelegateCommand.cs`
-
-Implements `ICommand` with `RaiseCanExecuteChanged()` — mimics `DevExpress.Mvvm.DelegateCommand`:
-
-```csharp
-using System.Windows.Input;
-
-namespace Finalspace.Onigiri.MVVM;
-
-public class DelegateCommand : ICommand
-{
-    private readonly Action _execute;
-    private readonly Func<bool>? _canExecute;
-
-    public DelegateCommand(Action execute, Func<bool>? canExecute = null)
-    {
-        _execute = execute;
-        _canExecute = canExecute;
-    }
-
-    public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
-    public void Execute(object? parameter) => _execute();
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-}
-
-public class DelegateCommand<T> : ICommand
-{
-    private readonly Action<T> _execute;
-    private readonly Func<T, bool>? _canExecute;
-
-    public DelegateCommand(Action<T> execute, Func<T, bool>? canExecute = null)
-    {
-        _execute = execute;
-        _canExecute = canExecute;
-    }
-
-    public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke((T)parameter!) ?? true;
-    public void Execute(object? parameter) => _execute((T)parameter!);
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-}
-```
+If needed, adjust the MVVM classes and interface to match the DevExpress API exactly.
 
 ### 1C. Model/Service Migration — `using` Change Only
 
@@ -578,7 +419,7 @@ These are not blocking but improve cross-platform support:
 
 | Current Package | Replacement | Scope |
 |---|---|---|
-| `DevExpressMvvm` 21.1.5 | Custom MVVM layer (built on `CommunityToolkit.Mvvm`) | OnigiriCore |
+| `DevExpressMvvm` 21.1.5 | Existing Custom MVVM layer (built on `CommunityToolkit.Mvvm`) | OnigiriCore/MVVM |
 | `MaterialDesignThemes` 5.2.1 | `Avalonia.Themes.Fluent` (built-in) | OnigiriAvalonia only |
 | `VirtualizingWrapPanel` 1.5.0 | Avalonia `ItemsRepeater` + layout | OnigiriAvalonia only |
 | `System.Management` 6.0.0 | Remove (dark mode detection via Avalonia) | OnigiriAvalonia only |
