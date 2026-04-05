@@ -77,4 +77,6 @@ public abstract class ViewModelBase : BindableBase, INotifyDataErrorInfo, IViewM
         errors.AddOrUpdate(propertyName, messages.ToImmutableArray(), (k, o) => o.AddRange(messages));
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
     }
+    
+    protected T GetService<T>() where T : class => _serviceContainer.GetService<T>() ?? MVVM.ServiceContainer.Default.GetService<T>();
 }
