@@ -1,4 +1,5 @@
-﻿using Finalspace.Onigiri.Security;
+﻿using Finalspace.Onigiri.Linux;
+using Finalspace.Onigiri.Security;
 using Finalspace.Onigiri.Win32;
 using System;
 using System.Runtime.InteropServices;
@@ -21,6 +22,8 @@ public static class OnigiriUserServiceFactory
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return new Win32UserService();
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return new LinuxUserService();
             else
                 throw new PlatformNotSupportedException($"This Platform '{RuntimeInformation.OSDescription} {RuntimeInformation.ProcessArchitecture}' is not supported");
         }
