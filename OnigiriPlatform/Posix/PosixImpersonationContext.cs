@@ -3,14 +3,15 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace Finalspace.Onigiri.Linux;
+namespace Finalspace.Onigiri.Posix;
 
 [SupportedOSPlatform(nameof(OSPlatform.Linux))]
-sealed class LinuxImpersonationContext : IImpersonationContext
+[SupportedOSPlatform(nameof(OSPlatform.FreeBSD))]
+sealed class PosixImpersonationContext : IImpersonationContext
 {
-    private readonly LinuxUserIdentity _identity;
+    private readonly PosixUserIdentity _identity;
 
-    public LinuxImpersonationContext(LinuxUserIdentity identity)
+    public PosixImpersonationContext(PosixUserIdentity identity)
     {
         ArgumentNullException.ThrowIfNull(identity);
         _identity = identity;

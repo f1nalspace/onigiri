@@ -2,21 +2,22 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace Finalspace.Onigiri.Linux;
+namespace Finalspace.Onigiri.Posix;
 
 [SupportedOSPlatform(nameof(OSPlatform.Linux))]
-sealed class LinuxUserIdentity : IUserIdentity
+[SupportedOSPlatform(nameof(OSPlatform.FreeBSD))]
+sealed class PosixUserIdentity : IUserIdentity
 {
     public string UserName { get; }
 
-    public LinuxUserIdentity(string userName)
+    public PosixUserIdentity(string userName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         UserName = userName;
     }
 
-    public static LinuxUserIdentity Current()
-        => new LinuxUserIdentity(Environment.UserName);
+    public static PosixUserIdentity Current()
+        => new PosixUserIdentity(Environment.UserName);
 
     public override string ToString() => UserName;
 
