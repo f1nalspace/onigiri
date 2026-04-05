@@ -1,7 +1,6 @@
 ﻿using Finalspace.Onigiri.MVVM;
-using log4net;
+using Serilog;
 using System;
-using System.Reflection;
 using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Models
@@ -9,7 +8,7 @@ namespace Finalspace.Onigiri.Models
     [Serializable]
     public class SearchTypeLanguage : BindableBase
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.ForContext<SearchTypeLanguage>();
 
         [XmlAttribute("type")]
         public string Type

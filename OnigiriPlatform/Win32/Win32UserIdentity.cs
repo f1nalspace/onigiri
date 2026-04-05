@@ -3,37 +3,36 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 
-namespace Finalspace.Onigiri.Security
+namespace Finalspace.Onigiri.Win32;
+
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
+class Win32UserIdentity : IUserIdentity
 {
-    [SupportedOSPlatform(nameof(OSPlatform.Windows))]
-    class Win32UserIdentity : IUserIdentity
+    public string UserName => _identity.User.Value;
+
+    private readonly WindowsIdentity _identity;
+
+    public Win32UserIdentity(WindowsIdentity identity = null)
     {
-        public string UserName => _identity.User.Value;
+        _identity = identity ?? WindowsIdentity.GetCurrent();
+    }
 
-        private readonly WindowsIdentity _identity;
+    private bool _disposed;
 
-        public Win32UserIdentity(WindowsIdentity identity = null)
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
         {
-            _identity = identity ?? WindowsIdentity.GetCurrent();
+            if (disposing)
+                _identity.Dispose();
+            _disposed = true;
         }
+    }
 
-        private bool _disposed;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                    _identity.Dispose();
-                _disposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

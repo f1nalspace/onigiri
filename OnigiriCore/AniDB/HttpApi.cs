@@ -17,7 +17,7 @@ namespace Finalspace.Onigiri.AniDB
 
     class HttpApi : IHttpApi
     {
-        private static readonly ILogger log = Log.For<HttpApi>();
+        private static readonly ILogger log = Log.ForContext<HttpApi>();
 
         private static string ApiURL = "http://api.anidb.net:9001/httpapi?client={{clientName}}&clientver={{clientVer}}&protover={{protoVer}}&request=anime&aid={{aid}}";
         private static string TitlesDumpURL = "https://anidb.net/api/animetitles.xml.gz";

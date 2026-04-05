@@ -1,14 +1,12 @@
 ﻿using Finalspace.Onigiri.Enums;
 using Finalspace.Onigiri.Events;
-using Finalspace.Onigiri.Media;
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Security;
 using Finalspace.Onigiri.Storage;
-using log4net.Config;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -144,8 +142,11 @@ namespace Finalspace.Onigiri
             Console.OutputEncoding = Encoding.UTF8;
 
             Console.WriteLine(string.Join(" ", args));
-
-            XmlConfigurator.Configure();
+            
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Debug()
+                .CreateLogger();
 
             if (args.Length == 0)
             {
@@ -177,6 +178,7 @@ namespace Finalspace.Onigiri
 
             Console.ReadKey();           
 
+            await Log.CloseAndFlushAsync();
         }
     }
 }

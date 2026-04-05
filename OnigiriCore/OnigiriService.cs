@@ -20,691 +20,690 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Finalspace.Onigiri
+namespace Finalspace.Onigiri;
+
+public class OnigiriService
 {
-    public class OnigiriService
+    private static readonly ILogger log = Log.ForContext<OnigiriService>();
+
+    private readonly IUserService _userService;
+
+    private readonly IUserIdentity _currentUser;
+
+    private readonly IHttpApi _api;
+
+    public Config Config { get; }
+    public Titles Titles { get; }
+    public Animes Animes { get; }
+    public Issues Issues { get; }
+
+    public OnigiriService(IUserService userService)
     {
-        private static readonly ILogger log = Log.For<OnigiriService>();
+        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
 
-        private readonly IUserService _userService;
+        _currentUser = _userService.GetCurrentUser();
 
-        private readonly IUserIdentity _currentUser;
+        _api = new HttpApi();
 
-        private readonly IHttpApi _api;
+        if (!Directory.Exists(OnigiriPaths.AppSettingsPath))
+            Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
 
-        public Config Config { get; }
-        public Titles Titles { get; }
-        public Animes Animes { get; }
-        public Issues Issues { get; }
+        if (!Directory.Exists(OnigiriPaths.PersistentPath))
+            Directory.CreateDirectory(OnigiriPaths.PersistentPath);
 
-        public OnigiriService(IUserService userService)
+        Config = new Config();
+        Titles = new Titles();
+        Animes = new Animes();
+        Issues = new Issues();
+    }
+
+    /// <summary>
+    /// Finds the anime id (aid) from the given title.
+    /// The title is typically the name of the folder.
+    /// </summary>
+    /// <remarks>Uses the 'SearchTypeLanguages' for probing titles</remarks>
+    /// <param name="name">The title of the anime without special characters</param>
+    /// <returns>Found aid or zero</returns>
+    public Task<Title> FindTitleAsync(string name) => Task.Run(() =>
+    {
+        Title result = null;
+        foreach (SearchTypeLanguage stl in Config.SearchTypeLanguages)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-
-            _currentUser = _userService.GetCurrentUser();
-
-            _api = new HttpApi();
-
-            if (!Directory.Exists(OnigiriPaths.AppSettingsPath))
-                Directory.CreateDirectory(OnigiriPaths.AppSettingsPath);
-
-            if (!Directory.Exists(OnigiriPaths.PersistentPath))
-                Directory.CreateDirectory(OnigiriPaths.PersistentPath);
-
-            Config = new Config();
-            Titles = new Titles();
-            Animes = new Animes();
-            Issues = new Issues();
-        }
-
-        /// <summary>
-        /// Finds the anime id (aid) from the given title.
-        /// The title is typically the name of the folder.
-        /// </summary>
-        /// <remarks>Uses the 'SearchTypeLanguages' for probing titles</remarks>
-        /// <param name="name">The title of the anime without special characters</param>
-        /// <returns>Found aid or zero</returns>
-        public Task<Title> FindTitleAsync(string name) => Task.Run(() =>
-        {
-            Title result = null;
-            foreach (SearchTypeLanguage stl in Config.SearchTypeLanguages)
+            if (!string.IsNullOrEmpty(stl.Type) &&
+                !string.IsNullOrEmpty(stl.Lang))
             {
-                if (!string.IsNullOrEmpty(stl.Type) &&
-                    !string.IsNullOrEmpty(stl.Lang))
+                Title found = Titles.FindTitle(name, stl.Type, stl.Lang);
+                if (found is not null)
                 {
-                    Title found = Titles.FindTitle(name, stl.Type, stl.Lang);
-                    if (found is not null)
-                    {
-                        log.Debug($"Found title {name} for name '{name}', type='{stl.Type}', lang='{stl.Lang}'!");
-                        result = found;
-                        break;
-                    }
-                }
-                else
-                    log.Error($"Invalid search type language '{stl.Type}/{stl.Lang}'!");
-            }
-            return result;
-        });
-
-        private static string ResolveSearchPath(SearchPath searchPath)
-        {
-            string path = searchPath.Path;
-            if (!string.IsNullOrEmpty(searchPath.DriveName))
-            {
-                DriveInfo[] drives = DriveInfo.GetDrives();
-                foreach (DriveInfo drive in drives)
-                {
-                    if (drive.IsReady && drive.VolumeLabel.Equals(searchPath.DriveName))
-                    {
-                        DirectoryInfo dir = new DirectoryInfo(path);
-                        path = path.Remove(0, dir.Root.FullName.Length);
-                        path = Path.Combine(drive.RootDirectory.FullName, path);
-                        break;
-                    }
+                    log.Debug($"Found title {name} for name '{name}', type='{stl.Type}', lang='{stl.Lang}'!");
+                    result = found;
+                    break;
                 }
             }
-            return path;
+            else
+                log.Error($"Invalid search type language '{stl.Type}/{stl.Lang}'!");
+        }
+        return result;
+    });
+
+    private static string ResolveSearchPath(SearchPath searchPath)
+    {
+        string path = searchPath.Path;
+        if (!string.IsNullOrEmpty(searchPath.DriveName))
+        {
+            DriveInfo[] drives = DriveInfo.GetDrives();
+            foreach (DriveInfo drive in drives)
+            {
+                if (drive.IsReady && drive.VolumeLabel.Equals(searchPath.DriveName))
+                {
+                    DirectoryInfo dir = new DirectoryInfo(path);
+                    path = path.Remove(0, dir.Root.FullName.Length);
+                    path = Path.Combine(drive.RootDirectory.FullName, path);
+                    break;
+                }
+            }
+        }
+        return path;
+    }
+
+    private async Task<Anime> GetOrUpdate(string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new ArgumentNullException(nameof(sourcePath));
+        if (flags == UpdateFlags.None)
+            throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+
+        log.Information($"Update anime from path '{sourcePath}' with flags {flags}");
+
+        DirectoryInfo sourceDir = new DirectoryInfo(sourcePath);
+        if (!sourceDir.Exists)
+        {
+            log.Warning($"Anime directory '{sourcePath}' could not be found!");
+            return (null);
         }
 
-        private async Task<Anime> GetOrUpdate(string sourcePath, UpdateFlags flags, StatusChangedEventHandler statusChanged)
+        if (sourceDir.Attributes.HasFlag(FileAttributes.System))
         {
-            if (string.IsNullOrWhiteSpace(sourcePath))
-                throw new ArgumentNullException(nameof(sourcePath));
-            if (flags == UpdateFlags.None)
-                throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+            log.Warning($"Anime directory '{sourcePath}' is a system directory!");
+            return (null);
+        }
 
-            log.Info($"Update anime from path '{sourcePath}' with flags {flags}");
+        string folderName = sourceDir.Name;
+        string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
+        string animeXmlFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeXMLDetailsFilename);
+        string animeAidFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeAIDFilename);
 
-            DirectoryInfo sourceDir = new DirectoryInfo(sourcePath);
-            if (!sourceDir.Exists)
+        ulong aid = 0;
+
+        // Get AID from text file
+        if (File.Exists(animeAidFilePath))
+        {
+            string text = File.ReadAllText(animeAidFilePath);
+            if (ulong.TryParse(text, out ulong tmp))
+                aid = tmp;
+        }
+
+        // Get AID from xml file
+        if (aid == 0 && File.Exists(animeXmlFilePath))
+        {
+            Anime tmpAnime = new Anime();
+            tmpAnime.LoadFromAnimeXML(animeXmlFilePath, true);
+            aid = tmpAnime.Aid;
+        }
+
+        // Still no aid found, use title as last fallback
+        if (aid == 0)
+        {
+            // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
+            log.Debug($"Find title by name '{cleanTitleName}' in folder '{folderName}'");
+            Title title = await FindTitleAsync(cleanTitleName);
+            if (title is not null)
             {
-                log.Warn($"Anime directory '{sourcePath}' could not be found!");
+                log.Debug($"Found title by name '{cleanTitleName}' in folder '{folderName}', got result: {title}");
+                aid = title.Aid;
+            }
+            else
+            {
+                // Still no aid, dont update anything
+                Issues.Add(IssueKind.TitleNotFound, $"No title for anime '{cleanTitleName}' found!", sourcePath, folderName);
+                log.Warning($"No title for anime '{sourcePath}' as '{cleanTitleName}' - no aid found!");
                 return (null);
             }
+        }
 
-            if (sourceDir.Attributes.HasFlag(FileAttributes.System))
+        // Download anime details xml
+        if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadDetails) || flags.HasFlag(UpdateFlags.ForceDetails)))
+        {
+            bool updateDetails = flags.HasFlag(UpdateFlags.ForceDetails) || !File.Exists(animeXmlFilePath);
+            if (updateDetails)
             {
-                log.Warn($"Anime directory '{sourcePath}' is a system directory!");
-                return (null);
-            }
-
-            string folderName = sourceDir.Name;
-            string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
-            string animeXmlFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeXMLDetailsFilename);
-            string animeAidFilePath = Path.Combine(sourcePath, OnigiriPaths.AnimeAIDFilename);
-
-            ulong aid = 0;
-
-            // Get AID from text file
-            if (File.Exists(animeAidFilePath))
-            {
-                string text = File.ReadAllText(animeAidFilePath);
-                if (ulong.TryParse(text, out ulong tmp))
-                    aid = tmp;
-            }
-
-            // Get AID from xml file
-            if (aid == 0 && File.Exists(animeXmlFilePath))
-            {
-                Anime tmpAnime = new Anime();
-                tmpAnime.LoadFromAnimeXML(animeXmlFilePath, true);
-                aid = tmpAnime.Aid;
-            }
-
-            // Still no aid found, use title as last fallback
-            if (aid == 0)
-            {
-                // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
-                log.Debug($"Find title by name '{cleanTitleName}' in folder '{folderName}'");
-                Title title = await FindTitleAsync(cleanTitleName);
-                if (title is not null)
+                log.Information($"Request details for aid {aid} as '{cleanTitleName}'");
+                TextContent content = await _api.RequestAnimeAsync(aid);
+                if (content is not null && !string.IsNullOrEmpty(content.Text))
                 {
-                    log.Debug($"Found title by name '{cleanTitleName}' in folder '{folderName}', got result: {title}");
-                    aid = title.Aid;
+                    log.Information($"Save details xml file a'{animeXmlFilePath}'");
+                    content.SaveToFile(animeXmlFilePath);
+                }
+                else
+                    log.Warning($"Failed requesting  by aid {aid} from anidb'!");
+            }
+        }
+
+        Anime anime = await LoadAnimeFromSourceDirAsync(sourceDir, statusChanged);
+        Debug.Assert(anime is not null);
+
+        // Find picture
+        string imageFilePath = await FindImageFileAsync(sourceDir);
+        if (!string.IsNullOrWhiteSpace(imageFilePath) && string.IsNullOrWhiteSpace(anime.Picture))
+            anime.Picture = Path.GetFileName(imageFilePath);
+
+        // Download picture
+        if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture)))
+        {
+            bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
+            if (updatePicture)
+            {
+                if (string.IsNullOrEmpty(anime.Picture))
+                {
+                    log.Warning($"Missing picture file in anime '{anime}'!");
+                    Issues.Add(IssueKind.PictureUndefined, $"No picture name in anime '{anime}' defined", sourceDir.FullName);
                 }
                 else
                 {
-                    // Still no aid, dont update anything
-                    Issues.Add(IssueKind.TitleNotFound, $"No title for anime '{cleanTitleName}' found!", sourcePath, folderName);
-                    log.Warn($"No title for anime '{sourcePath}' as '{cleanTitleName}' - no aid found!");
-                    return (null);
-                }
-            }
-
-            // Download anime details xml
-            if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadDetails) || flags.HasFlag(UpdateFlags.ForceDetails)))
-            {
-                bool updateDetails = flags.HasFlag(UpdateFlags.ForceDetails) || !File.Exists(animeXmlFilePath);
-                if (updateDetails)
-                {
-                    log.Info($"Request details for aid {aid} as '{cleanTitleName}'");
-                    TextContent content = await _api.RequestAnimeAsync(aid);
-                    if (content is not null && !string.IsNullOrEmpty(content.Text))
+                    imageFilePath = Path.Combine(sourceDir.FullName, anime.Picture);
+                    await _api.DownloadPictureAsync(anime.Picture, imageFilePath);
+                    if (!File.Exists(imageFilePath))
                     {
-                        log.Info($"Save details xml file a'{animeXmlFilePath}'");
-                        content.SaveToFile(animeXmlFilePath);
-                    }
-                    else
-                        log.Warn($"Failed requesting  by aid {aid} from anidb'!");
-                }
-            }
-
-            Anime anime = await LoadAnimeFromSourceDirAsync(sourceDir, statusChanged);
-            Debug.Assert(anime is not null);
-
-            // Find picture
-            string imageFilePath = await FindImageFileAsync(sourceDir);
-            if (!string.IsNullOrWhiteSpace(imageFilePath) && string.IsNullOrWhiteSpace(anime.Picture))
-                anime.Picture = Path.GetFileName(imageFilePath);
-
-            // Download picture
-            if (!flags.HasFlag(UpdateFlags.ReadOnly) && (flags.HasFlag(UpdateFlags.DownloadPicture) || flags.HasFlag(UpdateFlags.ForcePicture)))
-            {
-                bool updatePicture = flags.HasFlag(UpdateFlags.ForcePicture) || string.IsNullOrEmpty(imageFilePath);
-                if (updatePicture)
-                {
-                    if (string.IsNullOrEmpty(anime.Picture))
-                    {
-                        log.Warn($"Missing picture file in anime '{anime}'!");
-                        Issues.Add(IssueKind.PictureUndefined, $"No picture name in anime '{anime}' defined", sourceDir.FullName);
-                    }
-                    else
-                    {
-                        imageFilePath = Path.Combine(sourceDir.FullName, anime.Picture);
-                        await _api.DownloadPictureAsync(anime.Picture, imageFilePath);
-                        if (!File.Exists(imageFilePath))
-                        {
-                            log.Warn($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
-                            Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", sourceDir.FullName);
-                        }
+                        log.Warning($"Failed downloading picture '{anime.Picture}' to '{imageFilePath}' for '{anime}'!");
+                        Issues.Add(IssueKind.PictureNotFound, $"The picture '{anime.Picture}' does not exists for anime '{anime}'", sourceDir.FullName);
                     }
                 }
             }
-
-            if ((anime.Image is null || flags.HasFlag(UpdateFlags.ReadOnly) || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
-                !string.IsNullOrWhiteSpace(imageFilePath) &&
-                File.Exists(imageFilePath))
-            {
-                // TODO(tspaete): More robust image file read
-                byte[] imageData = await File.ReadAllBytesAsync(imageFilePath);
-                if (imageData is not null && imageData.Length > 0)
-                {
-                    string filename = Path.GetFileName(imageFilePath);
-                    anime.Image = new AnimeImage(filename, imageData);
-                }
-                else
-                {
-                    log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
-                    Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", sourceDir.FullName);
-                }
-            }
-
-            return (anime);
         }
 
-        public void ClearIssues()
+        if ((anime.Image is null || flags.HasFlag(UpdateFlags.ReadOnly) || flags.HasFlag(UpdateFlags.ForcePicture) || flags.HasFlag(UpdateFlags.DownloadPicture)) &&
+            !string.IsNullOrWhiteSpace(imageFilePath) &&
+            File.Exists(imageFilePath))
         {
-            Issues.Clear();
+            // TODO(tspaete): More robust image file read
+            byte[] imageData = await File.ReadAllBytesAsync(imageFilePath);
+            if (imageData is not null && imageData.Length > 0)
+            {
+                string filename = Path.GetFileName(imageFilePath);
+                anime.Image = new AnimeImage(filename, imageData);
+            }
+            else
+            {
+                log.Warning($"Failed reading picture file '{imageFilePath}' for anime '{anime}'!");
+                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{anime}'", sourceDir.FullName);
+            }
         }
 
-        public async Task UpdateSourcesAsync(UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
-        {
-            if (flags == UpdateFlags.None)
-                throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+        return (anime);
+    }
 
-            log.Info($"Update animes with flags {flags}");
+    public void ClearIssues()
+    {
+        Issues.Clear();
+    }
 
-            // Download anime titles dump raw file from anidb if needed
-            if (flags.HasFlag(UpdateFlags.DownloadTitles))
-                await ReadTitlesAsync(statusChanged, true);
+    public async Task UpdateSourcesAsync(UpdateFlags flags, StatusChangedEventHandler statusChanged = null)
+    {
+        if (flags == UpdateFlags.None)
+            throw new ArgumentException($"Flags must be set to something else other than zero", nameof(flags));
+
+        log.Information($"Update animes with flags {flags}");
+
+        // Download anime titles dump raw file from anidb if needed
+        if (flags.HasFlag(UpdateFlags.DownloadTitles))
+            await ReadTitlesAsync(statusChanged, true);
             
-            List<Anime> list = new List<Anime>();
+        List<Anime> list = new List<Anime>();
 
-            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
+        using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
+        {
+            List<DirectoryInfo> animeDirs = new List<DirectoryInfo>();
+            foreach (SearchPath searchPath in Config.SearchPaths)
             {
-                List<DirectoryInfo> animeDirs = new List<DirectoryInfo>();
-                foreach (SearchPath searchPath in Config.SearchPaths)
+                string path = ResolveSearchPath(searchPath);
+                if (string.IsNullOrEmpty(path))
                 {
-                    string path = ResolveSearchPath(searchPath);
-                    if (string.IsNullOrEmpty(path))
-                    {
-                        log.Warn($"Search path '{path}' is empty!");
-                        continue;
-                    }
-                    DirectoryInfo searchDir = new DirectoryInfo(path);
-                    if (!searchDir.Exists)
-                    {
-                        Issues.Add(IssueKind.SearchPathMissing, "Search path not found!", path);
-                        log.Warn($"Search path '{path}' not found!");
-                        continue;
-                    }
-
-                    log.Info($"Get anime folders from search dir '{searchDir.FullName}'");
-                    DirectoryInfo[] dirs = searchDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                    foreach (DirectoryInfo dir in dirs)
-                    {
-                        if (dir.Name.StartsWith("_"))
-                        {
-                            // Anime group folder
-                            DirectoryInfo[] subdirs = dir.GetDirectories();
-                            foreach (DirectoryInfo subdir in subdirs)
-                                animeDirs.Add(subdir);
-                            continue;
-                        }
-                        animeDirs.Add(dir);
-                    }
+                    log.Warning($"Search path '{path}' is empty!");
+                    continue;
+                }
+                DirectoryInfo searchDir = new DirectoryInfo(path);
+                if (!searchDir.Exists)
+                {
+                    Issues.Add(IssueKind.SearchPathMissing, "Search path not found!", path);
+                    log.Warning($"Search path '{path}' not found!");
+                    continue;
                 }
 
-                int count = 0;
-                int totalDirCount = animeDirs.Count;
+                log.Information($"Get anime folders from search dir '{searchDir.FullName}'");
+                DirectoryInfo[] dirs = searchDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                foreach (DirectoryInfo dir in dirs)
+                {
+                    if (dir.Name.StartsWith("_"))
+                    {
+                        // Anime group folder
+                        DirectoryInfo[] subdirs = dir.GetDirectories();
+                        foreach (DirectoryInfo subdir in subdirs)
+                            animeDirs.Add(subdir);
+                        continue;
+                    }
+                    animeDirs.Add(dir);
+                }
+            }
 
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
+            int count = 0;
+            int totalDirCount = animeDirs.Count;
 
-                var sortedAnimeDirs = animeDirs.OrderBy(d => d.FullName).ToArray();
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} animes" });
 
-                int threadCount = Config.MaxThreadCount;
+            var sortedAnimeDirs = animeDirs.OrderBy(d => d.FullName).ToArray();
 
-                ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
+            int threadCount = Config.MaxThreadCount;
 
-                ConcurrentBag<Anime> animes = new ConcurrentBag<Anime>();
-                foreach (DirectoryInfo animeDir in sortedAnimeDirs)
+            ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = threadCount };
+
+            ConcurrentBag<Anime> animes = new ConcurrentBag<Anime>();
+            foreach (DirectoryInfo animeDir in sortedAnimeDirs)
+            {
+                int c = Interlocked.Increment(ref count);
+                int percentage = (int)((c / (double)totalDirCount) * 100.0);
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
+                Anime anime = await GetOrUpdate(animeDir.FullName, flags, statusChanged);
+                animes.Add(anime);
+            }
+            list.AddRange(animes.Where(a => a is not null).OrderBy(a => a.MainTitle));
+
+            if (flags.HasFlag(UpdateFlags.ParseMediaInfo))
+            {
+                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} media infos" });
+
+                log.Information($"Find media files from {list.Count} animes");
+                count = 0;
+                Stopwatch watch = Stopwatch.StartNew();
+                await Parallel.ForEachAsync(list, parallelOptions, async (anime, token) =>
                 {
                     int c = Interlocked.Increment(ref count);
                     int percentage = (int)((c / (double)totalDirCount) * 100.0);
                     statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                    Anime anime = await GetOrUpdate(animeDir.FullName, flags, statusChanged);
-                    animes.Add(anime);
-                }
-                list.AddRange(animes.Where(a => a is not null).OrderBy(a => a.MainTitle));
-
-                if (flags.HasFlag(UpdateFlags.ParseMediaInfo))
-                {
-                    statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Update {totalDirCount} media infos" });
-
-                    log.Info($"Find media files from {list.Count} animes");
-                    count = 0;
-                    Stopwatch watch = Stopwatch.StartNew();
-                    await Parallel.ForEachAsync(list, parallelOptions, async (anime, token) =>
+                    DirectoryInfo animeDir = new DirectoryInfo(anime.FoundPath);
+                    if (animeDir.Exists)
                     {
-                        int c = Interlocked.Increment(ref count);
-                        int percentage = (int)((c / (double)totalDirCount) * 100.0);
-                        statusChanged?.Invoke(this, new StatusChangedArgs() { Percentage = percentage, Header = $"{c} of {totalDirCount} done" });
-                        DirectoryInfo animeDir = new DirectoryInfo(anime.FoundPath);
-                        if (animeDir.Exists)
-                        {
-                            AnimeMediaFile[] extendedMediaFiles = await GetExtendedMediaFilesAsync(animeDir);
-                            anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
-                            anime.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
-                        }
-                        else
-                        {
-                            anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>();
-                            anime.MediaFiles = new ObservableCollection<string>();
-                        }
-                    });
-                    int totalMediaFiles = list.Sum(a => a.MediaFileCount);
-                    watch.Stop();
-                    log.Debug($"Found {totalMediaFiles} media files from {list.Count} animes, took {watch.Elapsed.TotalSeconds} secs");
-                }
+                        AnimeMediaFile[] extendedMediaFiles = await GetExtendedMediaFilesAsync(animeDir);
+                        anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>(extendedMediaFiles);
+                        anime.MediaFiles = new ObservableCollection<string>(extendedMediaFiles.Select(m => m.FileName));
+                    }
+                    else
+                    {
+                        anime.ExtendedMediaFiles = new ObservableCollection<AnimeMediaFile>();
+                        anime.MediaFiles = new ObservableCollection<string>();
+                    }
+                });
+                int totalMediaFiles = list.Sum(a => a.MediaFileCount);
+                watch.Stop();
+                log.Debug($"Found {totalMediaFiles} media files from {list.Count} animes, took {watch.Elapsed.TotalSeconds} secs");
             }
+        }
 
-            Anime[] sortedAnimes = list.OrderBy(a => a.FoundPath).ToArray();
+        Anime[] sortedAnimes = list.OrderBy(a => a.FoundPath).ToArray();
+        Animes.Set(sortedAnimes);
+    }
+
+    private static Task<string> FindImageFileAsync(DirectoryInfo dir) => Task.Run(() =>
+    {
+        FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
+        DateTime? bestDate = null;
+        FileInfo bestImage = null;
+        foreach (FileInfo file in files)
+        {
+            if (!file.Extension.Equals(".jpg", StringComparison.InvariantCultureIgnoreCase) &&
+                !file.Extension.Equals(".png", StringComparison.InvariantCultureIgnoreCase))
+                continue;
+            if (bestDate is null || file.LastWriteTime > bestDate)
+            {
+                bestDate = file.LastWriteTime;
+                bestImage = file;
+            }
+        }
+        if (bestImage is not null)
+            return bestImage.FullName;
+        return null;
+    });
+
+    public static readonly FrozenSet<string> MediaFileExtensions = new HashSet<string>
+    {
+        ".avi",
+        ".mkv",
+        ".ogm",
+        ".ogv",
+        ".mpg",
+        ".mpeg",
+        ".mp4"
+    }.ToFrozenSet();
+
+    private static async Task<AnimeMediaFile[]> GetExtendedMediaFilesAsync(DirectoryInfo dir)
+    {
+        FileInfo[] files = dir
+            .GetFiles("*", SearchOption.TopDirectoryOnly)
+            .Where(f => !f.Attributes.HasFlag(FileAttributes.System))
+            .Where(f => MediaFileExtensions.Contains(f.Extension.ToLower()))
+            .OrderBy(f => f.Name)
+            .ToArray();
+
+        ConcurrentBag<AnimeMediaFile> list = new ConcurrentBag<AnimeMediaFile>();
+
+        await Parallel.ForEachAsync(files, async (file, token) =>
+        {
+            try
+            {
+                MediaInfo info = await MediaInfoParser.Parse(file);
+
+                AnimeMediaFile animeMediaFile = new AnimeMediaFile()
+                {
+                    FileName = file.Name,
+                    FileSize = (ulong)file.Length,
+                    Info = info,
+                };
+                list.Add(animeMediaFile);
+            }
+            catch
+            {
+                // @TODO(final): Log error!
+            }
+        });
+
+        AnimeMediaFile[] result = list.OrderBy(a => a.FileName).ToArray();
+
+        return result;
+    }
+
+    private static Title CreateFallbackTitle(ulong aid, string folderName)
+    {
+        // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
+        string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
+        Title result = new Title()
+        {
+            Aid = aid,
+            Lang = LanguageNames.EnglishShort,
+            Type = TitleTypes.Main,
+            Name = cleanTitleName
+        };
+        return result;
+    }
+
+    /// <summary>
+    /// Loads an <see cref="Anime"/> from the specified source <see cref="DirectoryInfo"/>.
+    /// </summary>
+    /// <param name="sourceDir">The source <see cref="DirectoryInfo"/>.</param>
+    /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+    /// <returns>The resulting <see cref="Anime"/>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="sourceDir"/> is <c>null</c>.</exception>
+    private async Task<Anime> LoadAnimeFromSourceDirAsync(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
+    {
+        ArgumentNullException.ThrowIfNull(sourceDir);
+
+        Stopwatch watch = new Stopwatch();
+
+        // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
+        string cleanTitleName = AnimeUtils.GetCleanAnimeName(sourceDir.Name);
+
+        // Find AID
+        ulong aid = 0;
+        statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find aid from: {sourceDir.Name}" });
+        log.Information($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
+        watch.Restart();
+        Title foundTitle = await FindTitleAsync(cleanTitleName);
+        watch.Stop();
+        log.Debug($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
+        if (foundTitle is null)
+            log.Warning($"No title found for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'!");
+        else
+            aid = foundTitle.Aid;
+
+        // Push aid and path
+        Anime result = new Anime()
+        {
+            Aid = aid,
+            FoundPath = sourceDir.FullName
+        };
+
+        // Load anime details into the anime
+        string animeXmlFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLDetailsFilename);
+        statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Load details: {sourceDir.Name}" });
+        if (!File.Exists(animeXmlFilePath))
+        {
+            log.Warning($"Not found anime details file '{animeXmlFilePath}', aid='{aid}', title='{cleanTitleName}'!");
+        }
+        else
+        {
+            watch.Restart();
+            result.LoadFromAnimeXML(animeXmlFilePath);
+            watch.Stop();
+            log.Debug($"Loading anime details file '{animeXmlFilePath}' took {watch.Elapsed.TotalSeconds} secs");
+            if (result.Aid > 0)
+                aid = result.Aid;
+        }
+
+        // Title fallbacks
+        Title databaseTitle = Titles.GetTitle(aid);
+        if (string.IsNullOrEmpty(result.MainTitle))
+        {
+            if (databaseTitle is not null)
+                result.Titles.Add(databaseTitle);
+            else
+                result.Titles.Add(CreateFallbackTitle(aid, sourceDir.Name));
+        }
+
+        // Find image
+        statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {sourceDir.Name}" });
+        log.Information($"Find image for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
+        watch.Restart();
+        string imageFilePath = await FindImageFileAsync(sourceDir);
+        watch.Stop();
+        log.Debug($"Find image in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
+        if (!string.IsNullOrEmpty(imageFilePath) && File.Exists(imageFilePath))
+        {
+            // TODO(tspaete): More robust image file read
+            byte[] imageData = File.ReadAllBytes(imageFilePath);
+            if (imageData is not null && imageData.Length > 0)
+            {
+                string filename = Path.GetFileName(imageFilePath);
+                result.Image = new AnimeImage(filename, imageData);
+            }
+            else
+            {
+                log.Warning($"Failed reading picture file '{imageFilePath}' for anime '{result}'!");
+                Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{result}'", sourceDir.FullName);
+            }
+        }
+        else
+            log.Warning($"Not found anime image '{result.Picture}' aid='{aid}', title='{cleanTitleName}'!");
+
+        // Find additional data
+        string addonFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLAddonFilename);
+        if (File.Exists(addonFilePath))
+        {
+            log.Information($"Loading addon data file '{addonFilePath}'");
+            watch.Restart();
+            result.AddonData.LoadFromFile(addonFilePath);
+            watch.Stop();
+            log.Debug($"Loading addon data file '{addonFilePath}' took {watch.Elapsed.TotalSeconds} secs");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Loads all <see cref="Animes"/> and <see cref="Issues"/> from the specified <see cref="IAnimeStorage"/>.
+    /// </summary>
+    /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
+    /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
+    public Task LoadAsync(IAnimeStorage storage, StatusChangedEventHandler statusChanged) => Task.Run(() =>
+    {
+        ArgumentNullException.ThrowIfNull(storage);
+
+        using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
+        {
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load from '{storage}'", Subject = "", Percentage = -1 });
+
+            Stopwatch watch;
+
+            watch = Stopwatch.StartNew();
+            log.Information($"Load animes from '{storage}' animes");
+            AnimeStorageData data = storage.Load(statusChanged);
+            watch.Stop();
+            log.Debug($"Load animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+
+            watch.Restart();
+            log.Debug($"Refresh {data.Animes.Length} animes");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{data.Animes.Length}' animes", Subject = "", Percentage = -1 });
+
+            Anime[] sortedAnimes = data.Animes.OrderBy(a => a.FoundPath).ToArray();
             Animes.Set(sortedAnimes);
-        }
 
-        private static Task<string> FindImageFileAsync(DirectoryInfo dir) => Task.Run(() =>
-        {
-            FileInfo[] files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
-            DateTime? bestDate = null;
-            FileInfo bestImage = null;
-            foreach (FileInfo file in files)
-            {
-                if (!file.Extension.Equals(".jpg", StringComparison.InvariantCultureIgnoreCase) &&
-                    !file.Extension.Equals(".png", StringComparison.InvariantCultureIgnoreCase))
-                    continue;
-                if (bestDate is null || file.LastWriteTime > bestDate)
-                {
-                    bestDate = file.LastWriteTime;
-                    bestImage = file;
-                }
-            }
-            if (bestImage is not null)
-                return bestImage.FullName;
-            return null;
-        });
-
-        public static readonly FrozenSet<string> MediaFileExtensions = new HashSet<string>
-        {
-            ".avi",
-            ".mkv",
-            ".ogm",
-            ".ogv",
-            ".mpg",
-            ".mpeg",
-            ".mp4"
-        }.ToFrozenSet();
-
-        private static async Task<AnimeMediaFile[]> GetExtendedMediaFilesAsync(DirectoryInfo dir)
-        {
-            FileInfo[] files = dir
-                .GetFiles("*", SearchOption.TopDirectoryOnly)
-                .Where(f => !f.Attributes.HasFlag(FileAttributes.System))
-                .Where(f => MediaFileExtensions.Contains(f.Extension.ToLower()))
-                .OrderBy(f => f.Name)
-                .ToArray();
-
-            ConcurrentBag<AnimeMediaFile> list = new ConcurrentBag<AnimeMediaFile>();
-
-            await Parallel.ForEachAsync(files, async (file, token) =>
-            {
-                try
-                {
-                    MediaInfo info = await MediaInfoParser.Parse(file);
-
-                    AnimeMediaFile animeMediaFile = new AnimeMediaFile()
-                    {
-                        FileName = file.Name,
-                        FileSize = (ulong)file.Length,
-                        Info = info,
-                    };
-                    list.Add(animeMediaFile);
-                }
-                catch
-                {
-                    // @TODO(final): Log error!
-                }
-            });
-
-            AnimeMediaFile[] result = list.OrderBy(a => a.FileName).ToArray();
-
-            return result;
-        }
-
-        private static Title CreateFallbackTitle(ulong aid, string folderName)
-        {
-            // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
-            string cleanTitleName = AnimeUtils.GetCleanAnimeName(folderName);
-            Title result = new Title()
-            {
-                Aid = aid,
-                Lang = LanguageNames.EnglishShort,
-                Type = TitleTypes.Main,
-                Name = cleanTitleName
-            };
-            return result;
-        }
-
-        /// <summary>
-        /// Loads an <see cref="Anime"/> from the specified source <see cref="DirectoryInfo"/>.
-        /// </summary>
-        /// <param name="sourceDir">The source <see cref="DirectoryInfo"/>.</param>
-        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
-        /// <returns>The resulting <see cref="Anime"/>.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="sourceDir"/> is <c>null</c>.</exception>
-        private async Task<Anime> LoadAnimeFromSourceDirAsync(DirectoryInfo sourceDir, StatusChangedEventHandler statusChanged)
-        {
-            ArgumentNullException.ThrowIfNull(sourceDir);
-
-            Stopwatch watch = new Stopwatch();
-
-            // TODO:  This is useless to remove all special chars from the foldername, because names cannot have special characters anyway.
-            string cleanTitleName = AnimeUtils.GetCleanAnimeName(sourceDir.Name);
-
-            // Find AID
-            ulong aid = 0;
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find aid from: {sourceDir.Name}" });
-            log.Info($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
-            watch.Restart();
-            Title foundTitle = await FindTitleAsync(cleanTitleName);
             watch.Stop();
-            log.Debug($"Find title for anime '{cleanTitleName}' in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
-            if (foundTitle is null)
-                log.Warn($"No title found for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'!");
-            else
-                aid = foundTitle.Aid;
+            log.Debug($"Refresh animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+        }
+    });
 
-            // Push aid and path
-            Anime result = new Anime()
-            {
-                Aid = aid,
-                FoundPath = sourceDir.FullName
-            };
+    /// <summary>
+    /// Saves the <see cref="Animes"/> to the specified <see cref="IAnimeStorage"/>.
+    /// </summary>
+    /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
+    /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
+    public void Save(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
+    {
+        ArgumentNullException.ThrowIfNull(storage);
 
-            // Load anime details into the anime
-            string animeXmlFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLDetailsFilename);
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Load details: {sourceDir.Name}" });
-            if (!File.Exists(animeXmlFilePath))
-            {
-                log.Warn($"Not found anime details file '{animeXmlFilePath}', aid='{aid}', title='{cleanTitleName}'!");
-            }
-            else
-            {
-                watch.Restart();
-                result.LoadFromAnimeXML(animeXmlFilePath);
-                watch.Stop();
-                log.Debug($"Loading anime details file '{animeXmlFilePath}' took {watch.Elapsed.TotalSeconds} secs");
-                if (result.Aid > 0)
-                    aid = result.Aid;
-            }
+        using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
+        {
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
 
-            // Title fallbacks
-            Title databaseTitle = Titles.GetTitle(aid);
-            if (string.IsNullOrEmpty(result.MainTitle))
-            {
-                if (databaseTitle is not null)
-                    result.Titles.Add(databaseTitle);
-                else
-                    result.Titles.Add(CreateFallbackTitle(aid, sourceDir.Name));
-            }
+            ImmutableArray<Anime> animes = Animes.Items.ToImmutableArray();
 
-            // Find image
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = $"Find image: {sourceDir.Name}" });
-            log.Info($"Find image for anime '{cleanTitleName}' in folder '{sourceDir.FullName}'");
-            watch.Restart();
-            string imageFilePath = await FindImageFileAsync(sourceDir);
+            ImmutableArray<Title> titles = Titles.Items.ToImmutableArray();
+
+            AnimeStorageData data = new AnimeStorageData(animes, titles);
+
+            Stopwatch watch = Stopwatch.StartNew();
+            log.Information($"Save '{animes}' animes to storage '{storage}'");
+            storage.Save(data, statusChanged);
             watch.Stop();
-            log.Debug($"Find image in folder '{sourceDir.FullName}' took {watch.Elapsed.TotalSeconds} secs");
-            if (!string.IsNullOrEmpty(imageFilePath) && File.Exists(imageFilePath))
-            {
-                // TODO(tspaete): More robust image file read
-                byte[] imageData = File.ReadAllBytes(imageFilePath);
-                if (imageData is not null && imageData.Length > 0)
-                {
-                    string filename = Path.GetFileName(imageFilePath);
-                    result.Image = new AnimeImage(filename, imageData);
-                }
-                else
-                {
-                    log.Warn($"Failed reading picture file '{imageFilePath}' for anime '{result}'!");
-                    Issues.Add(IssueKind.PictureNotFound, $"The picture '{imageFilePath}' failed to load for anime '{result}'", sourceDir.FullName);
-                }
-            }
-            else
-                log.Warn($"Not found anime image '{result.Picture}' aid='{aid}', title='{cleanTitleName}'!");
+            log.Information($"Save '{animes}' animes to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+        }
+    }
 
-            // Find additional data
-            string addonFilePath = Path.Combine(sourceDir.FullName, OnigiriPaths.AnimeXMLAddonFilename);
-            if (File.Exists(addonFilePath))
-            {
-                log.Info($"Loading addon data file '{addonFilePath}'");
-                watch.Restart();
-                result.AddonData.LoadFromFile(addonFilePath);
-                watch.Stop();
-                log.Debug($"Loading addon data file '{addonFilePath}' took {watch.Elapsed.TotalSeconds} secs");
-            }
+    /// <summary>
+    /// Saves the specified <paramref name="anime"/> to the <paramref name="storage"/>.
+    /// </summary>
+    /// <param name="anime">The <see cref="Anime"/>.</param>
+    /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
+    /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
+    public void Save(Anime anime, IAnimeStorage storage, StatusChangedEventHandler statusChanged)
+    {
+        ArgumentNullException.ThrowIfNull(anime);
+        ArgumentNullException.ThrowIfNull(storage);
 
-            return result;
+        using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
+        {
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
+
+            Stopwatch watch = Stopwatch.StartNew();
+            log.Information($"Save anime '{anime}' to storage '{storage}'");
+            storage.Save(anime, statusChanged);
+            watch.Stop();
+            log.Information($"Save anime '{anime}' to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
+        }
+    }
+
+    private async Task<Titles> ReadTitlesAsync(StatusChangedEventHandler statusChanged, bool overwrite)
+    {
+        string xmlFilePath = OnigiriPaths.AnimeTitlesDumpXMLFilePath;
+        string rawFilePath = OnigiriPaths.AnimeTitlesDumpRawFilePath;
+
+        // Download anime titles dump raw file from anidb if needed
+        bool updateTitlesRaw = !File.Exists(rawFilePath);
+        if (updateTitlesRaw || overwrite)
+        {
+            log.Information($"Download anime titles dump to '{rawFilePath}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Downloading titles database", Percentage = -1 });
+            await _api.DownloadTitlesDumpAsync(rawFilePath);
+        }
+        if (!File.Exists(rawFilePath))
+            log.Warning($"Not found anime titles dump file '{rawFilePath}'!");
+        else
+            log.Debug($"Use already existing anime titles dump file '{rawFilePath}'");
+
+        // Decompress anime dump raw file if needed and save it to disk
+        bool updateTitlesXML = updateTitlesRaw || overwrite || !File.Exists(xmlFilePath);
+        if (File.Exists(rawFilePath) && updateTitlesXML)
+        {
+            log.Information($"Decompress anime titles dump '{rawFilePath}' to '{xmlFilePath}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Decompress titles database", Percentage = -1 });
+            FileUtils.DecompressFile(rawFilePath, xmlFilePath);
+        }
+        else if (File.Exists(xmlFilePath))
+            log.Debug($"Use already existing anime titles xml file '{xmlFilePath}'");
+
+        // Read anime titles
+        Titles result = new Titles();
+        if (File.Exists(xmlFilePath))
+        {
+            log.Information($"Parse titles dump xml file '{xmlFilePath}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Parse titles database", Percentage = -1 });
+            result.ReadFromFile(xmlFilePath);
+        }
+        else
+            log.Warning($"Not found anime titles xml file '{xmlFilePath}'!");
+
+        // Print out anime title statistics
+        log.Information($"Found {result.Items.Count} anime titles total");
+        log.Information($"Found {result.AIDCount} animes total");
+
+        return result;
+    }
+
+    public async Task StartupAsync(StatusChangedEventHandler statusChanged = null)
+    {
+        log.Information("Started service");
+        statusChanged?.Invoke(this, new StatusChangedArgs() { Header = "StartupAsync", Subject = "", Percentage = -1 });
+
+        string configFilePath = OnigiriPaths.ConfigFilePath;
+
+        log.Information($"Use identity: {_currentUser.UserName}");
+
+        // Read config
+        if (File.Exists(configFilePath))
+        {
+            log.Information($"Loading config file '{configFilePath}'");
+            statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Loading config file", Percentage = -1 });
+            Config.LoadFromFile(configFilePath);
+        }
+        else
+            log.Warning($"Not found config file '{configFilePath}'!");
+
+        // Add default users
+        if (Config.Users.Count == 0)
+        {
+            Config.Users.Add(new User("final", "final.png", "final_false.png"));
+            Config.Users.Add(new User("anni", "anni.png", "anni_false.png"));
         }
 
-        /// <summary>
-        /// Loads all <see cref="Animes"/> and <see cref="Issues"/> from the specified <see cref="IAnimeStorage"/>.
-        /// </summary>
-        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
-        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
-        /// <exception cref="ArgumentNullException">Thrown when any argument is <c>null</c>.</exception>
-        public Task LoadAsync(IAnimeStorage storage, StatusChangedEventHandler statusChanged) => Task.Run(() =>
-        {
-            ArgumentNullException.ThrowIfNull(storage);
+        // Download anime titles dump raw file from anidb if needed
+        Titles titles = await ReadTitlesAsync(statusChanged, false);
+        Titles.Items = titles.Items;
+    }
 
-            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
-            {
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Load from '{storage}'", Subject = "", Percentage = -1 });
-
-                Stopwatch watch;
-
-                watch = Stopwatch.StartNew();
-                log.Info($"Load animes from '{storage}' animes");
-                AnimeStorageData data = storage.Load(statusChanged);
-                watch.Stop();
-                log.Debug($"Load animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
-
-                watch.Restart();
-                log.Debug($"Refresh {data.Animes.Length} animes");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Refresh to '{data.Animes.Length}' animes", Subject = "", Percentage = -1 });
-
-                Anime[] sortedAnimes = data.Animes.OrderBy(a => a.FoundPath).ToArray();
-                Animes.Set(sortedAnimes);
-
-                watch.Stop();
-                log.Debug($"Refresh animes from storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
-            }
-        });
-
-        /// <summary>
-        /// Saves the <see cref="Animes"/> to the specified <see cref="IAnimeStorage"/>.
-        /// </summary>
-        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
-        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
-        public void Save(IAnimeStorage storage, StatusChangedEventHandler statusChanged)
-        {
-            ArgumentNullException.ThrowIfNull(storage);
-
-            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
-            {
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
-
-                ImmutableArray<Anime> animes = Animes.Items.ToImmutableArray();
-
-                ImmutableArray<Title> titles = Titles.Items.ToImmutableArray();
-
-                AnimeStorageData data = new AnimeStorageData(animes, titles);
-
-                Stopwatch watch = Stopwatch.StartNew();
-                log.Info($"Save '{animes}' animes to storage '{storage}'");
-                storage.Save(data, statusChanged);
-                watch.Stop();
-                log.Info($"Save '{animes}' animes to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
-            }
-        }
-
-        /// <summary>
-        /// Saves the specified <paramref name="anime"/> to the <paramref name="storage"/>.
-        /// </summary>
-        /// <param name="anime">The <see cref="Anime"/>.</param>
-        /// <param name="storage">The <see cref="IAnimeStorage"/>.</param>
-        /// <param name="statusChanged">The <see cref="StatusChangedEventHandler"/>.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="storage"/> is <c>null</c>.</exception>
-        public void Save(Anime anime, IAnimeStorage storage, StatusChangedEventHandler statusChanged)
-        {
-            ArgumentNullException.ThrowIfNull(anime);
-            ArgumentNullException.ThrowIfNull(storage);
-
-            using (IImpersonationContext imp = _userService.Impersonate(_currentUser))
-            {
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Header = $"Save to '{storage}'", Subject = "", Percentage = -1 });
-
-                Stopwatch watch = Stopwatch.StartNew();
-                log.Info($"Save anime '{anime}' to storage '{storage}'");
-                storage.Save(anime, statusChanged);
-                watch.Stop();
-                log.Info($"Save anime '{anime}' to storage '{storage}' took {watch.Elapsed.TotalSeconds} secs");
-            }
-        }
-
-        private async Task<Titles> ReadTitlesAsync(StatusChangedEventHandler statusChanged, bool overwrite)
-        {
-            string xmlFilePath = OnigiriPaths.AnimeTitlesDumpXMLFilePath;
-            string rawFilePath = OnigiriPaths.AnimeTitlesDumpRawFilePath;
-
-            // Download anime titles dump raw file from anidb if needed
-            bool updateTitlesRaw = !File.Exists(rawFilePath);
-            if (updateTitlesRaw || overwrite)
-            {
-                log.Info($"Download anime titles dump to '{rawFilePath}'");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Downloading titles database", Percentage = -1 });
-                await _api.DownloadTitlesDumpAsync(rawFilePath);
-            }
-            if (!File.Exists(rawFilePath))
-                log.Warn($"Not found anime titles dump file '{rawFilePath}'!");
-            else
-                log.Debug($"Use already existing anime titles dump file '{rawFilePath}'");
-
-            // Decompress anime dump raw file if needed and save it to disk
-            bool updateTitlesXML = updateTitlesRaw || overwrite || !File.Exists(xmlFilePath);
-            if (File.Exists(rawFilePath) && updateTitlesXML)
-            {
-                log.Info($"Decompress anime titles dump '{rawFilePath}' to '{xmlFilePath}'");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Decompress titles database", Percentage = -1 });
-                FileUtils.DecompressFile(rawFilePath, xmlFilePath);
-            }
-            else if (File.Exists(xmlFilePath))
-                log.Debug($"Use already existing anime titles xml file '{xmlFilePath}'");
-
-            // Read anime titles
-            Titles result = new Titles();
-            if (File.Exists(xmlFilePath))
-            {
-                log.Info($"Parse titles dump xml file '{xmlFilePath}'");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Parse titles database", Percentage = -1 });
-                result.ReadFromFile(xmlFilePath);
-            }
-            else
-                log.Warn($"Not found anime titles xml file '{xmlFilePath}'!");
-
-            // Print out anime title statistics
-            log.Info($"Found {result.Items.Count} anime titles total");
-            log.Info($"Found {result.AIDCount} animes total");
-
-            return result;
-        }
-
-        public async Task StartupAsync(StatusChangedEventHandler statusChanged = null)
-        {
-            log.Info("Started service");
-            statusChanged?.Invoke(this, new StatusChangedArgs() { Header = "StartupAsync", Subject = "", Percentage = -1 });
-
-            string configFilePath = OnigiriPaths.ConfigFilePath;
-
-            log.Info($"Use identity: {_currentUser.UserName}");
-
-            // Read config
-            if (File.Exists(configFilePath))
-            {
-                log.Info($"Loading config file '{configFilePath}'");
-                statusChanged?.Invoke(this, new StatusChangedArgs() { Subject = "Loading config file", Percentage = -1 });
-                Config.LoadFromFile(configFilePath);
-            }
-            else
-                log.Warn($"Not found config file '{configFilePath}'!");
-
-            // Add default users
-            if (Config.Users.Count == 0)
-            {
-                Config.Users.Add(new User("final", "final.png", "final_false.png"));
-                Config.Users.Add(new User("anni", "anni.png", "anni_false.png"));
-            }
-
-            // Download anime titles dump raw file from anidb if needed
-            Titles titles = await ReadTitlesAsync(statusChanged, false);
-            Titles.Items = titles.Items;
-        }
-
-        public void SaveConfig()
-        {
-            string configFilePath = OnigiriPaths.ConfigFilePath;
-            log.Info($"Saving config file '{configFilePath}'");
-            Config.SaveToFile(configFilePath);
-        }
+    public void SaveConfig()
+    {
+        string configFilePath = OnigiriPaths.ConfigFilePath;
+        log.Information($"Saving config file '{configFilePath}'");
+        Config.SaveToFile(configFilePath);
     }
 }

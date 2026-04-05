@@ -1,17 +1,14 @@
-﻿using log4net;
-using System.Reflection;
-using System.Threading;
+﻿using Serilog;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections;
 using System;
 
 namespace Finalspace.Onigiri.Models
 {
     public class Animes
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.ForContext<Animes>();
 
         public IEnumerable<Anime> Items => _items;
         private ImmutableArray<Anime> _items = ImmutableArray<Anime>.Empty;

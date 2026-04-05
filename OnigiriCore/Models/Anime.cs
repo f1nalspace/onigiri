@@ -1,16 +1,15 @@
 ﻿using Finalspace.Onigiri.Utils;
-using log4net;
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Types;
+using Serilog;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -18,7 +17,7 @@ namespace Finalspace.Onigiri.Models
     [XmlRoot()]
     public class Anime : BindableBase
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.ForContext<Anime>();
 
         private static string UniversalDateFormat = "yyyy-MM-dd";
 

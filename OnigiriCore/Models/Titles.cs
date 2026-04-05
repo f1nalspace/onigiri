@@ -1,15 +1,14 @@
 ﻿using Finalspace.Onigiri.Utils;
-using log4net;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Linq;
 using System.Xml.Serialization;
 using Finalspace.Onigiri.MVVM;
+using Serilog;
 
 namespace Finalspace.Onigiri.Models
 {
@@ -17,7 +16,7 @@ namespace Finalspace.Onigiri.Models
     [XmlRoot(ElementName = "Titles")]
     public class Titles : BindableBase
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.ForContext<Titles>();
 
         [XmlArray("Items")]
         [XmlArrayItem("Item")]

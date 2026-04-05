@@ -1,21 +1,21 @@
-﻿using System;
+﻿using Finalspace.Onigiri.Security;
+using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace Finalspace.Onigiri.Security
+namespace Finalspace.Onigiri.Win32;
+
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
+class Win32ImpersonationContext : IImpersonationContext
 {
-    [SupportedOSPlatform(nameof(OSPlatform.Windows))]
-    class Win32ImpersonationContext : IImpersonationContext
+    private readonly IUserIdentity _identity;
+
+    public Win32ImpersonationContext(IUserIdentity identity)
     {
-        private readonly IUserIdentity _identity;
+        _identity = identity ?? throw new ArgumentNullException(nameof(identity));
+    }
 
-        public Win32ImpersonationContext(IUserIdentity identity)
-        {
-            _identity = identity ?? throw new ArgumentNullException(nameof(identity));
-        }
-
-        public void Dispose()
-        {
-        }
+    public void Dispose()
+    {
     }
 }

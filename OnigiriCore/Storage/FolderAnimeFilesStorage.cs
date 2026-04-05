@@ -2,24 +2,21 @@
 using Finalspace.Onigiri.Extensions;
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Types;
-using Finalspace.Onigiri.Utils;
-using log4net;
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace Finalspace.Onigiri.Storage
 {
     public class FolderAnimeFilesStorage : IAnimeStorage
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.ForContext<FolderAnimeFilesStorage>();
         private readonly string _persistentPath;
         private readonly int _maxThreadCount;
 
@@ -39,7 +36,7 @@ namespace Finalspace.Onigiri.Storage
 
         class AnimeFile
         {
-            private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+            private static readonly ILogger log = Log.ForContext<AnimeFile>();
 
             public ulong Aid { get; }
 
