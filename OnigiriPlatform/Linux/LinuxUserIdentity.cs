@@ -11,13 +11,12 @@ sealed class LinuxUserIdentity : IUserIdentity
 
     public LinuxUserIdentity(string userName)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         UserName = userName;
     }
 
     public static LinuxUserIdentity Current()
-    {
-        throw new NotImplementedException();
-    }
+        => new LinuxUserIdentity(Environment.UserName);
 
     public override string ToString() => UserName;
 

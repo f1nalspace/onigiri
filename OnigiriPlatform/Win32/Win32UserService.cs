@@ -14,7 +14,7 @@ sealed class Win32UserService : IUserService
     {
         ArgumentNullException.ThrowIfNull(identity);
         if (identity is not Win32UserIdentity winIdentity)
-            throw new ArgumentException("Invalid user identity type", nameof(identity));
+            throw new ArgumentException("Invalid windows user identity type", nameof(identity));
         return new Win32ImpersonationContext(winIdentity);
     }
 }
