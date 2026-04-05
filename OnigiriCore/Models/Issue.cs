@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
 
 namespace Finalspace.Onigiri.Models

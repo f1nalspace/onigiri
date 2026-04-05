@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Enums;
 using System.Collections.Generic;
 using System.Collections.Immutable;

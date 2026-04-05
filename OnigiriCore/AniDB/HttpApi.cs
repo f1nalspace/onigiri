@@ -1,11 +1,9 @@
 ﻿using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
-using log4net;
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Reflection;
-using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace Finalspace.Onigiri.AniDB
@@ -19,7 +17,7 @@ namespace Finalspace.Onigiri.AniDB
 
     class HttpApi : IHttpApi
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.For<HttpApi>();
 
         private static string ApiURL = "http://api.anidb.net:9001/httpapi?client={{clientName}}&clientver={{clientVer}}&protover={{protoVer}}&request=anime&aid={{aid}}";
         private static string TitlesDumpURL = "https://anidb.net/api/animetitles.xml.gz";

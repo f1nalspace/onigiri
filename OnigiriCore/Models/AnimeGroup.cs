@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using System.Collections.ObjectModel;
 
 namespace Finalspace.Onigiri.Models

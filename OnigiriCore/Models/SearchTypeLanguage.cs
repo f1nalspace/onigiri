@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using log4net;
 using System;
 using System.Reflection;

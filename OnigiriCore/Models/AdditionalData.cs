@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

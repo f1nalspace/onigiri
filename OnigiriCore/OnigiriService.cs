@@ -7,7 +7,7 @@ using Finalspace.Onigiri.Security;
 using Finalspace.Onigiri.Storage;
 using Finalspace.Onigiri.Types;
 using Finalspace.Onigiri.Utils;
-using log4net;
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +24,7 @@ namespace Finalspace.Onigiri
 {
     public class OnigiriService
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILogger log = Log.For<OnigiriService>();
 
         private readonly IUserService _userService;
 

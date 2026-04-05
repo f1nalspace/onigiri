@@ -1,4 +1,4 @@
-﻿using DevExpress.Mvvm;
+﻿using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Media;
 using Finalspace.Onigiri.Types;
 using System;

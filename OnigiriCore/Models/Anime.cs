@@ -9,7 +9,7 @@ using System.Xml;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
-using DevExpress.Mvvm;
+using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Types;
 
 namespace Finalspace.Onigiri.Models
