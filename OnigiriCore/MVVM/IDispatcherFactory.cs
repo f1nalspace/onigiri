@@ -1,7 +1,6 @@
-﻿namespace Finalspace.Onigiri.MVVM
+﻿namespace Finalspace.Onigiri.MVVM;
+
+public interface IDispatcherFactory
 {
-    public interface IDispatcherFactory
-    {
-        IDispatcher GetDefault();
-    }
+    IDispatcher GetDefault();
 }
