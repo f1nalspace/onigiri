@@ -16,7 +16,8 @@ The WPF `Onigiri/` project remains on `net9.0-windows` with DevExpress MVVM refe
 - Replace log4net with Serilog
 - Replace MaterialDesignThemes with Avalonia Fluent theme + custom styles
 - Replace WPF-specific APIs (ICollectionView, DependencyProperty, Frame/Page, etc.) with Avalonia equivalents
-- Cross-platform support (Windows, Linux, macOS)
+- Use ImmutableObservableCollection as Backing Store for all collections
+- Cross-platform support (Windows, Linux)
 
 ---
 
@@ -215,7 +216,7 @@ ViewModels are ported from `Onigiri/ViewModels/` to `OnigiriAvalonia/ViewModels/
 | `using System.Windows.Data;` | Remove (no `ICollectionView`/`CollectionViewSource`) |
 | `private static readonly ILog log = LogManager.GetLogger(...)` | `private static readonly Serilog.ILogger log = Serilog.Log.ForContext<ClassName>()` |
 | `System.Windows.Visibility` property | `bool` property with `IsVisible` binding in AXAML |
-| `ICollectionView` | Filtered `ObservableCollection<T>` or `ImmutableObservableCollection<T>` |
+| `ICollectionView` | Filtered `ImmutableObservableCollection<T>` |
 | `ListCollectionView` + `CustomSort` + `Filter` | LINQ sort + predicate filter applied to backing list |
 | `CollectionViewSource.GetDefaultView()` | Direct collection management |
 | `BindingOperations.EnableCollectionSynchronization()` | `Dispatcher.UIThread.InvokeAsync()` for collection mutations |
@@ -1249,9 +1250,6 @@ dotnet run --project OnigiriAvalonia/OnigiriAvalonia.csproj -c Debug
 
 ```bash
 # Linux
-dotnet run --project OnigiriAvalonia/OnigiriAvalonia.csproj
-
-# macOS (if available)
 dotnet run --project OnigiriAvalonia/OnigiriAvalonia.csproj
 ```
 
