@@ -1,0 +1,10 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Finalspace.Onigiri.Views.ConfigWindow"
+        Title="Configuration"
+        Width="600" Height="400"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="Height">
+  <!-- TODO: Phase 4 - full view migration -->
+  <TextBlock Text="Config Window" HorizontalAlignment="Center" VerticalAlignment="Center" />
+</Window>
