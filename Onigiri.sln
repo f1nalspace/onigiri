@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
@@ -12,6 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriTests", "OnigiriTests\OnigiriTests.csproj", "{B2FB629E-1FBA-4200-BAF1-C72916165827}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnigiriPlatform", "OnigiriPlatform\OnigiriPlatform.csproj", "{DB6EFD93-31CD-4527-A014-741864593C35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnigiriAvalonia", "OnigiriAvalonia\OnigiriAvalonia.csproj", "{A7962A01-441C-48F9-99CF-EACC41CD027B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{DB6EFD93-31CD-4527-A014-741864593C35}.Debug|x64.Build.0 = Debug|x64
 		{DB6EFD93-31CD-4527-A014-741864593C35}.Release|x64.ActiveCfg = Release|x64
 		{DB6EFD93-31CD-4527-A014-741864593C35}.Release|x64.Build.0 = Release|x64
+		{A7962A01-441C-48F9-99CF-EACC41CD027B}.Debug|x64.ActiveCfg = Debug|x64
+		{A7962A01-441C-48F9-99CF-EACC41CD027B}.Debug|x64.Build.0 = Debug|x64
+		{A7962A01-441C-48F9-99CF-EACC41CD027B}.Release|x64.ActiveCfg = Release|x64
+		{A7962A01-441C-48F9-99CF-EACC41CD027B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
