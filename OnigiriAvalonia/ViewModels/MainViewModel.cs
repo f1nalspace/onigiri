@@ -10,9 +10,14 @@ public class MainViewModel : ViewModelBase, IDisposable
 {
     public event Action CloseRequested;
 
+    public OnigiriService CoreService { get; private set; }
+    public IOnigiriDialogService DlgService => GetService<IOnigiriDialogService>();
+
     public MainViewModel()
     {
-        // TODO: Phase 2 - full ViewModel migration
+        // TODO: Full ViewModel migration
+        IUserService userService = OnigiriUserServiceFactory.Instance.Create();
+        CoreService = new OnigiriService(userService);
     }
 
     public void Dispose()
