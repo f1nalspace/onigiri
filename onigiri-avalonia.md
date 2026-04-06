@@ -18,6 +18,7 @@ The WPF `Onigiri/` project remains on `net9.0-windows` with DevExpress MVVM refe
 - Replace WPF-specific APIs (ICollectionView, DependencyProperty, Frame/Page, etc.) with Avalonia equivalents
 - Use ImmutableObservableCollection as Backing Store for all collections
 - Cross-platform support (Windows, Linux)
+- Do not use nullable for any types, except that it was excplitly defined in the original Onigiri/ sources
 
 ---
 
