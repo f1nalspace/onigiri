@@ -34,7 +34,7 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var mainWindow = new MainWindow();
+            MainWindow mainWindow = new MainWindow();
 
             ServiceContainer.Default.RegisterService<IOnigiriDialogService>(
                 new DefaultOnigiriDialogService(mainWindow));
@@ -43,7 +43,7 @@ public partial class App : Application
             ServiceContainer.Default.RegisterService<IFolderDialogService>(
                 new AvaloniaFolderDialogService(mainWindow));
 
-            var mainViewModel = new MainViewModel();
+            MainViewModel mainViewModel = new MainViewModel();
             mainViewModel.CloseRequested += () => mainWindow.Close();
             mainWindow.DataContext = mainViewModel;
             desktop.MainWindow = mainWindow;
