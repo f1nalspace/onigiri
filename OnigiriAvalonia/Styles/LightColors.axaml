@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Anime Card List - Light Theme -->
+
+  <SolidColorBrush x:Key="animeListBackground" Color="#FFD6E0EF" />
+  <SolidColorBrush x:Key="animeItemBackground" Color="#FFFAFCFC" />
+  <SolidColorBrush x:Key="headerBackground" Color="#FFFAFCFC" />
+  <SolidColorBrush x:Key="tagsBackground" Color="#FFE5E9F5" />
+  <SolidColorBrush x:Key="descriptionForeground" Color="#FF5C728A" />
+  <SolidColorBrush x:Key="mainlineForeground" Color="#FF5C728A" />
+  <SolidColorBrush x:Key="sublineForeground" Color="#FF5C728A" />
+  <SolidColorBrush x:Key="noAnimesForeground" Color="#FF5C728A" />
+  <SolidColorBrush x:Key="tagItemBorderBrush" Color="#FF000000" />
+</ResourceDictionary>
