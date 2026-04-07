@@ -1,9 +1,56 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+        xmlns:models="using:Finalspace.Onigiri.Models"
+        mc:Ignorable="d"
         x:Class="Finalspace.Onigiri.Views.IssuesWindow"
+        x:DataType="vm:IssuesViewModel"
         Title="Issues"
-        Width="800" Height="600"
+        Width="800" Height="450"
         WindowStartupLocation="CenterOwner">
-  <!-- TODO: Phase 4 - full view migration -->
-  <TextBlock Text="Issues Window" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+  <Grid Margin="10">
+    <DataGrid ItemsSource="{Binding Issues}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              SelectedItem="{Binding SelectedIssue}"
+              SelectionMode="Single"
+              CanUserResizeColumns="True"
+              CanUserSortColumns="False">
+      <DataGrid.Columns>
+        <!-- State column with solved icon -->
+        <DataGridTemplateColumn Header="State" Width="50">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="models:Issue">
+              <Panel>
+                <Image Width="16" Height="16" Stretch="UniformToFill"
+                       Source="avares://OnigiriAvalonia/Resources/mark.png"
+                       IsVisible="{Binding IsSolved}" />
+                <Image Width="16" Height="16" Stretch="UniformToFill"
+                       Source="avares://OnigiriAvalonia/Resources/mark_false.png"
+                       IsVisible="{Binding !IsSolved}" />
+              </Panel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*" />
+        <DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="100" />
+        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
+
+        <!-- Action column with Fix Name button -->
+        <DataGridTemplateColumn Header="Action" Width="100">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate x:DataType="models:Issue">
+              <Button Content="Fix Name"
+                      Command="{Binding $parent[Window].((vm:IssuesViewModel)DataContext).CmdSelectTitle}"
+                      CommandParameter="{Binding}" />
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+  </Grid>
 </Window>

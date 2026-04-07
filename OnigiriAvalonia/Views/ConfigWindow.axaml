@@ -1,10 +1,46 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+        mc:Ignorable="d"
         x:Class="Finalspace.Onigiri.Views.ConfigWindow"
+        x:DataType="vm:ConfigViewModel"
         Title="Configuration"
-        Width="600" Height="400"
-        WindowStartupLocation="CenterOwner"
-        SizeToContent="Height">
-  <!-- TODO: Phase 4 - full view migration -->
-  <TextBlock Text="Config Window" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        Width="600"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid RowDefinitions="*,Auto" Margin="10">
+    <!-- Search Paths -->
+    <StackPanel Grid.Row="0">
+      <HeaderedContentControl Header="Search Paths">
+        <DockPanel LastChildFill="True">
+          <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Spacing="5" Margin="10 0 0 0">
+            <Button Content="Add" Padding="10 5" Command="{Binding CmdAddSearchPath}" />
+            <Button Content="Remove" Padding="10 5"
+                    Command="{Binding CmdRemoveSearchPath}"
+                    CommandParameter="{Binding #searchPathsListbox.SelectedItem}" />
+          </StackPanel>
+          <ListBox x:Name="searchPathsListbox"
+                   Height="150"
+                   ItemsSource="{Binding Config.SearchPaths}" />
+        </DockPanel>
+      </HeaderedContentControl>
+    </StackPanel>
+
+    <!-- Buttons -->
+    <Grid Grid.Row="1" Margin="0 10 0 0">
+      <Button Content="Close"
+              Padding="10 5"
+              Width="100"
+              HorizontalAlignment="Left"
+              Click="CloseButton_Click" />
+      <Button Content="Apply"
+              Padding="10 5"
+              Width="100"
+              HorizontalAlignment="Right"
+              Click="ApplyButton_Click" />
+    </Grid>
+  </Grid>
 </Window>

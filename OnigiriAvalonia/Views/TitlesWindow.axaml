@@ -1,9 +1,76 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+        xmlns:models="using:Finalspace.Onigiri.Models"
+        mc:Ignorable="d"
         x:Class="Finalspace.Onigiri.Views.TitlesWindow"
+        x:DataType="vm:TitlesViewModel"
         Title="Titles"
-        Width="800" Height="600"
+        Width="860" Height="600"
         WindowStartupLocation="CenterOwner">
-  <!-- TODO: Phase 4 - full view migration -->
-  <TextBlock Text="Titles Window" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+  <Grid Margin="10">
+    <!-- Main content -->
+    <DockPanel IsEnabled="{Binding IsNotLoading}" LastChildFill="True">
+      <!-- Filter row -->
+      <DockPanel DockPanel.Dock="Top" Margin="0 0 0 5" LastChildFill="True">
+        <TextBlock Text="Filter:" Margin="0 0 10 0" VerticalAlignment="Center" />
+        <TextBox Text="{Binding FilterString}" KeyUp="FilterTextBox_KeyUp" />
+      </DockPanel>
+
+      <!-- Type filter row -->
+      <DockPanel DockPanel.Dock="Top" Margin="0 0 0 5" LastChildFill="True">
+        <TextBlock Text="Type:" Margin="0 0 10 0" VerticalAlignment="Center" />
+        <ComboBox SelectedItem="{Binding SelectedFilterType}"
+                  ItemsSource="{Binding FilterTypes}" />
+      </DockPanel>
+
+      <!-- DataGrid and buttons -->
+      <Grid RowDefinitions="*,Auto">
+        <DataGrid Grid.Row="0"
+                  Margin="0 5 0 0"
+                  ItemsSource="{Binding FilteredTitles}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectedItem="{Binding SelectedTitle}"
+                  SelectionMode="Single"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Aid" Binding="{Binding Aid}" Width="80" />
+            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="80" />
+            <DataGridTextColumn Header="Lang" Binding="{Binding Lang}" Width="60" />
+          </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="1"
+                    IsVisible="{Binding AllowButtons}"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Margin="0 10 0 0">
+          <Button Content="Apply"
+                  IsEnabled="{Binding HasSelectedTitle}"
+                  Click="ApplyButton_Click" />
+          <Button Content="Cancel"
+                  Click="CancelButton_Click" />
+        </StackPanel>
+      </Grid>
+    </DockPanel>
+
+    <!-- Loading Overlay -->
+    <Border IsVisible="{Binding IsLoading}"
+            Background="#80000000"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+        <TextBlock Text="Loading" Foreground="White" FontSize="18" HorizontalAlignment="Center" />
+        <ProgressBar Width="200" IsIndeterminate="True" />
+      </StackPanel>
+    </Border>
+  </Grid>
 </Window>

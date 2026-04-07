@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+             xmlns:models="using:Finalspace.Onigiri.Models"
+             mc:Ignorable="d"
+             d:DesignWidth="1200" d:DesignHeight="600"
+             x:Class="Finalspace.Onigiri.Views.CardListView"
+             x:DataType="vm:MainViewModel">
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+    <ItemsRepeater ItemsSource="{Binding Animes}">
+      <ItemsRepeater.Layout>
+        <UniformGridLayout MinItemWidth="800" MinItemHeight="400"
+                           MinColumnSpacing="10" MinRowSpacing="10" />
+      </ItemsRepeater.Layout>
+      <ItemsRepeater.ItemTemplate>
+        <DataTemplate x:DataType="models:Anime">
+          <!-- Phase 5: Replace with AnimeCardControl -->
+          <Border Background="{DynamicResource animeItemBackground}"
+                  CornerRadius="4"
+                  ClipToBounds="True">
+            <Grid ColumnDefinitions="260,*">
+              <!-- Picture placeholder -->
+              <Border Grid.Column="0"
+                      Background="{DynamicResource animeTitleBackground}">
+                <TextBlock Text="No Picture"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+              </Border>
+
+              <!-- Info area -->
+              <StackPanel Grid.Column="1" Margin="10" Spacing="5">
+                <TextBlock Text="{Binding MainTitle}"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="{Binding Type}" Opacity="0.7" />
+                  <TextBlock Text="{Binding EpCount, StringFormat='Episodes: {0}'}" Opacity="0.7" />
+                </StackPanel>
+                <TextBlock Text="{Binding Description}"
+                           TextWrapping="Wrap"
+                           MaxLines="5"
+                           TextTrimming="CharacterEllipsis"
+                           Opacity="0.7"
+                           Margin="0 5 0 0" />
+              </StackPanel>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsRepeater.ItemTemplate>
+    </ItemsRepeater>
+  </ScrollViewer>
+</UserControl>

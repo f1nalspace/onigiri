@@ -2,10 +2,253 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+        xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+        xmlns:views="using:Finalspace.Onigiri.Views"
+        xmlns:converters="using:Finalspace.Onigiri.Converters"
         mc:Ignorable="d"
-        d:DesignWidth="800" d:DesignHeight="600"
+        d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="Finalspace.Onigiri.Views.MainWindow"
-        Title="Onigiri">
-  <!-- TODO: Phase 4 - full view migration -->
-  <TextBlock Text="Onigiri - Avalonia" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        x:DataType="vm:MainViewModel"
+        Title="Onigiri"
+        Icon="avares://OnigiriAvalonia/Resources/onigiri.ico"
+        Width="1200" Height="800">
+
+  <Window.Resources>
+    <converters:ThemeToBoolConverter x:Key="themeBoolConv" />
+  </Window.Resources>
+
+  <i:Interaction.Behaviors>
+    <ia:EventTriggerBehavior EventName="Loaded">
+      <ia:InvokeCommandAction Command="{Binding OnLoadedCommand}" />
+    </ia:EventTriggerBehavior>
+  </i:Interaction.Behaviors>
+
+  <DockPanel LastChildFill="True">
+    <!-- Menu Bar -->
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="File">
+        <MenuItem Header="Import..." Command="{Binding CmdImport}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/download_to_local_store_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Export..." Command="{Binding CmdExport}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/export_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+        <MenuItem Header="Settings" Command="{Binding CmdSettings}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/customization_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+        <MenuItem Header="Exit" Command="{Binding CmdExit}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/close_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="Data">
+        <MenuItem Header="Reload Database" Command="{Binding CmdRefresh}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/refresh_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Rebuild Database" Command="{Binding CmdUpdate}" CommandParameter="Database">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/rebuild_database_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Update folders from local storage" Command="{Binding CmdUpdate}" CommandParameter="Store">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/download_to_local_store_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="View">
+        <MenuItem Header="Theme">
+          <MenuItem Header="Automatic"
+                    Command="{Binding CmdChangeTheme}"
+                    CommandParameter="{x:Static vm:MainTheme.Automatic}">
+            <MenuItem.Icon>
+              <Image Source="avares://OnigiriAvalonia/Resources/darkmode_trigger_32x32.png" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Light"
+                    Command="{Binding CmdChangeTheme}"
+                    CommandParameter="{x:Static vm:MainTheme.Light}">
+            <MenuItem.Icon>
+              <Image Source="avares://OnigiriAvalonia/Resources/sun_32x32.png" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Dark"
+                    Command="{Binding CmdChangeTheme}"
+                    CommandParameter="{x:Static vm:MainTheme.Dark}">
+            <MenuItem.Icon>
+              <Image Source="avares://OnigiriAvalonia/Resources/moon_32x32.png" />
+            </MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+        <MenuItem Header="Sort" IsEnabled="{Binding IsNotLoading}">
+          <MenuItem Header="Show" IsChecked="{Binding ShowSorting}" ToggleType="CheckBox" />
+          <Separator />
+          <MenuItem Header="Primary">
+            <MenuItem Header="Type" ItemsSource="{Binding SortItems}">
+              <MenuItem.DataTemplates>
+                <DataTemplate DataType="vm:SortItemViewModel">
+                  <TextBlock Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </MenuItem.DataTemplates>
+            </MenuItem>
+            <MenuItem Header="Descending" IsChecked="{Binding IsFirstSortOrderDesc}" ToggleType="CheckBox" />
+          </MenuItem>
+          <MenuItem Header="Secondary">
+            <MenuItem Header="Type" ItemsSource="{Binding SortItems}">
+              <MenuItem.DataTemplates>
+                <DataTemplate DataType="vm:SortItemViewModel">
+                  <TextBlock Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </MenuItem.DataTemplates>
+            </MenuItem>
+            <MenuItem Header="Descending" IsChecked="{Binding IsSecondSortOrderDesc}" ToggleType="CheckBox" />
+          </MenuItem>
+        </MenuItem>
+        <MenuItem Header="Filter" IsEnabled="{Binding IsNotLoading}">
+          <MenuItem Header="Show" IsChecked="{Binding ShowFilter}" ToggleType="CheckBox" />
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="Window">
+        <MenuItem Header="Titles" Command="{Binding CmdTitles}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/titles_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Issues" Command="{Binding CmdIssues}">
+          <MenuItem.Icon>
+            <Image Source="avares://OnigiriAvalonia/Resources/suggestion_32x32.png" />
+          </MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+    </Menu>
+
+    <!-- Sorting GroupBox -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Vertical" IsVisible="{Binding ShowSorting}">
+      <HeaderedContentControl Header="Sorting" IsEnabled="{Binding IsNotLoading}" Padding="5">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <HeaderedContentControl Header="Primary">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <ComboBox Width="150"
+                        ItemsSource="{Binding SortItems}"
+                        SelectedItem="{Binding FirstSortKey}"
+                        DisplayMemberBinding="{Binding DisplayName}" />
+              <CheckBox Content="Descending"
+                        IsChecked="{Binding IsFirstSortOrderDesc}"
+                        Command="{Binding CmdChangedSort}" />
+            </StackPanel>
+          </HeaderedContentControl>
+          <HeaderedContentControl Header="Secondary">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <ComboBox Width="150"
+                        ItemsSource="{Binding SortItems}"
+                        SelectedItem="{Binding SecondSortKey}"
+                        DisplayMemberBinding="{Binding DisplayName}" />
+              <CheckBox Content="Descending"
+                        IsChecked="{Binding IsSecondSortOrderDesc}"
+                        Command="{Binding CmdChangedSort}" />
+            </StackPanel>
+          </HeaderedContentControl>
+        </StackPanel>
+      </HeaderedContentControl>
+    </StackPanel>
+
+    <!-- Filtering GroupBox -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Vertical" IsVisible="{Binding ShowFilter}">
+      <HeaderedContentControl Header="Filtering" IsEnabled="{Binding IsNotLoading}" Padding="5">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <HeaderedContentControl Header="By Type">
+            <ComboBox Width="150"
+                      ItemsSource="{Binding AnimeTypes}"
+                      SelectedItem="{Binding FilterType}"
+                      DisplayMemberBinding="{Binding Name}" />
+          </HeaderedContentControl>
+          <HeaderedContentControl Header="By Title">
+            <TextBox Width="200"
+                     Text="{Binding FilterTitle}"
+                     Watermark="No title" />
+          </HeaderedContentControl>
+          <HeaderedContentControl Header="By States">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <ComboBox Width="180"
+                        ItemsSource="{Binding WatchStates}"
+                        SelectedItem="{Binding FilterWatchState}"
+                        DisplayMemberBinding="{Binding Name}" />
+              <CheckBox Content="Marked"
+                        IsChecked="{Binding FilterMarked}"
+                        Command="{Binding CmdChangedFilter}" />
+            </StackPanel>
+          </HeaderedContentControl>
+          <HeaderedContentControl Header="By Category">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <ComboBox Width="150"
+                        ItemsSource="{Binding FilterCategories}"
+                        SelectedItem="{Binding FilterCategory}"
+                        DisplayMemberBinding="{Binding DisplayName}" />
+              <ComboBox Width="150"
+                        ItemsSource="{Binding FilterCategoryWeights}"
+                        SelectedItem="{Binding FilterCategoryMinWeight}"
+                        DisplayMemberBinding="{Binding DisplayName}" />
+            </StackPanel>
+          </HeaderedContentControl>
+        </StackPanel>
+      </HeaderedContentControl>
+    </StackPanel>
+
+    <!-- Status Bar -->
+    <Border DockPanel.Dock="Bottom" Padding="5 2" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+      <DockPanel>
+        <TextBlock Text="Number of animes" Margin="0 0 5 0" />
+        <TextBlock Text="|" Margin="0 0 5 0" Opacity="0.5" />
+        <TextBlock Text="{Binding VisibleAnimeCount}" Margin="0 0 5 0" />
+        <TextBlock Text="of" Margin="0 0 5 0" />
+        <TextBlock Text="{Binding TotalAnimeCount}" Margin="0 0 5 0" />
+        <TextBlock Text="|" Margin="0 0 5 0" Opacity="0.5" />
+        <TextBlock Text="{Binding LoadingHeader}" DockPanel.Dock="Right" Margin="5 0 0 0" />
+        <TextBlock Text="|" DockPanel.Dock="Right" Opacity="0.5" />
+        <TextBlock Text="{Binding LoadingSubject}" DockPanel.Dock="Right" Margin="0 0 5 0" />
+        <Panel /> <!-- spacer -->
+      </DockPanel>
+    </Border>
+
+    <!-- Main Content -->
+    <Grid>
+      <!-- Loading Overlay -->
+      <Border IsVisible="{Binding IsLoading}"
+              ZIndex="1"
+              Background="#80000000"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+          <TextBlock Text="{Binding LoadingHeader}"
+                     Foreground="White"
+                     FontSize="18"
+                     HorizontalAlignment="Center" />
+          <TextBlock Text="{Binding LoadingSubject}"
+                     Foreground="White"
+                     FontSize="14"
+                     HorizontalAlignment="Center" />
+          <ProgressBar Width="300"
+                       IsIndeterminate="{Binding IsLoadingMarque}"
+                       Value="{Binding LoadingPercentage}"
+                       Minimum="0" Maximum="100" />
+        </StackPanel>
+      </Border>
+
+      <!-- Card List View -->
+      <views:CardListView DataContext="{Binding}" />
+    </Grid>
+  </DockPanel>
 </Window>

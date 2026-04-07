@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="using:Finalspace.Onigiri.Models"
+        mc:Ignorable="d"
+        x:Class="Finalspace.Onigiri.Views.DetailsWindow"
+        x:DataType="models:Anime"
+        Title="Details"
+        Width="800" Height="450"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid RowDefinitions="Auto,*">
+    <!-- Title -->
+    <StackPanel Grid.Row="0" Margin="10">
+      <TextBlock Text="{Binding MainTitle}"
+                 FontSize="20"
+                 FontWeight="Bold"
+                 TextTrimming="CharacterEllipsis" />
+    </StackPanel>
+
+    <!-- Content -->
+    <Grid Grid.Row="1" ColumnDefinitions="260,*">
+      <!-- Picture -->
+      <Border Grid.Column="0" Background="{DynamicResource animeTitleBackground}">
+        <!-- Phase 6: Add AnimeImageConverter for actual image loading -->
+        <TextBlock Text="No Picture"
+                   Foreground="White"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+      </Border>
+
+      <!-- Tabs -->
+      <TabControl Grid.Column="1" SelectedIndex="0">
+        <TabItem Header="Basic">
+          <StackPanel Orientation="Vertical" Margin="10" Spacing="5">
+            <TextBlock Text="{Binding Type, StringFormat='Type: {0}'}" />
+            <TextBlock Text="{Binding EpCount, StringFormat='Episodes: {0}'}" />
+          </StackPanel>
+        </TabItem>
+        <TabItem Header="Description">
+          <ScrollViewer Margin="10">
+            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+          </ScrollViewer>
+        </TabItem>
+      </TabControl>
+    </Grid>
+  </Grid>
+</Window>
