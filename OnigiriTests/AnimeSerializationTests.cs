@@ -2,19 +2,18 @@
 using Finalspace.Onigiri.Models;
 using Finalspace.Onigiri.Storage;
 using Finalspace.Onigiri.Types;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Xunit;
 
 namespace OnigiriTests;
 
-[TestClass]
 public class AnimeSerializationTests
 {
-    [TestMethod]
+    [Fact]
     public void SerializeTest()
     {
         Anime source = new Anime()
@@ -133,20 +132,20 @@ public class AnimeSerializationTests
         using (MemoryStream stream = AnimeSerialization.SerializeAnime(source))
             target = AnimeSerialization.DeserializeAnime(stream.GetBuffer(), source.Aid);
 
-        Assert.IsNotNull(target);
-        Assert.AreEqual(source.Aid, target.Aid);
-        Assert.AreEqual(source.MainTitle, target.MainTitle);
+        Assert.NotNull(target);
+        Assert.Equal(source.Aid, target.Aid);
+        Assert.Equal(source.MainTitle, target.MainTitle);
 
-        Assert.AreEqual(source.MediaFiles.Count, target.MediaFiles.Count);
+        Assert.Equal(source.MediaFiles.Count, target.MediaFiles.Count);
         for (int i = 0; i < source.MediaFiles.Count; i++)
-            Assert.AreEqual(source.MediaFiles[i], target.MediaFiles[i]);
+            Assert.Equal(source.MediaFiles[i], target.MediaFiles[i]);
 
-        Assert.AreEqual(source.ExtendedMediaFiles.Count, target.ExtendedMediaFiles.Count);
+        Assert.Equal(source.ExtendedMediaFiles.Count, target.ExtendedMediaFiles.Count);
         for (int i = 0; i < source.ExtendedMediaFiles.Count; i++)
         {
             AnimeMediaFile sourceMediaFile = source.ExtendedMediaFiles[i];
             AnimeMediaFile targetExtendedMediaFile = target.ExtendedMediaFiles[i];
-            Assert.AreEqual(sourceMediaFile, targetExtendedMediaFile);
+            Assert.Equal(sourceMediaFile, targetExtendedMediaFile);
         }
     }
 }
