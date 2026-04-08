@@ -6,6 +6,7 @@ using Finalspace.Onigiri.Services;
 using Finalspace.Onigiri.Views;
 using Finalspace.Onigiri.ViewModels;
 using Serilog;
+using System;
 using System.IO;
 
 namespace Finalspace.Onigiri;
@@ -28,6 +29,20 @@ public partial class App : Application
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
+        OperatingSystem osVersion = Environment.OSVersion;
+        
+        // Move to OnigiriPlatform
+        IDarkModeDetector darkModeDetector;
+        if (osVersion.Platform == PlatformID.Unix)
+            darkModeDetector = new UnixDarkModeDetectorService();
+        else
+            darkModeDetector = null;
+
+        if (darkModeDetector?.IsAvailable ?? false)
+            RequestedThemeVariant = darkModeDetector.IsDarkMode ? Avalonia.Styling.ThemeVariant.Dark : Avalonia.Styling.ThemeVariant.Light;
+        else
+            RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light;
+        
         ServiceContainer.Default.RegisterService<IProcessStarterService>(new DefaultProcessStarterService());
         ServiceContainer.Default.RegisterService<IThemeManagerService>(new AvaloniaThemeManagerService(this));
         ServiceContainer.Default.RegisterService<IDarkModeDetectionService>(new AvaloniaDarkModeDetectionService(this));

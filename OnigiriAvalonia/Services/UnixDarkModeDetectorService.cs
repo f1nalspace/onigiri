@@ -9,12 +9,12 @@ namespace Finalspace.Onigiri.Services;
 [SupportedOSPlatform("freebsd")]
 public sealed class UnixDarkModeDetectorService : IDarkModeDetector, IDisposable
 {
-    private readonly List<IDarkModeDetector> _detectors;
+    private readonly IReadOnlyCollection<IDarkModeDetector> _detectors;
     private readonly IDarkModeDetector _activeDetector;
 
-    public UnixDarkModeDetectorService(params IEnumerable<IDarkModeDetector> detectors)
+    public UnixDarkModeDetectorService()
     {
-        _detectors = detectors.ToList();
+        _detectors = [new KdeDarkModeDetector(), new GnomeDarkModeDetector()];
         _activeDetector = _detectors.FirstOrDefault(d => d.IsAvailable);
     }
 
@@ -25,6 +25,5 @@ public sealed class UnixDarkModeDetectorService : IDarkModeDetector, IDisposable
     {
         foreach (IDarkModeDetector detector in _detectors)
             detector.Dispose();
-        _detectors.Clear();
     }
 }
