@@ -1,0 +1,158 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:Finalspace.Onigiri.Models"
+             xmlns:vm="using:Finalspace.Onigiri.ViewModels"
+             xmlns:views="using:Finalspace.Onigiri.Views"
+             xmlns:controls="using:Finalspace.Onigiri.Controls"
+             xmlns:converters="using:Finalspace.Onigiri.Converters"
+             mc:Ignorable="d"
+             d:DesignWidth="800" d:DesignHeight="400"
+             x:Class="Finalspace.Onigiri.Controls.AnimeCardControl"
+             x:DataType="models:Anime">
+
+  <UserControl.Resources>
+    <converters:AnimeImageConverter x:Key="animeImageConverter" />
+    <converters:AnimeDescriptionConverter x:Key="animeDescConv" />
+    <converters:VideoQualityConverter x:Key="videoQualityConv" />
+    <converters:RatingToStarConverter x:Key="ratingStar0" StarIndex="0" />
+    <converters:RatingToStarConverter x:Key="ratingStar1" StarIndex="1" />
+    <converters:RatingToStarConverter x:Key="ratingStar2" StarIndex="2" />
+    <converters:RatingToStarConverter x:Key="ratingStar3" StarIndex="3" />
+    <converters:RatingToStarConverter x:Key="ratingStar4" StarIndex="4" />
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="260" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <!-- Image block -->
+    <Grid Grid.Column="0">
+      <!-- Picture -->
+      <Image Width="260" Height="400" Stretch="UniformToFill"
+             Source="{Binding Image, Converter={StaticResource animeImageConverter}}" />
+      <!-- No picture fallback -->
+      <Border Background="{DynamicResource animeTitleBackground}"
+              IsVisible="{Binding Image, Converter={x:Static ObjectConverters.IsNull}}"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Image Source="avares://OnigiriAvalonia/Resources/nopicture.png"
+               Stretch="UniformToFill" />
+      </Border>
+
+      <!-- Anime title overlay -->
+      <Grid VerticalAlignment="Bottom" Background="{DynamicResource animeTitleBackground}">
+        <TextBlock Foreground="White" Padding="6" TextWrapping="Wrap" FontWeight="Bold"
+                   Text="{Binding MainTitle}" />
+      </Grid>
+
+      <!-- Video quality icons -->
+      <ItemsControl ItemsSource="{Binding VideoHeights}"
+                    VerticalAlignment="Top" HorizontalAlignment="Left">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Image Width="64" Height="50" Stretch="Fill" Opacity="0.65"
+                   Source="{Binding Converter={StaticResource videoQualityConv}}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Grid>
+
+    <!-- Content block -->
+    <Grid Grid.Column="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="60" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="70" />
+      </Grid.RowDefinitions>
+
+      <!-- Header -->
+      <DockPanel Grid.Row="0" Background="{DynamicResource headerBackground}" LastChildFill="True">
+        <!-- Rating stars -->
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0 0 8 0"
+                    VerticalAlignment="Center"
+                    ToolTip.Tip="{Binding PermanentRating}">
+          <Image Height="26" Stretch="UniformToFill"
+                 Source="{Binding PermanentRating, Converter={StaticResource ratingStar0}}" />
+          <Image Height="26" Stretch="UniformToFill"
+                 Source="{Binding PermanentRating, Converter={StaticResource ratingStar1}}" />
+          <Image Height="26" Stretch="UniformToFill"
+                 Source="{Binding PermanentRating, Converter={StaticResource ratingStar2}}" />
+          <Image Height="26" Stretch="UniformToFill"
+                 Source="{Binding PermanentRating, Converter={StaticResource ratingStar3}}" />
+          <Image Height="26" Stretch="UniformToFill"
+                 Source="{Binding PermanentRating, Converter={StaticResource ratingStar4}}" />
+        </StackPanel>
+
+        <!-- Episode count + type + dates -->
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Margin="8 0">
+            <TextBlock Text="{Binding EpCount, StringFormat='{}{0} Episodes'}"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource mainlineForeground}" />
+            <TextBlock Text=" " Foreground="{DynamicResource mainlineForeground}" />
+            <TextBlock Text="{Binding Type, StringFormat='({0})', TargetNullValue=None}"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource mainlineForeground}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="8 0">
+            <TextBlock Text="{Binding StartDate, StringFormat='yyyy-MM-dd', TargetNullValue=None}"
+                       Foreground="{DynamicResource sublineForeground}" />
+            <TextBlock Text="/" Foreground="{DynamicResource sublineForeground}" />
+            <TextBlock Text="{Binding EndDate, StringFormat='yyyy-MM-dd', TargetNullValue=None}"
+                       Foreground="{DynamicResource sublineForeground}" />
+          </StackPanel>
+        </StackPanel>
+      </DockPanel>
+
+      <!-- Description + User states/actions -->
+      <Grid Grid.Row="1">
+        <TextBlock Text="{Binding Description, Converter={StaticResource animeDescConv}, ConverterParameter=500}"
+                   Foreground="{DynamicResource descriptionForeground}"
+                   Padding="8"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   TextWrapping="Wrap" />
+        <Grid VerticalAlignment="Bottom">
+          <controls:UserStatesControl DataContext="{Binding}" />
+          <controls:UserActionsPanel DataContext="{Binding}"
+              Users="{Binding $parent[views:CardListView].((vm:MainViewModel)DataContext).Users}"
+              ToggleRemoveAnimeCommand="{Binding $parent[views:CardListView].((vm:MainViewModel)DataContext).CmdUserActionToggleDelete}"
+              ToggleWatchedAnimeCommand="{Binding $parent[views:CardListView].((vm:MainViewModel)DataContext).CmdUserActionToggleWatched}"
+              ToggleMarkedAnimeCommand="{Binding $parent[views:CardListView].((vm:MainViewModel)DataContext).CmdToggleMarked}" />
+        </Grid>
+      </Grid>
+
+      <!-- Tags -->
+      <ItemsControl Grid.Row="2"
+                    ItemsSource="{Binding TopCategories}"
+                    Background="{DynamicResource tagsBackground}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="models:Category">
+            <Border Background="BlueViolet" Padding="3" Margin="2" CornerRadius="2"
+                    BorderBrush="{DynamicResource tagItemBorderBrush}" BorderThickness="0.25">
+              <TextBlock Text="{Binding Name}"
+                         ToolTip.Tip="{Binding Name}"
+                         Foreground="White"
+                         TextTrimming="None"
+                         TextWrapping="NoWrap"
+                         VerticalAlignment="Center" />
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:Finalspace.Onigiri.Models"
+             xmlns:converters="using:Finalspace.Onigiri.Converters"
+             mc:Ignorable="d"
+             d:DesignWidth="800" d:DesignHeight="96"
+             x:Class="Finalspace.Onigiri.Controls.UserActionsPanel"
+             x:DataType="models:Anime"
+             x:Name="userActionsControl">
+
+  <UserControl.Resources>
+    <converters:AnimeUserMultiConverter x:Key="animeUserMultiConv" />
+    <converters:UserImageConverter x:Key="userImgConv" />
+    <converters:BoolToImageSourceConverter x:Key="markedHoverConv"
+        TrueImage="avares://OnigiriAvalonia/Resources/mark.png"
+        FalseImage="avares://OnigiriAvalonia/Resources/mark_false.png" />
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <!-- Show inner panel on pointer over -->
+    <Style Selector="Grid#outerActionPanel:pointerover > StackPanel#innerActionPanel">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid x:Name="outerActionPanel"
+        HorizontalAlignment="Right"
+        VerticalAlignment="Bottom"
+        Background="Transparent">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+
+    <StackPanel x:Name="innerActionPanel"
+                Grid.Column="0"
+                Orientation="Horizontal"
+                IsVisible="False">
+
+      <!-- Mark toggle button -->
+      <Button Width="48" Height="48" Margin="2 1" Padding="0"
+              Background="Transparent" BorderThickness="0"
+              Command="{Binding #userActionsControl.CmdToggleMarkedAnime}"
+              CommandParameter="{Binding}">
+        <Panel>
+          <Image Width="48" Height="48" Stretch="UniformToFill"
+                 Source="avares://OnigiriAvalonia/Resources/mark_false.png"
+                 x:Name="markIconDefault" />
+        </Panel>
+      </Button>
+
+      <!-- Per-user action buttons -->
+      <ItemsControl ItemsSource="{Binding #userActionsControl.Users}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="models:User">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+
+              <!-- Delete toggle -->
+              <Button Grid.Row="0" Width="48" Height="48" Margin="2 1" Padding="0"
+                      Background="Transparent" BorderThickness="0"
+                      Command="{Binding #userActionsControl.CmdToggleRemoveAnime}">
+                <Button.CommandParameter>
+                  <MultiBinding Converter="{StaticResource animeUserMultiConv}">
+                    <Binding ElementName="userActionsControl" Path="DataContext" />
+                    <Binding Path="UserName" />
+                  </MultiBinding>
+                </Button.CommandParameter>
+                <Grid>
+                  <Image Width="48" Height="48" Stretch="UniformToFill"
+                         Source="{Binding UserName, Converter={StaticResource userImgConv}}" />
+                  <Image Width="32" Height="32"
+                         Source="avares://OnigiriAvalonia/Resources/delete_false.png" />
+                </Grid>
+              </Button>
+
+              <!-- Watch toggle -->
+              <Button Grid.Row="1" Width="48" Height="48" Margin="2 1" Padding="0"
+                      Background="Transparent" BorderThickness="0"
+                      Command="{Binding #userActionsControl.CmdToggleWatchedAnime}">
+                <Button.CommandParameter>
+                  <MultiBinding Converter="{StaticResource animeUserMultiConv}">
+                    <Binding ElementName="userActionsControl" Path="DataContext" />
+                    <Binding Path="UserName" />
+                  </MultiBinding>
+                </Button.CommandParameter>
+                <Grid>
+                  <Image Width="48" Height="48" Stretch="UniformToFill"
+                         Source="{Binding UserName, Converter={StaticResource userImgConv}}" />
+                  <Image Width="32" Height="32"
+                         Source="avares://OnigiriAvalonia/Resources/watch_false.png" />
+                </Grid>
+              </Button>
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+
+    <!-- Add button placeholder -->
+    <Button Grid.Column="1" Width="48" Height="48" Padding="0"
+            Background="Transparent" BorderThickness="0"
+            VerticalAlignment="Bottom">
+      <Image Source="avares://OnigiriAvalonia/Resources/add_32x32.png" />
+    </Button>
+  </Grid>
+</UserControl>
