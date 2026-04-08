@@ -1,8 +1,19 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Base control styles - placeholder for Phase 7 full migration -->
 
-  <!-- Brushes -->
+  <!-- Base Window style (replaces WPF windowStyle with MaterialDesignWindow) -->
+  <Style Selector="Window">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+
+  <!-- Base UserControl style (replaces WPF userControlStyle) -->
+  <Style Selector="UserControl">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+
+  <!-- Shared resources -->
   <Style Selector=":is(Control)">
     <Style.Resources>
       <SolidColorBrush x:Key="animeTitleBackground" Color="#BF000000" />

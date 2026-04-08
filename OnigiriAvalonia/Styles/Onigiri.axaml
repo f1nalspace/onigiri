@@ -1,9 +1,156 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Application-specific styles - placeholder for Phase 7 full migration -->
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Finalspace.Onigiri.Controls">
 
-  <!-- Window base style -->
-  <Style Selector="Window.onigiri">
-    <Setter Property="FontSize" Value="14" />
+  <!-- ============================================ -->
+  <!-- Anime Card Image                             -->
+  <!-- ============================================ -->
+
+  <Style Selector="Image.pictureImage">
+    <Setter Property="Width" Value="260" />
+    <Setter Property="Height" Value="400" />
+    <Setter Property="Stretch" Value="UniformToFill" />
   </Style>
+
+  <!-- ============================================ -->
+  <!-- Anime Card Text                              -->
+  <!-- ============================================ -->
+
+  <Style Selector="TextBlock.animeTitleText">
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="FontWeight" Value="Bold" />
+  </Style>
+
+  <Style Selector="TextBlock.animeMainlineText">
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{DynamicResource mainlineForeground}" />
+  </Style>
+
+  <Style Selector="TextBlock.animeSublineText">
+    <Setter Property="Foreground" Value="{DynamicResource sublineForeground}" />
+  </Style>
+
+  <Style Selector="TextBlock.descriptionText">
+    <Setter Property="Foreground" Value="{DynamicResource descriptionForeground}" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <Style Selector="TextBlock.noAnimesText">
+    <Setter Property="Foreground" Value="{DynamicResource noAnimesForeground}" />
+  </Style>
+
+  <Style Selector="TextBlock.detailsTitleText">
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Video Quality Icons                          -->
+  <!-- ============================================ -->
+
+  <Style Selector="Image.videoQualityIcon">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Width" Value="64" />
+    <Setter Property="Height" Value="50" />
+    <Setter Property="Stretch" Value="Fill" />
+    <Setter Property="Opacity" Value="0.65" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Rating Stars                                 -->
+  <!-- ============================================ -->
+
+  <Style Selector="Image.ratingIcon">
+    <Setter Property="Height" Value="26" />
+    <Setter Property="Stretch" Value="UniformToFill" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- User State Panel                             -->
+  <!-- ============================================ -->
+
+  <Style Selector="Image.userIconImage">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="Stretch" Value="UniformToFill" />
+  </Style>
+
+  <Style Selector="Image.userIconStateImage">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Actions Panel                                -->
+  <!-- ============================================ -->
+
+  <Style Selector="Button.actionPanelButton">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="Margin" Value="2 1" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
+  <Style Selector="Image.actionIcon">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="Stretch" Value="UniformToFill" />
+  </Style>
+
+  <Style Selector="Image.actionPanelIcon">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Tag Items                                    -->
+  <!-- ============================================ -->
+
+  <Style Selector="Border.tagItem">
+    <Setter Property="Background" Value="BlueViolet" />
+    <Setter Property="Padding" Value="3" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource tagItemBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0.25" />
+  </Style>
+
+  <Style Selector="TextBlock.tagItemText">
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="TextTrimming" Value="None" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+    <Setter Property="TextAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Anime Card List                              -->
+  <!-- ============================================ -->
+
+  <Style Selector="ListBox.animeList">
+    <Setter Property="Background" Value="{DynamicResource animeListBackground}" />
+  </Style>
+
+  <Style Selector="ListBoxItem.animeItem">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="10" />
+    <Setter Property="Background" Value="{DynamicResource animeItemBackground}" />
+  </Style>
+
+  <!-- ============================================ -->
+  <!-- Filter Controls                              -->
+  <!-- ============================================ -->
+
+  <Style Selector="TextBox.filterTitleTextbox">
+    <Setter Property="Width" Value="300" />
+  </Style>
+
 </Styles>
