@@ -1,9 +1,7 @@
 using System;
 using System.Runtime.Versioning;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Finalspace.Onigiri.Services;
+namespace Finalspace.Onigiri.Unix;
 
 [SupportedOSPlatform("linux")]
 [SupportedOSPlatform("freebsd")]

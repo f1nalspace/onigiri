@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Finalspace.Onigiri.MVVM;
 using Finalspace.Onigiri.Services;
+using Finalspace.Onigiri.Unix;
 using Finalspace.Onigiri.Views;
 using Finalspace.Onigiri.ViewModels;
 using Serilog;
@@ -28,15 +29,8 @@ public partial class App : Application
                 Path.Combine(OnigiriPaths.AppSettingsPath, "log_app.txt"),
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
-
-        OperatingSystem osVersion = Environment.OSVersion;
         
-        // Move to OnigiriPlatform
-        IDarkModeDetector darkModeDetector;
-        if (osVersion.Platform == PlatformID.Unix)
-            darkModeDetector = new UnixDarkModeDetectorService();
-        else
-            darkModeDetector = null;
+        IDarkModeDetector darkModeDetector = DarkModeDetectorFactory.Instance.Get();
 
         if (darkModeDetector?.IsAvailable ?? false)
             RequestedThemeVariant = darkModeDetector.IsDarkMode ? Avalonia.Styling.ThemeVariant.Dark : Avalonia.Styling.ThemeVariant.Light;

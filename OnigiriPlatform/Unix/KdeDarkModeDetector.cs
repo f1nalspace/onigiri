@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
-namespace Finalspace.Onigiri.Services;
+namespace Finalspace.Onigiri.Unix;
 
 [SupportedOSPlatform("linux")]
 [SupportedOSPlatform("freebsd")]

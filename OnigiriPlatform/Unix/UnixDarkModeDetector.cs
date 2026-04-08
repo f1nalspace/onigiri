@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 
-namespace Finalspace.Onigiri.Services;
+namespace Finalspace.Onigiri.Unix;
 
 [SupportedOSPlatform("linux")]
 [SupportedOSPlatform("freebsd")]
-public sealed class UnixDarkModeDetectorService : IDarkModeDetector, IDisposable
+public sealed class UnixDarkModeDetector : IDarkModeDetector, IDisposable
 {
     private readonly IReadOnlyCollection<IDarkModeDetector> _detectors;
     private readonly IDarkModeDetector _activeDetector;
 
-    public UnixDarkModeDetectorService()
+    public UnixDarkModeDetector()
     {
         _detectors = [new KdeDarkModeDetector(), new GnomeDarkModeDetector()];
         _activeDetector = _detectors.FirstOrDefault(d => d.IsAvailable);

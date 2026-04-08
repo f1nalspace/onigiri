@@ -23,7 +23,7 @@ public static class OnigiriUserServiceFactory
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return new Win32UserService();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-                return new PosixUserService();
+                return new UnixUserService();
             throw new PlatformNotSupportedException($"This Platform '{RuntimeInformation.OSDescription} {RuntimeInformation.ProcessArchitecture}' is not supported");
         }
     }

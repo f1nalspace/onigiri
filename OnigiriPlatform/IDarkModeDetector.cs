@@ -1,6 +1,6 @@
 using System;
 
-namespace Finalspace.Onigiri.Services;
+namespace Finalspace.Onigiri;
 
 public interface IDarkModeDetector : IDisposable
 {

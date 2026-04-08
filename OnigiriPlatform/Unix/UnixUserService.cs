@@ -7,15 +7,15 @@ namespace Finalspace.Onigiri.Posix;
 
 [SupportedOSPlatform(nameof(OSPlatform.Linux))]
 [SupportedOSPlatform(nameof(OSPlatform.FreeBSD))]
-sealed class PosixUserService : IUserService
+sealed class UnixUserService : IUserService
 {
-    public IUserIdentity GetCurrentUser() => PosixUserIdentity.Current();
+    public IUserIdentity GetCurrentUser() => UnixUserIdentity.Current();
     
     public IImpersonationContext Impersonate(IUserIdentity identity)
     {
         ArgumentNullException.ThrowIfNull(identity);
-        if (identity is not PosixUserIdentity linuxIdentity)
+        if (identity is not UnixUserIdentity linuxIdentity)
             throw new ArgumentException("Invalid linux user identity type", nameof(identity));
-        return new PosixImpersonationContext(linuxIdentity);
+        return new UnixImpersonationContext(linuxIdentity);
     }
 }

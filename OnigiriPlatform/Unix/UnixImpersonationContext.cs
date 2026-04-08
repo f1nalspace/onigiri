@@ -7,11 +7,11 @@ namespace Finalspace.Onigiri.Posix;
 
 [SupportedOSPlatform(nameof(OSPlatform.Linux))]
 [SupportedOSPlatform(nameof(OSPlatform.FreeBSD))]
-sealed class PosixImpersonationContext : IImpersonationContext
+sealed class UnixImpersonationContext : IImpersonationContext
 {
-    private readonly PosixUserIdentity _identity;
+    private readonly UnixUserIdentity _identity;
 
-    public PosixImpersonationContext(PosixUserIdentity identity)
+    public UnixImpersonationContext(UnixUserIdentity identity)
     {
         ArgumentNullException.ThrowIfNull(identity);
         _identity = identity;

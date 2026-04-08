@@ -6,18 +6,18 @@ namespace Finalspace.Onigiri.Posix;
 
 [SupportedOSPlatform(nameof(OSPlatform.Linux))]
 [SupportedOSPlatform(nameof(OSPlatform.FreeBSD))]
-sealed class PosixUserIdentity : IUserIdentity
+sealed class UnixUserIdentity : IUserIdentity
 {
     public string UserName { get; }
 
-    public PosixUserIdentity(string userName)
+    public UnixUserIdentity(string userName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         UserName = userName;
     }
 
-    public static PosixUserIdentity Current()
-        => new PosixUserIdentity(Environment.UserName);
+    public static UnixUserIdentity Current()
+        => new UnixUserIdentity(Environment.UserName);
 
     public override string ToString() => UserName;
 
